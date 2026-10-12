@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CarCommunity brand animation (reference)</title>
+  <style>
+    body {
+      background: #19b062;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      font-family: 'Arial Rounded MT Bold', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    .lc-brand-splash {
+      position: relative;
+      width: min(700px, 100vw - 2rem);
+    }
+
+    .lc-brand-splash svg {
+      width: 100%;
+      overflow: visible;
+      display: block;
+    }
+
+    .lc-brand-splash text {
+      font-size: clamp(42px, 12vw, 75px);
+      font-weight: 900;
+      text-transform: lowercase;
+      letter-spacing: 2px;
+    }
+
+    .lc-brand-splash .text-stroke {
+      fill: none;
+      stroke: #ffffff;
+      stroke-width: 2px;
+      stroke-dasharray: 400;
+      stroke-dashoffset: 400;
+      animation: lc-draw-outline 3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    .lc-brand-splash .text-fill {
+      fill: #ffffff;
+      opacity: 0;
+      animation: lc-fill-characters 3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    .lc-brand-splash .text-glow {
+      fill: none;
+      stroke: #ffffff;
+      stroke-width: 4px;
+      filter: blur(8px);
+      opacity: 0;
+      animation: lc-glow-pulse 3s ease-in-out forwards;
+    }
+
+    @keyframes lc-draw-outline {
+      0% {
+        stroke-dashoffset: 400;
+      }
+
+      40%,
+      100% {
+        stroke-dashoffset: 0;
+      }
+    }
+
+    @keyframes lc-fill-characters {
+
+      0%,
+      30% {
+        opacity: 0;
+        clip-path: inset(0 100% 0 0);
+      }
+
+      70%,
+      100% {
+        opacity: 1;
+        clip-path: inset(0 0% 0 0);
+      }
+    }
+
+    @keyframes lc-glow-pulse {
+
+      0%,
+      45% {
+        opacity: 0;
+      }
+
+      60% {
+        opacity: 0.6;
+      }
+
+      80%,
+      100% {
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="lc-brand-splash">
+    <svg viewBox="0 0 650 100">
+      <text x="50%" y="70%" text-anchor="middle" class="text-glow">carcommunity</text>
+      <text x="50%" y="70%" text-anchor="middle" class="text-stroke">carcommunity</text>
+      <text x="50%" y="70%" text-anchor="middle" class="text-fill">carcommunity</text>
+    </svg>
+  </div>
+</body>
+
+</html>

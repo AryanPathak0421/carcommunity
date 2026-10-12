@@ -1,0 +1,279 @@
+{
+  "info": {
+    "name": "Mappto Backend APIs",
+    "description": "Collection of all APIs for the Service Booking Platform.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Auth & Users",
+      "item": [
+        {
+          "name": "Send OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"9876543210\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/v1/auth/send-otp", "host": ["{{base_url}}"], "path": ["api", "v1", "auth", "send-otp"] }
+          }
+        },
+        {
+          "name": "Verify OTP (Login)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"9876543210\",\n  \"otp\": \"123456\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/v1/auth/verify-otp", "host": ["{{base_url}}"], "path": ["api", "v1", "auth", "verify-otp"] }
+          }
+        },
+        {
+          "name": "Get My Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/v1/users/me", "host": ["{{base_url}}"], "path": ["api", "v1", "users", "me"] }
+          }
+        },
+        {
+          "name": "Update Profile (Labour Config)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"labourProfile\": {\n    \"subcategoryIds\": [\"replace_with_subcat_id\"],\n    \"minAcceptedPrice\": 500,\n    \"maxAcceptedPrice\": 2000\n  }\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/v1/users/me", "host": ["{{base_url}}"], "path": ["api", "v1", "users", "me"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Admin Settings & Catalogue",
+      "item": [
+        {
+          "name": "Get Global Settings",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Authorization", "value": "Bearer {{admin_jwt}}" } ],
+            "url": { "raw": "{{base_url}}/api/v1/admin/settings", "host": ["{{base_url}}"], "path": ["api", "v1", "admin", "settings"] }
+          }
+        },
+        {
+          "name": "Update Platform Fees",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{admin_jwt}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"type\": \"percentage\",\n  \"value\": 5,\n  \"isActive\": true\n}" },
+            "url": { "raw": "{{base_url}}/api/v1/admin/settings/platform-fees", "host": ["{{base_url}}"], "path": ["api", "v1", "admin", "settings", "platform-fees"] }
+          }
+        },
+        {
+          "name": "Update Global Commission",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{admin_jwt}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"type\": \"global\",\n  \"globalPercentage\": 10,\n  \"isActive\": true\n}" },
+            "url": { "raw": "{{base_url}}/api/v1/admin/settings/commission", "host": ["{{base_url}}"], "path": ["api", "v1", "admin", "settings", "commission"] }
+          }
+        },
+        {
+          "name": "Create Subcategory",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{admin_jwt}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"categoryId\": \"replace_with_category_id\",\n  \"name\": \"Pipe Leakage\",\n  \"basePrice\": 800,\n  \"estimatedDurationMins\": 45,\n  \"description\": \"Fixing leaking pipes\"\n}" },
+            "url": { "raw": "{{base_url}}/api/v1/admin/labour-subcategories", "host": ["{{base_url}}"], "path": ["api", "v1", "admin", "labour-subcategories"] }
+          }
+        },
+        {
+          "name": "Get Public Catalogue",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/v1/labour-categories/grouped", "host": ["{{base_url}}"], "path": ["api", "v1", "labour-categories", "grouped"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Booking Engine",
+      "item": [
+        {
+          "name": "Calculate Bill",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"subcategoryId\": \"replace_with_subcategory_id\"\n}" },
+            "url": { "raw": "{{base_url}}/api/v1/bookings/calculate", "host": ["{{base_url}}"], "path": ["api", "v1", "bookings", "calculate"] }
+          }
+        },
+        {
+          "name": "Create Booking",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"subcategoryId\": \"replace_with_subcategory_id\",\n  \"type\": \"INSTANT\",\n  \"locationText\": \"123 Main St, Block B\",\n  \"paymentMethod\": \"CASH\"\n}" },
+            "url": { "raw": "{{base_url}}/api/v1/bookings", "host": ["{{base_url}}"], "path": ["api", "v1", "bookings"] }
+          }
+        },
+        {
+          "name": "Get My Bookings",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Authorization", "value": "Bearer {{jwt_token}}" } ],
+            "url": { "raw": "{{base_url}}/api/v1/bookings/me", "host": ["{{base_url}}"], "path": ["api", "v1", "bookings", "me"] }
+          }
+        },
+        {
+          "name": "Update Booking Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"EN_ROUTE\"\n}" },
+            "url": { "raw": "{{base_url}}/api/v1/bookings/{{booking_id}}/status", "host": ["{{base_url}}"], "path": ["api", "v1", "bookings", "{{booking_id}}", "status"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Broadcasts",
+      "item": [
+        {
+          "name": "Accept Broadcast",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Authorization", "value": "Bearer {{jwt_token}}" } ],
+            "url": { "raw": "{{base_url}}/api/v1/broadcasts/{{log_id}}/accept", "host": ["{{base_url}}"], "path": ["api", "v1", "broadcasts", "{{log_id}}", "accept"] }
+          }
+        },
+        {
+          "name": "Reject Broadcast",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Authorization", "value": "Bearer {{jwt_token}}" } ],
+            "url": { "raw": "{{base_url}}/api/v1/broadcasts/{{log_id}}/reject", "host": ["{{base_url}}"], "path": ["api", "v1", "broadcasts", "{{log_id}}", "reject"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Wallets & Payments",
+      "item": [
+        {
+          "name": "Get My Wallet",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Authorization", "value": "Bearer {{jwt_token}}" } ],
+            "url": { "raw": "{{base_url}}/api/v1/wallets/me", "host": ["{{base_url}}"], "path": ["api", "v1", "wallets", "me"] }
+          }
+        },
+        {
+          "name": "Init Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"amount\": 840,\n  \"purpose\": \"BOOKING\",\n  \"bookingId\": \"replace_with_booking_id\"\n}" },
+            "url": { "raw": "{{base_url}}/api/v1/payments/init", "host": ["{{base_url}}"], "path": ["api", "v1", "payments", "init"] }
+          }
+        },
+        {
+          "name": "Verify Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"razorpayOrderId\": \"order_123\",\n  \"razorpayPaymentId\": \"pay_123\",\n  \"razorpaySignature\": \"sig_123\"\n}" },
+            "url": { "raw": "{{base_url}}/api/v1/payments/verify", "host": ["{{base_url}}"], "path": ["api", "v1", "payments", "verify"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Reviews",
+      "item": [
+        {
+          "name": "Submit Review",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"bookingId\": \"replace_with_booking_id\",\n  \"rating\": 5,\n  \"comment\": \"Great service!\"\n}" },
+            "url": { "raw": "{{base_url}}/api/v1/reviews", "host": ["{{base_url}}"], "path": ["api", "v1", "reviews"] }
+          }
+        },
+        {
+          "name": "Get User Reviews",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Authorization", "value": "Bearer {{jwt_token}}" } ],
+            "url": { "raw": "{{base_url}}/api/v1/reviews/user/{{user_id}}", "host": ["{{base_url}}"], "path": ["api", "v1", "reviews", "user", "{{user_id}}"] }
+          }
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [ "" ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [ "" ]
+      }
+    }
+  ],
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:5000", "type": "string" },
+    { "key": "jwt_token", "value": "your_user_or_labor_token_here", "type": "string" },
+    { "key": "admin_jwt", "value": "your_admin_token_here", "type": "string" },
+    { "key": "booking_id", "value": "replace_with_id", "type": "string" },
+    { "key": "log_id", "value": "replace_with_id", "type": "string" },
+    { "key": "user_id", "value": "replace_with_id", "type": "string" }
+  ]
+}

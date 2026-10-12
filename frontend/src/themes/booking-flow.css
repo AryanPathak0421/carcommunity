@@ -1,0 +1,129 @@
+/* Booking flow — black text, highlighted selections, solid CTAs */
+
+.lc-booking-highlight {
+  border-radius: 1rem;
+  border: 1px solid rgb(249 115 22 / 0.25);
+  border-left-width: 4px;
+  border-left-color: #F97316;
+  background: #FFF4E8;
+  padding: 0.875rem 1rem;
+}
+
+.lc-booking-highlight-kicker {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #000000;
+}
+
+.lc-booking-highlight-title {
+  margin-top: 0.25rem;
+  font-size: 1.125rem;
+  font-weight: 800;
+  line-height: 1.25;
+  color: #000000;
+}
+
+.lc-booking-highlight-sub {
+  margin-top: 0.125rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #000000;
+}
+
+.lc-booking-flow-label {
+  display: block;
+  margin-bottom: 0.375rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #000000;
+}
+
+.lc-booking-flow-muted {
+  color: #000000;
+  opacity: 0.55;
+}
+
+.lc-booking-flow-body {
+  color: #000000;
+}
+
+.lc-booking-flow-card {
+  border-radius: 1rem;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  padding: 1rem;
+}
+
+.lc-booking-btn-primary {
+  display: inline-flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.75rem;
+  background: #F97316;
+  padding: 0.875rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #ffffff;
+  transition: opacity 0.15s ease;
+}
+
+.lc-booking-btn-primary:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.lc-booking-btn-primary:not(:disabled):active {
+  opacity: 0.9;
+}
+
+.lc-booking-btn-secondary {
+  display: inline-flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.75rem;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  padding: 0.875rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #000000;
+}
+
+.lc-booking-chip {
+  border-radius: 9999px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #000000;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.lc-booking-chip[data-active='true'] {
+  background: #F97316;
+  border-color: #F97316;
+  color: #ffffff;
+}
+
+.lc-booking-slot {
+  border-radius: 0.75rem;
+  border: 1px solid #e2e8f0;
+  padding: 0.625rem 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: #000000;
+  background: #ffffff;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.lc-booking-slot[data-active='true'] {
+  border: 2px solid #F97316;
+  background: #FFF4E8;
+}
