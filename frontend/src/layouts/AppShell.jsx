@@ -41,7 +41,8 @@ export function AppShell() {
 
   const { headerTagline, bottomNav, drawerNav } = useMemo(() => getAppNavigation(user?.role), [user?.role])
 
-  const isIndividualAppHome = user?.role === USER_ROLES.INDIVIDUAL && pathname === '/app'
+  // must match AppHomePage: anything that is not a mechanic gets the customer home (incl. guests / missing role)
+  const isIndividualAppHome = user?.role !== USER_ROLES.MECHANIC && pathname === '/app'
   const isLabourAppHome = user?.role === USER_ROLES.MECHANIC && pathname === '/app'
   const isLabourNotifications = user?.role === USER_ROLES.MECHANIC && pathname === '/app/notifications'
   const isLabourJobs = user?.role === USER_ROLES.MECHANIC && pathname === '/app/jobs'
