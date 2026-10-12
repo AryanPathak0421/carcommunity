@@ -1,0 +1,113 @@
+@import "tailwindcss";
+@import "./themes/app.css";
+@import "./themes/splash.css";
+@import "./themes/individual-home.css";
+@import "./themes/booking-flow.css";
+
+/* Light-first theme · brand #F97316 · dark only on stats + footer */
+@theme {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --color-page: #ffffff;
+  --color-page-accent: #ffffff;
+  --color-surface-950: #0a1210;
+  --color-surface-900: #0f1c17;
+  --color-surface-850: #152820;
+  --color-surface-800: #1c3228;
+  --color-brand: #F97316;
+  --color-brand-bright: #FB923C;
+  --color-brand-muted: #FFEDD5;
+  --color-navy: #0B2A5B;
+  --shadow-glow: 0 0 80px -20px rgb(249 115 22 / 0.2);
+}
+
+html {
+  scroll-behavior: smooth;
+  overscroll-behavior-y: none;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font-sans);
+  background: var(--color-page);
+  color: #0f172a;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior-y: none;
+}
+
+::selection {
+  background: rgb(249 115 22 / 0.25);
+  color: #0f172a;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 3px;
+}
+
+/* Text fields show focus through their own box styling; the global ring drew a stray green line beside them. */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[contenteditable]:focus-visible {
+  outline: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .animate-app-shimmer {
+    animation: none !important;
+  }
+}
+
+@keyframes app-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.animate-app-shimmer {
+  animation: app-shimmer 2.2s ease-in-out infinite;
+}
+
+@keyframes wave {
+  0% { transform: rotate(0.0deg) }
+  10% { transform: rotate(14.0deg) }
+  20% { transform: rotate(-8.0deg) }
+  30% { transform: rotate(14.0deg) }
+  40% { transform: rotate(-4.0deg) }
+  50% { transform: rotate(10.0deg) }
+  60% { transform: rotate(0.0deg) }
+  100% { transform: rotate(0.0deg) }
+}
+
+.animate-wave {
+  animation: wave 2.5s infinite;
+  transform-origin: 70% 70%;
+}
+
+@layer utilities {
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Google Places autocomplete element follows the OS colour scheme by default, which made the
+   booking address field a black bar on dark-mode phones. The app is light-only. */
+gmp-place-autocomplete {
+  color-scheme: light;
+  background-color: #ffffff;
+  color: #0f172a;
+  --gmp-mat-color-surface: #ffffff;
+  --gmp-mat-color-on-surface: #0f172a;
+}

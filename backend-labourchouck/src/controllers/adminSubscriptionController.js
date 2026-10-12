@@ -1,0 +1,102 @@
+import { SubscriptionPlan } from '../models/SubscriptionPlan.js'
+
+export const createSubscriptionPlan = async (req, res, next) => {
+  try {
+    const { name, price, description, features, buttonText, recommended, gradient, shadow, planType, allowedBookings } = req.body
+    
+    let parsedFeatures = []
+    if (Array.isArray(features)) {
+      parsedFeatures = features
+    } else if (typeof features === 'string') {
+      parsedFeatures = features.split(',').map(f => f.trim()).filter(f => f)
+    }
+
+    const plan = await SubscriptionPlan.create({
+      name,
+      price,
+      description,
+      features: parsedFeatures,
+      buttonText,
+      recommended,
+      gradient: gradient || 'from-[#7a280e] to-[#c45c26]',
+      shadow: shadow || 'shadow-orange-500/20',
+      planType: planType || 'individual',
+      allowedBookings: allowedBookings || 0
+    })
+
+    res.status(201).json({ success: true, plan })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const getSubscriptionPlans = async (req, res, next) => {
+  try {
+    const plans = await SubscriptionPlan.find({ isActive: true }).sort({ price: 1 })
+    res.status(200).json({ success: true, plans })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const getSubscriptionPlanById = async (req, res, next) => {
+  try {
+    const plan = await SubscriptionPlan.findById(req.params.id)
+    if (!plan) return res.status(404).json({ success: false, message: 'Plan not found' })
+    res.status(200).json({ success: true, plan })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const updateSubscriptionPlan = async (req, res, next) => {
+  try {
+    const { name, price, description, features, buttonText, recommended, gradient, shadow, planType, allowedBookings } = req.body
+    
+    let parsedFeatures = []
+    if (Array.isArray(features)) {
+      parsedFeatures = features
+    } else if (typeof features === 'string') {
+      parsedFeatures = features.split(',').map(f => f.trim()).filter(f => f)
+    }
+
+    const updateData = {
+      name, price, description, features: parsedFeatures, buttonText, recommended, gradient, shadow, planType, allowedBookings
+    }
+
+    const plan = await SubscriptionPlan.findByIdAndUpdate(req.params.id, updateData, { new: true })
+    if (!plan) return res.status(404).json({ success: false, message: 'Plan not found' })
+
+    res.status(200).json({ success: true, plan })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const deleteSubscriptionPlan = async (req, res, next) => {
+  try {
+    // Instead of hard delete, we can soft delete or actually delete
+    // The user asked to "delete", so we'll hard delete
+    const plan = await SubscriptionPlan.findByIdAndDelete(req.params.id)
+    if (!plan) return res.status(404).json({ success: false, message: 'Plan not found' })
+
+    res.status(200).json({ success: true, message: 'Plan deleted successfully' })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const getUserSubscriptions = async (req, res, next) => {
+  try {
+    // Need to dynamically import UserSubscription if not imported at top
+    const { UserSubscription } = await import('../models/UserSubscription.js')
+    const subscriptions = await UserSubscription.find()
+      .populate('user', 'fullName phone')
+      .populate('plan', 'name price allowedBookings')
+      .sort({ createdAt: -1 })
+    
+    res.status(200).json({ success: true, subscriptions })
+  } catch (error) {
+    next(error)
+  }
+}

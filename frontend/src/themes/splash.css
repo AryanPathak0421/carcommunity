@@ -1,0 +1,116 @@
+.lc-splash-page {
+  background-color: #F97316;
+  color: #ffffff;
+}
+
+.lc-splash-next {
+  display: flex;
+  min-height: 3rem;
+  width: 100%;
+  max-width: 18rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: #ffffff;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #F97316;
+  box-shadow: 0 12px 32px -8px rgb(0 0 0 / 0.22);
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+.lc-splash-next:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.lc-splash-next:not(:disabled):hover {
+  transform: translateY(-1px);
+}
+
+.lc-splash-skip {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: rgb(255 255 255 / 0.75);
+  transition: color 0.2s ease;
+}
+
+.lc-splash-skip:hover {
+  color: #ffffff;
+}
+
+/* Role select — same brand fill as splash */
+.lc-role-page {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.lc-role-back {
+  display: flex;
+  height: 2.75rem;
+  width: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  border: 1px solid rgb(255 255 255 / 0.22);
+  color: #ffffff;
+  background: rgb(255 255 255 / 0.14);
+  backdrop-filter: blur(8px);
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.lc-role-back:active {
+  transform: scale(0.96);
+}
+
+.lc-role-back:hover {
+  background: rgb(255 255 255 / 0.22);
+}
+
+.lc-role-tile {
+  display: flex;
+  min-height: 10.5rem;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1.5rem;
+  border: 1px solid rgb(255 255 255 / 0.65);
+  background: #ffffff;
+  padding: 1.25rem 0.875rem 1.125rem;
+  text-align: center;
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 0.8) inset,
+    0 14px 36px -14px rgb(0 0 0 / 0.28);
+  transition:
+    box-shadow 0.22s ease,
+    transform 0.22s ease;
+}
+
+.lc-role-tile:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 3px;
+}
+
+@media (hover: hover) {
+  .lc-role-tile:hover {
+    transform: translateY(-3px);
+    box-shadow:
+      0 1px 0 rgb(255 255 255 / 0.9) inset,
+      0 20px 44px -16px rgb(0 0 0 / 0.32);
+  }
+}
+
+.lc-role-tile-icon {
+  display: flex;
+  height: 3.5rem;
+  width: 3.5rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1.125rem;
+  background-color: #F97316;
+  color: #ffffff;
+  box-shadow: 0 8px 20px -8px rgb(249 115 22 / 0.55);
+}

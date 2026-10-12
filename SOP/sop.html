@@ -1,0 +1,659 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SOP - Platform Delivery (User App, Vendor App, Admin Panel, Website)</title>
+<style>
+  @page { size: A4; margin: 12mm 13mm 13mm 13mm;
+    @bottom-center { content: "SOP | Platform Delivery in 8-10 Days | Page " counter(page); font: 8pt Segoe UI, Arial; color:#667; }
+    @top-right { content: "CONFIDENTIAL - Internal & Client Use"; font: 8pt Segoe UI, Arial; color:#99a; } }
+  @page :first { @bottom-center { content: ""; } @top-right { content: ""; } }
+  :root { --brand:#1d3a8a; --accent:#e8590c; --ink:#1b2333; --mute:#5b6577; --line:#d9deea; --soft:#f3f6fc; }
+  * { box-sizing: border-box; }
+  body { font-family: "Segoe UI", Arial, sans-serif; font-size: 8.8pt; line-height: 1.32; color: var(--ink); margin:0; }
+  h1 { page-break-after: avoid; font-size: 16pt; color: var(--brand); border-bottom: 3px solid var(--accent); padding-bottom: 4px; margin: 14px 0 6px; }
+  h2 { page-break-after: avoid; font-size: 11pt; color: var(--brand); margin: 11px 0 4px; }
+  h3 { font-size: 10.5pt; color: var(--ink); margin: 12px 0 4px; }
+  p { margin: 5px 0 8px; }
+  ul, ol { margin: 4px 0 10px; padding-left: 20px; }
+  li { margin: 2px 0; }
+  .pb { page-break-before: always; }
+  table { width:100%; border-collapse: collapse; margin: 6px 0 10px; font-size: 8.3pt; page-break-inside: auto; }
+  tr { page-break-inside: avoid; }
+  th { background: var(--brand); color:#fff; text-align:left; padding:4px 6px; font-weight:600; }
+  td { padding:3px 6px; border-bottom:1px solid var(--line); vertical-align: top; }
+  tr:nth-child(even) td { background: var(--soft); }
+  .box { background: var(--soft); border-left: 4px solid var(--brand); padding: 8px 12px; margin: 10px 0; border-radius: 3px; }
+  .warn { background:#fff4e8; border-left-color: var(--accent); }
+  .tag { display:inline-block; font-size:8pt; padding:1px 7px; border-radius:9px; color:#fff; font-weight:600; }
+  .ready { background:#1f8a4c; } .adapt { background:#c9820a; } .build { background:#c2410c; }
+  .cover { height: 255mm; display:flex; flex-direction:column; justify-content:center; }
+  .cover .k { color: var(--accent); font-weight:700; letter-spacing:2px; font-size: 10pt; }
+  .cover h1 { font-size: 30pt; border:none; line-height:1.15; margin: 8px 0 14px; }
+  .cover .sub { font-size: 13pt; color: var(--mute); margin-bottom: 30px; }
+  .meta td { border:none; background:none !important; padding:3px 0; font-size:10pt; }
+  .meta td:first-child { width: 150px; color: var(--mute); }
+  .grid { display:grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .card { border:1px solid var(--line); border-radius:6px; padding:8px 10px; }
+  .card b { color: var(--brand); }
+  .flow { font-size:9pt; background:var(--soft); border:1px dashed #9fb0d6; padding:8px 10px; border-radius:4px; margin:8px 0 12px; }
+  .small { font-size: 8.5pt; color: var(--mute); }
+  th code { background:rgba(255,255,255,.2); color:#fff; } code { background:#eef1f8; padding:0 4px; border-radius:3px; font-size:9pt; }
+</style>
+</head>
+<body>
+
+<!-- ============ COVER ============ -->
+<div class="cover">
+  <div class="k">STANDARD OPERATING PROCEDURE</div>
+  <h1>Platform Delivery SOP<br>User App &bull; Vendor App &bull; Admin Panel &bull; Website</h1>
+  <div class="sub">With Live Tracking &mdash; 8 to 10 Day Delivery Plan, based on analysis of the existing codebase</div>
+  <table class="meta">
+    <tr><td>Document</td><td>SOP-PLT-001 &nbsp;|&nbsp; Version 1.0 (Draft for client review)</td></tr>
+    <tr><td>Prepared by</td><td>Aryan Pathak (Delivery / Project Lead)</td></tr>
+    <tr><td>Prepared for</td><td>Management &amp; Client Stakeholders</td></tr>
+    <tr><td>Date</td><td>12 October 2026</td></tr>
+    <tr><td>Basis</td><td>Review of repository <code>E:\CarCommunity</code> &mdash; <code>backend-labourchouck</code> (Node.js API) and <code>frontend</code> (React web app)</td></tr>
+    <tr><td>Target timeline</td><td>8&ndash;10 working days from kick-off</td></tr>
+  </table>
+</div>
+
+<!-- ============ 1. DOC CONTROL & CONTENTS ============ -->
+<div class="pb"></div>
+<h1>1. Document Control &amp; Contents</h1>
+<h2>1.1 Purpose of this SOP</h2>
+<p>This SOP defines <b>how</b> the team will take the existing codebase and deliver the four client-required products &mdash; <b>User Application, Vendor Application, Admin Panel and Website</b>, all with <b>live tracking</b> &mdash; in 8&ndash;10 days. It covers what already exists, what must be adapted, what must be built, who does what, in which order, and how each stage is verified and signed off.</p>
+<h2>1.2 Who should use it</h2>
+<table>
+  <tr><th style="width:26%">Reader</th><th>How they use this document</th></tr>
+  <tr><td>Client / Business owner</td><td>Sections 2, 4, 6, 9, 14 &mdash; understand scope, timeline, acceptance criteria.</td></tr>
+  <tr><td>Project lead</td><td>Entire document &mdash; plan, track, report, control change.</td></tr>
+  <tr><td>Frontend / Backend developers</td><td>Sections 3, 4, 5, 8, 9 &mdash; daily task list and technical approach.</td></tr>
+  <tr><td>QA / Tester</td><td>Sections 6, 11 &mdash; test matrix and UAT checklist.</td></tr>
+  <tr><td>DevOps</td><td>Section 12 &mdash; environment, deployment, go-live and rollback.</td></tr>
+</table>
+<h2>1.3 Contents</h2>
+<table>
+  <tr><th style="width:8%">No.</th><th>Section</th></tr>
+  <tr><td>1</td><td>Document control &amp; contents</td></tr>
+  <tr><td>2</td><td>Executive summary &amp; project understanding</td></tr>
+  <tr><td>3</td><td>Analysis of the existing system (architecture, roles, modules, data model)</td></tr>
+  <tr><td>4</td><td>Scope of Work &mdash; the four deliverables</td></tr>
+  <tr><td>5</td><td>Live tracking &mdash; current state, gaps, and design</td></tr>
+  <tr><td>6</td><td>Feature matrix &mdash; Ready / Adapt / Build</td></tr>
+  <tr><td>7</td><td>Role-wise workflows (User, Vendor, Admin)</td></tr>
+  <tr><td>8</td><td>UI/UX adaptation SOP</td></tr>
+  <tr><td>9</td><td>10-day execution plan (day-by-day)</td></tr>
+  <tr><td>10</td><td>Team, responsibilities &amp; communication rhythm</td></tr>
+  <tr><td>11</td><td>Quality assurance &amp; UAT SOP</td></tr>
+  <tr><td>12</td><td>Deployment, go-live &amp; rollback SOP</td></tr>
+  <tr><td>13</td><td>Risks, assumptions, dependencies &amp; out-of-scope</td></tr>
+  <tr><td>14</td><td>Change control, acceptance criteria &amp; sign-off</td></tr>
+</table>
+<h2>1.4 Revision history</h2>
+<table>
+  <tr><th>Version</th><th>Date</th><th>Author</th><th>Change</th></tr>
+  <tr><td>1.0</td><td>12 Oct 2026</td><td>Aryan Pathak</td><td>Initial draft from codebase analysis</td></tr>
+</table>
+
+<!-- ============ 2. EXEC SUMMARY ============ -->
+
+<h1>2. Executive Summary &amp; Project Understanding</h1>
+<h2>2.1 What the client has asked for</h2>
+<p>From the client conversation, the requirement is a complete on-demand service platform consisting of:</p>
+<ol>
+  <li><b>User Application</b> &mdash; for end customers to browse services, book, pay and track.</li>
+  <li><b>Vendor Application</b> &mdash; for service providers/contractors to receive, accept, assign and complete jobs and get paid.</li>
+  <li><b>Admin Panel</b> &mdash; for the business to control users, vendors, pricing, bookings, money and content.</li>
+  <li><b>Website</b> &mdash; public marketing/landing site that drives customers and vendors into the apps.</li>
+  <li><b>Live tracking</b> across the booking journey, plus the &ldquo;features as discussed&rdquo;.</li>
+  <li>A UI/UX matching the reference design shared by the client, delivered in <b>8&ndash;10 days</b>.</li>
+</ol>
+<h2>2.2 Key finding from the analysis</h2>
+<div class="box"><b>We are not starting from zero.</b> The repository already contains a working, feature-rich multi-role platform: a Node.js/Express + MongoDB backend with about 40 route modules and 45 data models, and a React 19 web application containing the public website, a mobile-style user/worker app shell, a vendor (contractor) panel, a corporate panel and a 40-page admin panel. Real-time (Socket.io), payments (Razorpay), push notifications (Firebase FCM), wallet, commission, referral, subscriptions, OTP-verified job start/end and a materials marketplace (&ldquo;BuildMart&rdquo;) are already implemented.</div>
+<p>Therefore the 8&ndash;10 day plan is realistic <b>only</b> because the strategy is <b>adapt &amp; harden, not rebuild</b>: re-skin the UI to the client&rsquo;s reference design, align terminology and flows to the client&rsquo;s business, complete and harden live tracking, close the gaps listed in Section 6, then test and deploy.</p>
+<h2>2.3 Delivery strategy in one view</h2>
+<table>
+  <tr><th style="width:20%">Principle</th><th>What it means in practice</th></tr>
+  <tr><td>Reuse first</td><td>Every module that already works is kept; changes are configuration, copy and styling wherever possible.</td></tr>
+  <tr><td>Vertical slices</td><td>Work is organised by journey (Book &rarr; Track &rarr; Pay) not by file, so each day ends with something demonstrable.</td></tr>
+  <tr><td>Live tracking is the hero</td><td>It gets dedicated engineering time (Section 5) because it is the one feature the client named explicitly.</td></tr>
+  <tr><td>Freeze early</td><td>Scope is frozen on Day 1 sign-off; anything new goes through change control (Section 14).</td></tr>
+  <tr><td>Test continuously</td><td>QA starts on Day 3, not Day 8; UAT on Day 8 is confirmation, not discovery.</td></tr>
+</table>
+<h2>2.4 Success criteria</h2>
+<ul>
+  <li>A user can register, book, pay, watch the provider approach on a live map, complete the job and rate it &mdash; end to end, without manual intervention.</li>
+  <li>A vendor can be onboarded (KYC), approved, receive jobs, accept/assign, work, and withdraw earnings.</li>
+  <li>Admin can configure pricing/commission, approve vendors, monitor all bookings live and settle money.</li>
+  <li>The website is live, responsive and routes visitors to the correct app.</li>
+  <li>All Priority-1 test cases pass on the production environment before hand-over.</li>
+</ul>
+
+<!-- ============ 3. EXISTING SYSTEM ============ -->
+
+<h1>3. Analysis of the Existing System</h1>
+<h2>3.1 Technology stack</h2>
+<table>
+  <tr><th style="width:18%">Layer</th><th>Technology (from <code>package.json</code>)</th><th style="width:32%">Notes</th></tr>
+  <tr><td>Backend</td><td>Node.js (ES modules), Express 4, Mongoose 8 (MongoDB), express-validator, Helmet, Morgan, Multer</td><td>REST API, versioned under one router (<code>routes/index.js</code>)</td></tr>
+  <tr><td>Real-time</td><td>Socket.io 4 with JWT-authenticated sockets</td><td>Each user joins a private room by user ID</td></tr>
+  <tr><td>Auth</td><td>JWT, bcryptjs, OTP login (SMS gateway, DLT template)</td><td>Dev OTP bypass flags exist &mdash; must be off in production</td></tr>
+  <tr><td>Payments</td><td>Razorpay (orders, verify, wallet clearance)</td><td>Online + Cash flows both supported</td></tr>
+  <tr><td>Notifications</td><td>Firebase Admin (FCM push), in-app notifications</td><td>Needs live service-account key</td></tr>
+  <tr><td>Media</td><td>Cloudinary uploads</td><td>KYC docs, job photos, banners</td></tr>
+  <tr><td>Scheduling</td><td>node-cron (every-minute broadcast &amp; stuck-booking cleanup)</td><td>Scheduled bookings start broadcasting 1 hour before time</td></tr>
+  <tr><td>Frontend</td><td>React 19, Vite 8, Redux Toolkit, React Router 7, Tailwind CSS 4, Framer Motion, Lottie, socket.io-client, Firebase</td><td>Single SPA, role-based routing, deployable on Vercel (<code>vercel.json</code>)</td></tr>
+  <tr><td>Maps</td><td>Google Maps Places Autocomplete + browser Geolocation</td><td>Requires <code>GOOGLE_MAPS_API_KEY</code></td></tr>
+</table>
+<h2>3.2 User roles in the system</h2>
+<table>
+  <tr><th style="width:18%">Role (code)</th><th style="width:22%">Maps to client term</th><th>What they do today</th></tr>
+  <tr><td><code>individual</code></td><td><b>User</b> (customer)</td><td>Browse catalog, instant/scheduled booking, wallet, referral, subscription, marketplace enquiry.</td></tr>
+  <tr><td><code>labour</code></td><td>Service worker</td><td>Receives broadcast jobs, accepts, OTP start/finish, earns, withdraws, KYC.</td></tr>
+  <tr><td><code>contractor</code></td><td><b>Vendor</b></td><td>Business profile + KYC, manages crew, accepts/assigns jobs, attendance, earnings, subscriptions, marketplace products.</td></tr>
+  <tr><td><code>corporate</code></td><td>B2B client (optional)</td><td>Projects/sites, bulk workforce requests, invoices, analytics.</td></tr>
+  <tr><td><code>admin</code></td><td><b>Admin</b></td><td>Full control: users, vendors, catalog, pricing, wallets, bookings, reports, CMS.</td></tr>
+</table>
+<div class="box warn"><b>Decision needed (Day 1):</b> the client names only <i>User, Vendor, Admin</i>. The existing <code>labour</code> (individual worker) and <code>corporate</code> roles are extra. We recommend keeping them hidden/behind feature flags unless the client confirms they are needed &mdash; this protects the 8&ndash;10 day timeline.</div>
+<h2>3.3 Backend module inventory</h2>
+<div class="grid">
+  <div class="card"><b>Identity &amp; onboarding</b><br>Auth/OTP, users, vendor KYC &amp; documents, corporate verification, address book, crew labour management with OTP linking.</div>
+  <div class="card"><b>Catalog &amp; pricing</b><br>Labour category groups &rarr; categories &rarr; subcategories &rarr; services, pricing rates, time slots, zones, banners.</div>
+  <div class="card"><b>Booking engine</b><br>Calculate bill, create booking (instant/scheduled), broadcast to nearby providers, accept/reject, status machine, daily start/end OTP, cancellation.</div>
+  <div class="card"><b>Money</b><br>Wallets (earnings + dues), commission, platform fee, wallet discount, withdrawals, invoices, settlements, referral rewards, subscriptions.</div>
+  <div class="card"><b>Workforce / B2B</b><br>Workforce requests, allocations, assignments, attendance (4-stage check-in/out), projects &amp; sites, billing.</div>
+  <div class="card"><b>Engagement &amp; support</b><br>Reviews, complaints, notifications (push + in-app), FAQs, terms, privacy policy, referral.</div>
+  <div class="card"><b>Marketplace (BuildMart)</b><br>Categories, products, banners, product reviews, lead/enquiry capture, vendor product CRUD, mart subscriptions.</div>
+  <div class="card"><b>Admin &amp; reporting</b><br>Dashboard stats, reports, settings (fees, radius, limits), CMS content, wallet &amp; withdrawal approvals.</div>
+</div>
+<h2>3.4 Core booking lifecycle (as implemented)</h2>
+<div class="flow"><b>CREATED</b> &rarr; <b>BROADCASTING</b> (nearby eligible providers receive <code>NEW_BROADCAST</code>) &rarr; <b>ACCEPTED</b> (first accept wins) &rarr; <b>ASSIGNED</b> &rarr; <b>EN_ROUTE</b> &rarr; <b>STARTED</b> (start OTP verified) &rarr; <b>COMPLETED</b> (end OTP verified) &nbsp;|&nbsp; exits: <b>CANCELLED</b>, <b>FAILED</b> (no provider within 10 minutes &mdash; auto, with wallet refund), <b>REFUNDED</b>.</div>
+<p>Money is computed at booking time and stored on the booking: <code>basePrice</code>, <code>platformFee</code>, <code>taxes</code>, <code>totalAmount</code>, <code>commissionAmount</code>, <code>laborShare</code>, optional <code>walletDiscount</code>. Admin-configurable settings include platform fee (fixed/percent), B2B fee, global commission %, broadcast radius (10 km B2C, 50 km B2B), wallet/cash limits, cancellation penalty and time slots.</p>
+<h2>3.5 Frontend structure</h2>
+<ul>
+  <li><b>Website:</b> <code>LandingPage</code>, legal pages, boot/splash and role-select screens.</li>
+  <li><b>User/worker app shell (<code>/app</code>):</b> ~30 pages &mdash; home, services, sub-category, checkout, tracking, bookings, wallet, refer &amp; earn, KYC, earnings, notifications, BuildMart, address book, support.</li>
+  <li><b>Vendor panel (<code>/vendor</code>):</b> dashboard, jobs, job detail, crew, attendance, earnings, analytics, mart products/enquiries/subscription, profile, support.</li>
+  <li><b>Admin panel:</b> ~40 pages &mdash; dashboard, users, vendors, labour, bookings, categories/subcategories/services, zones, time slots, fees, commission, wallets &amp; cash, banners, reviews, complaints, referrals, subscriptions, reports, CMS, settings.</li>
+  <li><b>Documentation present:</b> <code>frontend/docx</code> (API contract, Postman collection, developer guide) and backend API notes (Vendor, Admin Booking, Job Allocations, BuildMart).</li>
+</ul>
+<h2>3.6 Housekeeping observations</h2>
+<ul>
+  <li>The backend root holds many one-off scripts (<code>check_*.js</code>, <code>fix_*.js</code>, <code>test*.js</code>) &mdash; they are data-repair utilities and must not ship to production.</li>
+  <li><code>.env</code> and a Firebase service-account JSON are present in the project &mdash; secrets must be rotated and kept out of version control and hand-over packages.</li>
+  <li>Several comments in routes/models show the product was built for a labour-hiring business; user-facing wording, seed data and icons must be re-aligned to the client&rsquo;s business (Section 8).</li>
+</ul>
+
+<!-- ============ 4. SCOPE OF WORK ============ -->
+
+<h1>4. Scope of Work &mdash; The Four Deliverables</h1>
+<p>Each deliverable below lists the <b>baseline we inherit</b>, the <b>work to be done</b> in this engagement, and the <b>exit condition</b>.</p>
+
+<h2>4.1 User Application</h2>
+<table>
+  <tr><th style="width:24%">Area</th><th>Baseline (exists)</th><th style="width:34%">Work in this engagement</th></tr>
+  <tr><td>Onboarding &amp; login</td><td>Splash, role select, mobile-OTP auth, guest browsing</td><td>Apply new branding; simplify to User-only entry; production SMS OTP (bypass off).</td></tr>
+  <tr><td>Discovery</td><td>Home with banners, category &rarr; subcategory &rarr; service pages, search</td><td>Re-skin to reference UI; load client&rsquo;s catalog and imagery.</td></tr>
+  <tr><td>Booking</td><td>Instant &amp; scheduled flow, address book, Places autocomplete, bill calculation, time slots</td><td>Align flow/steps to reference UI; validate pricing rules per client.</td></tr>
+  <tr><td>Payment</td><td>Razorpay online, cash, wallet discount</td><td>Switch to client&rsquo;s live Razorpay keys; test refunds.</td></tr>
+  <tr><td>Live tracking</td><td>Partial &mdash; location event stream + tracking page</td><td>Complete map view, ETA, status stepper, reconnect handling (Section 5).</td></tr>
+  <tr><td>Post-service</td><td>OTP completion, reviews, complaints</td><td>Rating modal polish; invoice/receipt view.</td></tr>
+  <tr><td>Account</td><td>Wallet, referral, subscription, notifications, FAQ/T&amp;C</td><td>Content update; hide unused items.</td></tr>
+</table>
+<p><b>Exit condition:</b> a new user completes a paid booking and sees the provider live on a map on a real phone.</p>
+
+<h2>4.2 Vendor Application</h2>
+<table>
+  <tr><th style="width:24%">Area</th><th>Baseline (exists)</th><th style="width:34%">Work in this engagement</th></tr>
+  <tr><td>Registration &amp; KYC</td><td>Business profile, PAN/GST/documents, verification checklist &amp; submit</td><td>Align document list to client; admin approval loop test.</td></tr>
+  <tr><td>Job intake</td><td>Real-time job popup, accept/reject, direct requests, availability toggle</td><td>Sound/vibration alert, timer UX; mobile-first layout.</td></tr>
+  <tr><td>Execution</td><td>Assign/replace crew, OTP start &amp; end, photos, attendance, cash collection</td><td>Add <b>vendor live-location sharing</b> from the job screen (Section 5).</td></tr>
+  <tr><td>Earnings</td><td>Dashboard, earnings, analytics, settlements, withdrawals with bank details</td><td>Verify payout math; admin approval loop.</td></tr>
+  <tr><td>Growth</td><td>Subscription plans, BuildMart product listing &amp; enquiries</td><td>Keep only if client confirms; otherwise feature-flag off.</td></tr>
+</table>
+<p><b>Exit condition:</b> a vendor is onboarded, approved, accepts a job, shares location, completes with OTP and requests a withdrawal that admin approves.</p>
+<div class="box warn"><b>Note on &ldquo;Vendor Application&rdquo;:</b> today the vendor experience is a web panel (<code>/vendor</code>) inside the same React app, designed mobile-first. Delivering it as an installable <b>PWA</b> satisfies &ldquo;application&rdquo; within 10 days. A native Play Store / App Store build is <b>not</b> in this timeline unless explicitly added (see Section 13).</div>
+
+<h2>4.3 Admin Panel</h2>
+<table>
+  <tr><th style="width:24%">Area</th><th>Baseline (exists)</th><th style="width:34%">Work in this engagement</th></tr>
+  <tr><td>Dashboard &amp; reports</td><td>Stats, reports, revenue views</td><td>Add <b>live operations view</b> (active jobs on map).</td></tr>
+  <tr><td>User &amp; vendor management</td><td>List, view, block, delete, vendor approval, KYC review</td><td>Wording and field alignment.</td></tr>
+  <tr><td>Catalog &amp; pricing</td><td>Categories, subcategories, services, zones, time slots</td><td>Load client catalog; confirm price ladder.</td></tr>
+  <tr><td>Money control</td><td>Platform fee, commission, wallet limits, cash management, withdrawals, referrals, subscriptions</td><td>Configure client values; reconcile one sample booking end-to-end.</td></tr>
+  <tr><td>Content / CMS</td><td>Banners (user/vendor/corporate/mart), FAQ, T&amp;C, privacy</td><td>Replace default legal text with client-approved text.</td></tr>
+  <tr><td>Support</td><td>Complaints, reviews &amp; ratings</td><td>Verify status workflow.</td></tr>
+</table>
+<p><b>Exit condition:</b> admin can run the business for a day without touching the database.</p>
+
+<h2>4.4 Website</h2>
+<table>
+  <tr><th style="width:24%">Area</th><th>Baseline (exists)</th><th style="width:34%">Work in this engagement</th></tr>
+  <tr><td>Landing page</td><td>Animated landing page, role entry points</td><td>Rebuild sections/copy/imagery per reference UI.</td></tr>
+  <tr><td>Conversion</td><td>Links into app/vendor flows</td><td>Clear &ldquo;Book now&rdquo;, &ldquo;Become a vendor&rdquo;, app-download CTAs.</td></tr>
+  <tr><td>Trust &amp; legal</td><td>Terms, privacy pages, FAQ</td><td>Final legal text, contact details, social links.</td></tr>
+  <tr><td>SEO &amp; speed</td><td>react-helmet-async present</td><td>Titles/meta, OG tags, image optimisation, sitemap.</td></tr>
+</table>
+<p><b>Exit condition:</b> website live on the client domain with HTTPS, responsive on mobile/tablet/desktop, Lighthouse performance &ge; 80.</p>
+
+<!-- ============ 5. LIVE TRACKING ============ -->
+
+<h1>5. Live Tracking &mdash; Current State, Gaps and Design</h1>
+<h2>5.1 What already exists (verified in code)</h2>
+<table>
+  <tr><th style="width:30%">Piece</th><th>Where</th></tr>
+  <tr><td>Worker device sends GPS</td><td><code>ActiveJob.jsx</code> uses the browser <code>watchPosition</code> API while a job is active.</td></tr>
+  <tr><td>Socket relay to customer</td><td><code>socket.js</code> listens for <code>LABOUR_LOCATION_UPDATE</code> and forwards it to the customer&rsquo;s private room.</td></tr>
+  <tr><td>Customer receives updates</td><td><code>JobTracking.jsx</code> subscribes to <code>LABOUR_LOCATION_UPDATE</code>, <code>BOOKING_ACCEPTED</code>, <code>BOOKING_STATUS_UPDATE</code>.</td></tr>
+  <tr><td>Last-known location storage</td><td>REST <code>POST /labour/location/update</code> and <code>/status</code> (provider location &amp; online status; used for nearby matching).</td></tr>
+  <tr><td>Geospatial matching</td><td>Bookings carry GeoJSON coordinates with a 2dsphere index; broadcast radius is admin-configurable.</td></tr>
+  <tr><td>Push fallback</td><td>FCM notifications for accept / status / failure.</td></tr>
+</table>
+<h2>5.2 Gaps to close</h2>
+<table>
+  <tr><th style="width:5%">#</th><th style="width:34%">Gap</th><th>Why it matters / fix</th></tr>
+  <tr><td>1</td><td>Location relay trusts <code>customerId</code> sent by the client</td><td><b>Security:</b> any logged-in socket could push fake locations to any user. Fix: server looks up the booking, verifies the sender is the assigned provider, and derives the customer ID itself.</td></tr>
+  <tr><td>2</td><td>No emission when the vendor (contractor) is the assigned party</td><td>Add the same location sharing to the vendor job screen and to the assigned crew member where relevant.</td></tr>
+  <tr><td>3</td><td>No stored route / breadcrumb</td><td>Persist throttled points per booking so admin can replay and resolve disputes.</td></tr>
+  <tr><td>4</td><td>No ETA / distance to destination</td><td>Compute from Google Directions/Distance Matrix (server-side, cached) and show &ldquo;Arriving in X min&rdquo;.</td></tr>
+  <tr><td>5</td><td>Map visual on tracking page to be confirmed/completed</td><td>Show provider marker, destination marker, route line, smooth marker animation.</td></tr>
+  <tr><td>6</td><td>Reconnect &amp; refresh behaviour</td><td>On reload, fetch last known point via REST, then resume socket stream. Persist active booking ID.</td></tr>
+  <tr><td>7</td><td>Update frequency / battery</td><td>Throttle to one update every 5&ndash;10 s or 20 m movement; stop streaming when status is not EN_ROUTE/STARTED.</td></tr>
+  <tr><td>8</td><td>Admin live view absent</td><td>Admin map of all active bookings with provider position and status.</td></tr>
+  <tr><td>9</td><td>Background tracking limits of browser/PWA</td><td>Web geolocation pauses when the screen locks. Document clearly; mitigate with wake-lock and keep-screen-on prompt on the job screen.</td></tr>
+</table>
+<h2>5.3 Target design</h2>
+<div class="flow"><b>Provider device</b> &mdash; GPS every 5&ndash;10 s &rarr; <code>socket: LOCATION_UPDATE {bookingId, lat, lng, heading, speed}</code> &rarr; <b>Server</b> validates sender == assigned provider and booking status &isin; {EN_ROUTE, STARTED} &rarr; saves latest point + throttled breadcrumb &rarr; computes ETA (cached) &rarr; emits to <b>customer room</b> and <b>admin live room</b> &rarr; <b>Customer map</b> animates marker, updates ETA, shows status stepper.</div>
+<h3>Acceptance tests for live tracking</h3>
+<ul>
+  <li>Provider moves 500 m &rarr; customer marker moves within 3 seconds.</li>
+  <li>Customer refreshes the page &rarr; marker reappears at last known position within 2 seconds.</li>
+  <li>A third user cannot receive, and cannot inject, another booking&rsquo;s location.</li>
+  <li>Streaming stops automatically at COMPLETED / CANCELLED.</li>
+  <li>ETA shown is within &plusmn;20% of Google Maps for the same route.</li>
+</ul>
+
+<!-- ============ 6. FEATURE MATRIX ============ -->
+
+<h1>6. Feature Matrix &mdash; Ready / Adapt / Build</h1>
+<p class="small">Legend: <span class="tag ready">READY</span> works as-is, needs config/testing only &nbsp; <span class="tag adapt">ADAPT</span> exists, needs UI/flow/wording change &nbsp; <span class="tag build">BUILD</span> new or substantial completion. Priority P1 = must for go-live, P2 = should, P3 = nice to have.</p>
+<table>
+  <tr><th style="width:28%">Feature</th><th style="width:9%">Product</th><th style="width:11%">Status</th><th style="width:7%">Prio</th><th>Remark</th></tr>
+  <tr><td>Mobile OTP login</td><td>User, Vendor</td><td><span class="tag ready">READY</span></td><td>P1</td><td>Turn OFF OTP bypass flags; configure DLT SMS.</td></tr>
+  <tr><td>Service catalog &amp; search</td><td>User</td><td><span class="tag adapt">ADAPT</span></td><td>P1</td><td>Load client categories, icons, prices.</td></tr>
+  <tr><td>Instant booking + broadcast</td><td>User, Vendor</td><td><span class="tag ready">READY</span></td><td>P1</td><td>Tune radius, timer, retry rules.</td></tr>
+  <tr><td>Scheduled booking</td><td>User</td><td><span class="tag ready">READY</span></td><td>P1</td><td>Cron triggers 1 h before slot.</td></tr>
+  <tr><td>Bill calculation (fee, tax, commission)</td><td>All</td><td><span class="tag adapt">ADAPT</span></td><td>P1</td><td>Confirm GST, fee and commission rules with client.</td></tr>
+  <tr><td>Online payment (Razorpay)</td><td>User</td><td><span class="tag ready">READY</span></td><td>P1</td><td>Client live keys; webhook/verify test.</td></tr>
+  <tr><td>Cash payment &amp; dues</td><td>Vendor, Admin</td><td><span class="tag ready">READY</span></td><td>P1</td><td>Cash limit blocks new jobs when exceeded.</td></tr>
+  <tr><td>Live tracking (map, ETA)</td><td>User, Vendor, Admin</td><td><span class="tag build">BUILD</span></td><td>P1</td><td>Section 5.</td></tr>
+  <tr><td>OTP start / end of job</td><td>User, Vendor</td><td><span class="tag ready">READY</span></td><td>P1</td><td>Daily OTP for multi-day jobs.</td></tr>
+  <tr><td>Ratings &amp; reviews</td><td>User</td><td><span class="tag ready">READY</span></td><td>P2</td><td>Admin moderation page exists.</td></tr>
+  <tr><td>Wallet, withdrawals, settlements</td><td>User, Vendor, Admin</td><td><span class="tag ready">READY</span></td><td>P1</td><td>Reconcile one booking end-to-end.</td></tr>
+  <tr><td>Vendor KYC &amp; approval</td><td>Vendor, Admin</td><td><span class="tag adapt">ADAPT</span></td><td>P1</td><td>Align document list.</td></tr>
+  <tr><td>Crew management &amp; assignment</td><td>Vendor</td><td><span class="tag ready">READY</span></td><td>P2</td><td>Keep if vendors have staff.</td></tr>
+  <tr><td>Push notifications</td><td>All</td><td><span class="tag adapt">ADAPT</span></td><td>P1</td><td>New Firebase project &amp; keys; copy review.</td></tr>
+  <tr><td>Referral &amp; subscriptions</td><td>User, Vendor</td><td><span class="tag ready">READY</span></td><td>P3</td><td>Feature-flag per client decision.</td></tr>
+  <tr><td>BuildMart marketplace</td><td>All</td><td><span class="tag adapt">ADAPT</span></td><td>P3</td><td>Out of scope unless confirmed; hide.</td></tr>
+  <tr><td>Corporate / B2B panel</td><td>Corporate</td><td><span class="tag adapt">ADAPT</span></td><td>P3</td><td>Out of scope unless confirmed; hide.</td></tr>
+  <tr><td>Admin live operations map</td><td>Admin</td><td><span class="tag build">BUILD</span></td><td>P2</td><td>Reuses tracking stream.</td></tr>
+  <tr><td>Admin CMS &amp; settings</td><td>Admin</td><td><span class="tag ready">READY</span></td><td>P1</td><td>Fill values.</td></tr>
+  <tr><td>Complaints &amp; support</td><td>User, Admin</td><td><span class="tag ready">READY</span></td><td>P2</td><td>Verify workflow.</td></tr>
+  <tr><td>Website landing + SEO</td><td>Website</td><td><span class="tag adapt">ADAPT</span></td><td>P1</td><td>Rebuild sections per design.</td></tr>
+  <tr><td>PWA install (vendor/user)</td><td>Apps</td><td><span class="tag build">BUILD</span></td><td>P2</td><td>Manifest, icons, service worker.</td></tr>
+  <tr><td>Production hardening (rate limit, logs, secrets)</td><td>Backend</td><td><span class="tag build">BUILD</span></td><td>P1</td><td>Section 12.</td></tr>
+</table>
+
+<!-- ============ 7. WORKFLOWS ============ -->
+
+<h1>7. Role-wise Workflows</h1>
+<h2>7.1 User journey</h2>
+<ol>
+  <li><b>Open website / app</b> &rarr; splash &rarr; choose to browse as guest or log in.</li>
+  <li><b>Login</b> with mobile number &rarr; OTP &rarr; profile created.</li>
+  <li><b>Choose service</b> &rarr; category &rarr; sub-category &rarr; service.</li>
+  <li><b>Set address &amp; time</b> &rarr; map pin / autocomplete &rarr; Instant or Scheduled slot.</li>
+  <li><b>Review bill</b> &rarr; base price + platform fee + tax = total; optional wallet credit.</li>
+  <li><b>Pay</b> &rarr; Online (Razorpay) or Cash.</li>
+  <li><b>Searching</b> &rarr; broadcast to nearby providers; user sees &ldquo;Finding your provider&rdquo;.</li>
+  <li><b>Accepted</b> &rarr; provider name, photo, phone, rating shown; <b>live map</b> starts when EN_ROUTE.</li>
+  <li><b>Arrival &amp; start</b> &rarr; user shares start OTP; status STARTED.</li>
+  <li><b>Completion</b> &rarr; end OTP; payment settles; rating &amp; review prompt; receipt.</li>
+  <li><b>After</b> &rarr; booking history, rebook, complaint, referral.</li>
+</ol>
+<h3>User edge cases</h3>
+<ul>
+  <li>No provider accepts in 10 minutes &rarr; booking FAILED, wallet discount refunded, user notified.</li>
+  <li>User cancels before accept &rarr; free; after accept &rarr; policy/penalty as configured.</li>
+  <li>Payment failed &rarr; booking stays unpaid; retry or switch to cash.</li>
+</ul>
+<h2>7.2 Vendor journey</h2>
+<ol>
+  <li><b>Register</b> &rarr; business details &rarr; upload KYC documents &rarr; submit for verification.</li>
+  <li><b>Wait for approval</b> &rarr; admin approves or rejects with reason; vendor notified.</li>
+  <li><b>Go online</b> &rarr; toggle availability; location shared for matching.</li>
+  <li><b>Receive job</b> &rarr; popup with service, distance, earning, countdown &rarr; Accept / Reject.</li>
+  <li><b>Assign crew</b> (if applicable) &rarr; select member; replace if unavailable.</li>
+  <li><b>Navigate</b> &rarr; Start journey (EN_ROUTE), live location shared, &ldquo;Open in Google Maps&rdquo;.</li>
+  <li><b>Start work</b> &rarr; enter customer start OTP + start photo.</li>
+  <li><b>Finish work</b> &rarr; end OTP + end photo; collect cash if cash booking.</li>
+  <li><b>Earnings</b> &rarr; wallet credit minus commission; withdraw to bank; admin approves.</li>
+</ol>
+<h3>Vendor edge cases</h3>
+<ul>
+  <li>Cash dues above limit &rarr; vendor blocked from new jobs until cleared online.</li>
+  <li>Cancel after accept &rarr; penalty debited from wallet.</li>
+  <li>Offline mid-job &rarr; last location retained; customer sees &ldquo;location last updated X min ago&rdquo;.</li>
+</ul>
+<h2>7.3 Admin journey</h2>
+<ol>
+  <li><b>Login</b> &rarr; dashboard KPIs (bookings, revenue, active vendors, pending approvals).</li>
+  <li><b>Approve vendors</b> &rarr; review documents &rarr; approve/reject.</li>
+  <li><b>Configure</b> &rarr; categories, services, prices, zones, slots, fee, commission, radius, limits.</li>
+  <li><b>Monitor</b> &rarr; all bookings, live map, intervene (reassign/cancel/refund) via admin booking API.</li>
+  <li><b>Finance</b> &rarr; wallets, cash collected, withdrawals approve/reject, commission report.</li>
+  <li><b>Content &amp; support</b> &rarr; banners, FAQ, legal; complaints; reviews.</li>
+  <li><b>Reports</b> &rarr; export for accounting.</li>
+</ol>
+<h2>7.4 End-to-end sequence</h2>
+<div class="flow">User books &rarr; System broadcasts &rarr; Vendor accepts &rarr; User + Admin notified &rarr; Vendor EN_ROUTE (live map) &rarr; Start OTP &rarr; Work &rarr; End OTP &rarr; Payment settled (commission split) &rarr; Ratings &rarr; Wallet / withdrawal &rarr; Admin reports.</div>
+
+<!-- ============ 8. UI/UX ============ -->
+
+<h1>8. UI/UX Adaptation SOP</h1>
+<p>The client wants the UI/UX &ldquo;like this&rdquo; (reference design shared in the conversation). The existing app already has a design system (<code>components/app-ui</code>: buttons, cards, inputs, navigation, feedback, typography; Tailwind 4 theme tokens in <code>src/themes</code>). The goal is <b>re-skin through tokens and component variants</b>, not rewriting screens.</p>
+<h2>8.1 Procedure</h2>
+<table>
+  <tr><th style="width:6%">Step</th><th style="width:30%">Action</th><th>Output</th></tr>
+  <tr><td>1</td><td>Collect reference design (all screens/links) and brand assets (logo, colours, fonts)</td><td>Design pack in shared folder</td></tr>
+  <tr><td>2</td><td>Screen mapping: reference screen &rarr; existing page &rarr; delta (None / Style / Layout / New)</td><td>Mapping sheet (Day 1)</td></tr>
+  <tr><td>3</td><td>Update design tokens: colours, radius, shadows, typography, spacing, icon set</td><td>Theme file merged</td></tr>
+  <tr><td>4</td><td>Update shared components first (button, card, input, header, bottom nav, sheet, toast)</td><td>Component gallery verified</td></tr>
+  <tr><td>5</td><td>Page-by-page adaptation in priority order: Home &rarr; Catalog &rarr; Checkout &rarr; Tracking &rarr; Bookings &rarr; Wallet &rarr; Profile</td><td>Pages signed off in review</td></tr>
+  <tr><td>6</td><td>Admin panel: apply colour/typography only; keep layout (tables/forms) as is</td><td>Consistent look, low risk</td></tr>
+  <tr><td>7</td><td>Responsive pass at 360, 390, 768, 1280 px</td><td>No horizontal scroll, tap targets &ge; 44 px</td></tr>
+  <tr><td>8</td><td>Content pass: replace labour-specific wording, icons, seed data, legal text</td><td>Copy deck approved by client</td></tr>
+</table>
+<h2>8.2 Design rules</h2>
+<ul>
+  <li>One primary action per screen; sticky bottom CTA on mobile.</li>
+  <li>Booking status always visible as a stepper; colours: pending (amber), active (blue), done (green), failed/cancelled (red).</li>
+  <li>Skeleton loaders for lists, empty-state illustration with action for every list.</li>
+  <li>Accessible contrast (WCAG AA), minimum 14 px body text on mobile.</li>
+  <li>Maps: full-bleed with bottom sheet containing provider card, ETA, call/chat, OTP.</li>
+  <li>Motion: subtle (Framer Motion), never block the user; respect reduced-motion.</li>
+</ul>
+<h2>8.3 Screen priority (adapt in this order)</h2>
+<table>
+  <tr><th style="width:8%">Prio</th><th style="width:40%">Screens</th><th>Reason</th></tr>
+  <tr><td>1</td><td>Splash, login/OTP, home, service listing</td><td>First impression; client will judge by these.</td></tr>
+  <tr><td>2</td><td>Checkout, payment, searching, tracking, OTP, completion/rating</td><td>Core revenue and live-tracking journey.</td></tr>
+  <tr><td>3</td><td>Vendor dashboard, job popup, job detail, earnings, KYC</td><td>Supply side must be equally polished.</td></tr>
+  <tr><td>4</td><td>Website landing, legal pages</td><td>Marketing entry.</td></tr>
+  <tr><td>5</td><td>Admin panel theme</td><td>Internal; lowest visual risk.</td></tr>
+</table>
+
+<!-- ============ 9. 10-DAY PLAN ============ -->
+
+<h1>9. 10-Day Execution Plan</h1>
+<p>Day 0 = kick-off. The plan has two spare days (Day 9&ndash;10) as buffer; if everything is on time the project can close on Day 8.</p>
+<table>
+  <tr><th style="width:9%">Day</th><th style="width:20%">Theme</th><th>Tasks</th><th style="width:22%">Deliverable / Gate</th></tr>
+  <tr><td><b>Day 1</b></td><td>Freeze &amp; setup</td><td>Scope workshop; confirm roles to keep (Section 3.2); collect reference UI, brand assets, API keys (Razorpay, Google Maps, Firebase, SMS); set up staging environment; screen-mapping sheet; feature flags for out-of-scope modules.</td><td><b>Gate 1:</b> signed scope &amp; asset pack</td></tr>
+  <tr><td><b>Day 2</b></td><td>Foundation</td><td>Design tokens &amp; shared components; clean repo (remove scripts/secrets); env configs; seed client catalog, zones, time slots, admin account; production OTP wiring.</td><td>Staging running with client data</td></tr>
+  <tr><td><b>Day 3</b></td><td>User app UI</td><td>Splash, login, home, catalog, sub-category pages re-skinned; address &amp; map picker; copy changes.</td><td>User app demo build (part 1)</td></tr>
+  <tr><td><b>Day 4</b></td><td>Booking &amp; payment</td><td>Checkout, bill, slots, payment flow, bookings list; Razorpay live-mode test; wallet discount check.</td><td>Paid booking works on staging</td></tr>
+  <tr><td><b>Day 5</b></td><td>Live tracking (backend)</td><td>Secure location relay, booking-bound validation, breadcrumb storage, ETA service, admin room, reconnect REST endpoint, throttling.</td><td>Tracking API contract + tests</td></tr>
+  <tr><td><b>Day 6</b></td><td>Live tracking (UI) + Vendor</td><td>Customer map screen, provider marker, ETA, stepper; vendor job screen sends location; vendor KYC, job popup, earnings UI re-skin.</td><td><b>Gate 2:</b> live tracking demo end-to-end</td></tr>
+  <tr><td><b>Day 7</b></td><td>Admin &amp; website</td><td>Admin theme + live operations map; configure fees/commission; website landing, SEO, legal pages; PWA manifest/icons.</td><td>All 4 products feature-complete</td></tr>
+  <tr><td><b>Day 8</b></td><td>QA &amp; UAT</td><td>Full regression, device matrix, payment &amp; refund cases, load smoke test; client UAT walkthrough; bug triage.</td><td><b>Gate 3:</b> UAT report</td></tr>
+  <tr><td><b>Day 9</b></td><td>Fix &amp; harden</td><td>Fix P1/P2 bugs; security checks (rate limits, CORS, secrets rotated, helmet); backups; monitoring; content final.</td><td>Release candidate</td></tr>
+  <tr><td><b>Day 10</b></td><td>Go-live</td><td>Production deploy, DNS/SSL, smoke test on production, hand-over docs, training session, hyper-care plan.</td><td><b>Gate 4:</b> go-live sign-off</td></tr>
+</table>
+<h2>9.1 Daily operating rhythm</h2>
+<ul>
+  <li><b>10:00</b> &mdash; 15-minute stand-up: yesterday / today / blockers.</li>
+  <li><b>Throughout</b> &mdash; small commits to a feature branch per journey; merge to <code>staging</code> only after self-test.</li>
+  <li><b>17:30</b> &mdash; staging demo link and a 5-line status update to the client (done / next / need from client).</li>
+  <li><b>End of day</b> &mdash; update tracker: % complete per product, open bugs, risks.</li>
+</ul>
+<h2>9.2 Dependencies on the client (must arrive by Day 1&ndash;2)</h2>
+<table>
+  <tr><th style="width:36%">Item</th><th>Needed for</th></tr>
+  <tr><td>Reference UI files / links, logo, brand colours, fonts</td><td>Re-skin (Section 8)</td></tr>
+  <tr><td>Final service list, categories, prices, commission and fee rules</td><td>Catalog and pricing</td></tr>
+  <tr><td>Razorpay account (test + live keys)</td><td>Payments</td></tr>
+  <tr><td>Google Maps API key with Places, Maps JS, Directions enabled and billing on</td><td>Maps &amp; ETA</td></tr>
+  <tr><td>SMS gateway account, DLT sender ID and OTP template approval</td><td>Production OTP (DLT approval can take days &mdash; start immediately)</td></tr>
+  <tr><td>Firebase project for push</td><td>Notifications</td></tr>
+  <tr><td>Domain, hosting access, MongoDB Atlas (or server) access</td><td>Deployment</td></tr>
+  <tr><td>Legal text (T&amp;C, privacy, refund), contact details</td><td>Website &amp; app</td></tr>
+</table>
+
+<!-- ============ 10. TEAM ============ -->
+
+<h1>10. Team, Responsibilities &amp; Communication</h1>
+<h2>10.1 Roles</h2>
+<table>
+  <tr><th style="width:22%">Role</th><th>Responsibility</th><th style="width:24%">Strength</th></tr>
+  <tr><td>Project Lead (Aryan)</td><td>Scope, plan, client communication, daily reporting, risk &amp; change control, final sign-off.</td><td>1</td></tr>
+  <tr><td>Frontend Developers</td><td>Re-skin, user/vendor/admin/website pages, tracking map UI, PWA.</td><td>2 (user+website, vendor+admin)</td></tr>
+  <tr><td>Backend Developer</td><td>Tracking service, security fixes, config, seed data, payments/notification wiring.</td><td>1</td></tr>
+  <tr><td>UI/UX Designer</td><td>Screen mapping, tokens, assets, design QA.</td><td>1 (part-time)</td></tr>
+  <tr><td>QA Engineer</td><td>Test cases, regression, device testing, UAT support.</td><td>1 (from Day 3)</td></tr>
+  <tr><td>DevOps (part-time)</td><td>Environments, CI, deployment, SSL, monitoring, backups.</td><td>1 (Day 2, 9, 10)</td></tr>
+</table>
+<h2>10.2 RACI</h2>
+<table>
+  <tr><th style="width:34%">Activity</th><th>Lead</th><th>FE</th><th>BE</th><th>Design</th><th>QA</th><th>DevOps</th><th>Client</th></tr>
+  <tr><td>Scope freeze</td><td>R</td><td>C</td><td>C</td><td>C</td><td>I</td><td>I</td><td>A</td></tr>
+  <tr><td>UI re-skin</td><td>A</td><td>R</td><td>I</td><td>R</td><td>C</td><td>-</td><td>C</td></tr>
+  <tr><td>Live tracking</td><td>A</td><td>R</td><td>R</td><td>C</td><td>C</td><td>I</td><td>I</td></tr>
+  <tr><td>Payments &amp; keys</td><td>A</td><td>C</td><td>R</td><td>-</td><td>C</td><td>C</td><td>R</td></tr>
+  <tr><td>Testing &amp; UAT</td><td>A</td><td>C</td><td>C</td><td>I</td><td>R</td><td>I</td><td>R</td></tr>
+  <tr><td>Deployment</td><td>A</td><td>C</td><td>C</td><td>-</td><td>C</td><td>R</td><td>C</td></tr>
+  <tr><td>Go-live approval</td><td>R</td><td>I</td><td>I</td><td>I</td><td>C</td><td>I</td><td>A</td></tr>
+</table>
+<p class="small">R = Responsible, A = Accountable, C = Consulted, I = Informed.</p>
+<h2>10.3 Communication protocol</h2>
+<ul>
+  <li><b>Single channel</b> for client queries (WhatsApp group / Slack); decisions confirmed in writing.</li>
+  <li><b>Blocker rule:</b> any blocker older than 2 hours is escalated to the Project Lead.</li>
+  <li><b>Client response SLA:</b> approvals and assets within 4 working hours to protect the timeline.</li>
+  <li><b>Demo rule:</b> every demo is on the staging URL, not on a developer machine.</li>
+</ul>
+
+<!-- ============ 11. QA ============ -->
+
+<h1>11. Quality Assurance &amp; UAT SOP</h1>
+<h2>11.1 Test levels</h2>
+<table>
+  <tr><th style="width:22%">Level</th><th>What is covered</th><th style="width:20%">Owner / When</th></tr>
+  <tr><td>Developer self-test</td><td>Feature works on desktop and phone viewport; no console errors.</td><td>Developer / each commit</td></tr>
+  <tr><td>Functional (QA)</td><td>Every feature in Section 6 against its acceptance rule.</td><td>QA / Day 3&ndash;8</td></tr>
+  <tr><td>Integration</td><td>Razorpay, SMS OTP, FCM push, Google Maps, Cloudinary uploads.</td><td>QA + BE / Day 4&ndash;7</td></tr>
+  <tr><td>Real-device</td><td>Android Chrome, iOS Safari, one low-end Android; GPS actually moving (walk/drive test).</td><td>QA / Day 6&ndash;8</td></tr>
+  <tr><td>Security</td><td>Auth on every route, role checks, socket validation, rate limits, no secrets in client bundle.</td><td>BE + Lead / Day 9</td></tr>
+  <tr><td>Performance</td><td>50 concurrent users smoke test; page load &lt; 3 s on 4G; Lighthouse &ge; 80.</td><td>QA + DevOps / Day 8&ndash;9</td></tr>
+  <tr><td>UAT</td><td>Client executes the scripted journeys below on staging.</td><td>Client / Day 8</td></tr>
+</table>
+<h2>11.2 Priority-1 test scenarios</h2>
+<table>
+  <tr><th style="width:6%">ID</th><th style="width:34%">Scenario</th><th>Expected result</th></tr>
+  <tr><td>T01</td><td>New user signs up with OTP</td><td>Account created, token issued, lands on home.</td></tr>
+  <tr><td>T02</td><td>Instant booking with online payment</td><td>Razorpay success &rarr; booking BROADCASTING; vendor receives popup &lt; 3 s.</td></tr>
+  <tr><td>T03</td><td>Vendor accepts</td><td>User sees provider card; booking ACCEPTED; admin dashboard updates.</td></tr>
+  <tr><td>T04</td><td>Live tracking while EN_ROUTE</td><td>Marker moves; ETA updates; refresh restores position.</td></tr>
+  <tr><td>T05</td><td>Start &amp; end OTP</td><td>Wrong OTP rejected; correct OTP advances status.</td></tr>
+  <tr><td>T06</td><td>Cash booking completion</td><td>Cash collected recorded; commission added to vendor dues.</td></tr>
+  <tr><td>T07</td><td>No provider accepts</td><td>After timeout booking FAILED; discount refunded; user notified.</td></tr>
+  <tr><td>T08</td><td>Cancellation by user / vendor</td><td>Correct refund/penalty per settings.</td></tr>
+  <tr><td>T09</td><td>Vendor KYC &rarr; admin approval</td><td>Status changes; vendor can go online only after approval.</td></tr>
+  <tr><td>T10</td><td>Withdrawal request &rarr; approve</td><td>Balance debited; status and remark visible to vendor.</td></tr>
+  <tr><td>T11</td><td>Role isolation</td><td>User token cannot call vendor/admin APIs (403).</td></tr>
+  <tr><td>T12</td><td>Location spoof attempt via socket</td><td>Rejected; no event delivered to other users.</td></tr>
+  <tr><td>T13</td><td>Rating after completion</td><td>Stored; average rating updates.</td></tr>
+  <tr><td>T14</td><td>Admin changes commission %</td><td>New bookings use new value; old bookings unchanged.</td></tr>
+  <tr><td>T15</td><td>Website CTAs</td><td>All links route correctly; forms submit; mobile layout intact.</td></tr>
+</table>
+<h2>11.3 Defect handling</h2>
+<table>
+  <tr><th style="width:14%">Severity</th><th>Definition</th><th style="width:28%">Rule</th></tr>
+  <tr><td>S1 Critical</td><td>Money wrong, booking blocked, security hole, crash on core journey</td><td>Fix same day; blocks go-live</td></tr>
+  <tr><td>S2 Major</td><td>Feature broken with workaround</td><td>Fix before UAT close</td></tr>
+  <tr><td>S3 Minor</td><td>UI glitch, wording</td><td>Fix if time; else backlog</td></tr>
+</table>
+<p><b>Exit criteria for UAT:</b> 100% P1 scenarios pass, no open S1/S2, S3 list agreed with client.</p>
+
+<!-- ============ 12. DEPLOYMENT ============ -->
+
+<h1>12. Deployment, Go-live &amp; Rollback SOP</h1>
+<h2>12.1 Environments</h2>
+<table>
+  <tr><th style="width:18%">Env</th><th>Purpose</th><th style="width:34%">Notes</th></tr>
+  <tr><td>Local</td><td>Developer work</td><td>Local MongoDB, test keys</td></tr>
+  <tr><td>Staging</td><td>QA, demos, UAT</td><td>Mirrors production; Razorpay test mode; seeded demo data</td></tr>
+  <tr><td>Production</td><td>Live customers</td><td>Separate DB, keys and domain; backups on</td></tr>
+</table>
+<h2>12.2 Pre-deployment checklist</h2>
+<ul>
+  <li><code>NODE_ENV=production</code>; <b>OTP bypass and dev OTP logging disabled</b> (<code>OTP_BYPASS_LAST6</code>, <code>OTP_DEV_LOG</code>).</li>
+  <li>New strong <code>JWT_SECRET</code>; admin seed password changed; default seed credentials removed.</li>
+  <li>All secrets rotated and stored in the host&rsquo;s secret manager; <code>.env</code> and Firebase JSON not in the repository or hand-over zip.</li>
+  <li>CORS restricted to the real domains; Helmet on; API rate-limit on auth and booking endpoints.</li>
+  <li>MongoDB Atlas (or managed DB) with IP allow-list, automated daily backup, indexes verified (2dsphere on booking location, provider location).</li>
+  <li>Razorpay live keys + webhook; Google Maps key restricted by HTTP referrer / IP; SMS DLT template approved.</li>
+  <li>Utility scripts (<code>check_*</code>, <code>fix_*</code>, <code>test*</code>) excluded from the production build.</li>
+  <li>Error logging (e.g. Sentry) and uptime monitoring configured.</li>
+</ul>
+<h2>12.3 Hosting plan</h2>
+<table>
+  <tr><th style="width:22%">Component</th><th>Recommended hosting</th></tr>
+  <tr><td>Website + User/Vendor/Admin web apps</td><td>Vercel/Netlify static hosting (project already has <code>vercel.json</code>), custom domains with SSL</td></tr>
+  <tr><td>API + Socket.io</td><td>Node server on VPS / Render / Railway / AWS with <b>sticky WebSocket support</b> and process manager (PM2)</td></tr>
+  <tr><td>Database</td><td>MongoDB Atlas (M10 or higher for production)</td></tr>
+  <tr><td>Media</td><td>Cloudinary</td></tr>
+</table>
+<h2>12.4 Go-live runbook</h2>
+<ol>
+  <li>Code freeze on the release branch; tag <code>v1.0.0</code>.</li>
+  <li>Take database snapshot (if migrating data) and record current DNS values.</li>
+  <li>Deploy API &rarr; run health check &rarr; run seed (categories, settings, admin) once.</li>
+  <li>Deploy web apps with production environment variables (<code>VITE_API_URL</code>, Maps, Razorpay key ID).</li>
+  <li>Switch DNS; verify SSL; verify WebSocket connects on the production domain.</li>
+  <li>Smoke test T01&ndash;T05 and T15 on production with a real &#8377;1&ndash;10 transaction and refund.</li>
+  <li>Announce to client; start hyper-care.</li>
+</ol>
+<h2>12.5 Rollback</h2>
+<ul>
+  <li><b>Trigger:</b> any S1 in the first 2 hours, or payment/tracking failure rate &gt; 5%.</li>
+  <li><b>Action:</b> redeploy previous tag (static apps are instant on Vercel; API via PM2 / previous image), restore DB snapshot only if data corruption is confirmed.</li>
+  <li><b>Owner:</b> DevOps executes, Project Lead decides, client informed immediately.</li>
+</ul>
+<h2>12.6 Hyper-care (first 7 days after go-live)</h2>
+<ul>
+  <li>Daily review of error logs, failed payments, stuck bookings (cron already auto-fails broadcasts after 10 min).</li>
+  <li>Same-day response for S1/S2 issues; daily 5-line health report to client.</li>
+  <li>Hand-over: admin user guide, vendor onboarding guide, API docs, credentials register (delivered securely), and one live training session.</li>
+</ul>
+
+<!-- ============ 13. RISKS ============ -->
+
+<h1>13. Risks, Assumptions, Dependencies &amp; Out-of-Scope</h1>
+<h2>13.1 Assumptions</h2>
+<ul>
+  <li>The delivered system is built on the existing codebase; it is not a rewrite.</li>
+  <li>&ldquo;Application&rdquo; means a responsive web app installable as a PWA. Native Android/iOS store apps are separate work.</li>
+  <li>The reference UI is of mobile-app scale (about 15&ndash;25 screens). A much larger design needs re-estimation.</li>
+  <li>The client supplies all third-party accounts and keys in Day 1&ndash;2.</li>
+  <li>One city/zone and one language (English) at launch; Hindi/other languages are additive.</li>
+  <li>The business domain of the client matches the &ldquo;book a provider &rarr; track &rarr; pay&rdquo; model of the existing platform. If the client&rsquo;s domain differs materially (e.g. car-specific inventory, listings, community feed), those parts are additional scope.</li>
+</ul>
+<h2>13.2 Risk register</h2>
+<table>
+  <tr><th style="width:4%">#</th><th style="width:28%">Risk</th><th style="width:9%">Impact</th><th style="width:9%">Likelihood</th><th>Mitigation</th></tr>
+  <tr><td>1</td><td>Reference UI is larger/different from existing flows</td><td>High</td><td>Med</td><td>Screen mapping on Day 1; priority order; defer low-priority screens.</td></tr>
+  <tr><td>2</td><td>SMS DLT template approval delays OTP</td><td>High</td><td>Med</td><td>Apply immediately; keep staging bypass; escalate with gateway.</td></tr>
+  <tr><td>3</td><td>Browser geolocation stops when phone locks</td><td>High</td><td>High</td><td>Wake-lock + keep-screen-on prompt; communicate limitation; native wrapper as phase 2.</td></tr>
+  <tr><td>4</td><td>Google Maps billing / key not ready</td><td>High</td><td>Med</td><td>Client to enable billing Day 1; fall back to OSM/Leaflet for tracking map.</td></tr>
+  <tr><td>5</td><td>Scope creep from &ldquo;features as discussed&rdquo;</td><td>High</td><td>High</td><td>Written feature list signed on Day 1; change control (Section 14).</td></tr>
+  <tr><td>6</td><td>Money-flow defects (commission, refunds)</td><td>High</td><td>Low</td><td>Reconcile sample bookings on Day 4; S1 rule; real &#8377;1 test on production.</td></tr>
+  <tr><td>7</td><td>Secrets exposed in the repo</td><td>High</td><td>Med</td><td>Rotate all keys, purge from history, use secret manager.</td></tr>
+  <tr><td>8</td><td>Concurrency / socket scaling on single server</td><td>Med</td><td>Low</td><td>Single instance adequate for launch; Redis adapter if scaling out.</td></tr>
+  <tr><td>9</td><td>Client feedback arrives late</td><td>Med</td><td>Med</td><td>4-hour response SLA; auto-approval after 24 h silence for non-critical items.</td></tr>
+  <tr><td>10</td><td>Team member unavailable</td><td>Med</td><td>Low</td><td>Shared ownership per journey; buffer Day 9&ndash;10.</td></tr>
+</table>
+<h2>13.3 Out of scope for this engagement</h2>
+<ul>
+  <li>Native Android/iOS apps and store publishing (Play Store / App Store listing).</li>
+  <li>In-app chat or voice calling beyond tap-to-call.</li>
+  <li>Multi-language, multi-currency, multi-city expansion tooling.</li>
+  <li>Automated accounting/ERP integration, GST e-invoicing.</li>
+  <li>Marketing site blog/CMS beyond the pages listed; paid-ads setup.</li>
+  <li>Corporate/B2B panel and BuildMart marketplace, unless confirmed in Day 1 scope freeze.</li>
+  <li>Data migration from any legacy system.</li>
+</ul>
+<h2>13.4 Post-launch roadmap (suggested)</h2>
+<table>
+  <tr><th style="width:18%">Phase</th><th>Items</th></tr>
+  <tr><td>Phase 2 (weeks 3&ndash;6)</td><td>Native apps (React Native / Capacitor wrapper), background GPS, in-app chat, surge/dynamic pricing, coupons.</td></tr>
+  <tr><td>Phase 3 (months 2&ndash;3)</td><td>Multi-city operations, advanced analytics, vendor ranking &amp; auto-assignment, subscription marketing, WhatsApp notifications.</td></tr>
+</table>
+
+<!-- ============ 14. CHANGE CONTROL & SIGN-OFF ============ -->
+
+<h1>14. Change Control, Acceptance &amp; Sign-off</h1>
+<h2>14.1 Change-control procedure</h2>
+<ol>
+  <li><b>Raise:</b> any new or changed requirement is written in the change log (what, why, who asked).</li>
+  <li><b>Assess:</b> Project Lead estimates effort, timeline and risk impact within 4 working hours.</li>
+  <li><b>Decide:</b> client chooses one &mdash; (a) accept with extra days, (b) swap with an equal-sized item, (c) move to Phase 2.</li>
+  <li><b>Record:</b> approved changes update this SOP version and the day plan.</li>
+</ol>
+<div class="box warn"><b>Rule:</b> after Day 1 freeze, a request that adds more than 0.5 day of work is never absorbed silently &mdash; it is either swapped or moves the date.</div>
+<h2>14.2 Definition of Done (per feature)</h2>
+<ul>
+  <li>Implemented and merged to staging; no console or server errors.</li>
+  <li>Works on mobile viewport and one real phone.</li>
+  <li>Role/permission checks in place; inputs validated.</li>
+  <li>Test scenario(s) pass; demo shown to Project Lead.</li>
+  <li>Wording and visuals match the approved design.</li>
+</ul>
+<h2>14.3 Final acceptance criteria</h2>
+<table>
+  <tr><th style="width:5%">#</th><th>Criterion</th><th style="width:16%">Verified by</th></tr>
+  <tr><td>1</td><td>User App, Vendor App, Admin Panel and Website are live on client domains with HTTPS.</td><td>Client</td></tr>
+  <tr><td>2</td><td>Complete journey (book &rarr; pay &rarr; live track &rarr; OTP complete &rarr; rate) works on production with a real transaction.</td><td>Client + QA</td></tr>
+  <tr><td>3</td><td>Vendor onboarding, approval, job handling and withdrawal verified.</td><td>Client + QA</td></tr>
+  <tr><td>4</td><td>Admin can configure fees, catalog, zones, content and see live bookings.</td><td>Client</td></tr>
+  <tr><td>5</td><td>UI matches the approved reference design on agreed priority screens.</td><td>Client</td></tr>
+  <tr><td>6</td><td>No open S1/S2 defects; S3 list accepted.</td><td>QA</td></tr>
+  <tr><td>7</td><td>Secrets rotated, backups on, monitoring active, rollback tested.</td><td>DevOps</td></tr>
+  <tr><td>8</td><td>Documentation and training delivered.</td><td>Lead</td></tr>
+</table>
+<h2>14.4 Open decisions to close on Day 1</h2>
+<table>
+  <tr><th style="width:5%">#</th><th>Decision</th><th style="width:28%">Recommended default</th></tr>
+  <tr><td>1</td><td>Keep Corporate (B2B) panel and BuildMart marketplace?</td><td>Hide behind flags</td></tr>
+  <tr><td>2</td><td>Is the individual worker (<code>labour</code>) a separate app, or only Vendor?</td><td>Vendor only for launch</td></tr>
+  <tr><td>3</td><td>Pricing model: fixed per service or per hour/day? Commission % and platform fee?</td><td>Fixed per service + % commission</td></tr>
+  <tr><td>4</td><td>Payments: online only, or cash allowed?</td><td>Both, with cash-dues limit</td></tr>
+  <tr><td>5</td><td>Live tracking by web/PWA or native app?</td><td>PWA now, native in Phase 2</td></tr>
+  <tr><td>6</td><td>Launch city / zone and service radius</td><td>Single zone, 10 km</td></tr>
+  <tr><td>7</td><td>Reference UI: full screen list and priority</td><td>Provide on Day 1</td></tr>
+</table>
+<h2>14.5 Sign-off</h2>
+<table>
+  <tr><th style="width:30%">Name / Role</th><th>Signature</th><th style="width:20%">Date</th></tr>
+  <tr><td>Client Representative</td><td>&nbsp;<br>&nbsp;</td><td></td></tr>
+  <tr><td>Project Lead &mdash; Aryan Pathak</td><td>&nbsp;<br>&nbsp;</td><td></td></tr>
+  <tr><td>Management</td><td>&nbsp;<br>&nbsp;</td><td></td></tr>
+</table>
+<p class="small">This SOP is derived from a static review of the repository and the client conversation. Items marked &ldquo;to be confirmed&rdquo; or listed in Section 14.4 must be validated with the client before scope freeze.</p>
+
+</body>
+</html>
+
+
+

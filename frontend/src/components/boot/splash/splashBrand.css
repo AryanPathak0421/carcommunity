@@ -1,0 +1,103 @@
+/**
+ * Brand title animation — matches repo root screen.html (scoped for /splash).
+ * Do not move keyframes to Tailwind @layer; keep plain CSS so SVG text animates reliably.
+ */
+
+.lc-brand-splash {
+  position: relative;
+  width: 100%;
+  max-width: 700px;
+  margin-inline: auto;
+  font-family: 'Arial Rounded MT Bold', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.lc-brand-splash svg {
+  width: 100%;
+  overflow: visible;
+  display: block;
+}
+
+.lc-brand-splash text {
+  font-size: clamp(42px, 12vw, 75px);
+  font-weight: 900;
+  text-transform: lowercase;
+  letter-spacing: 2px;
+}
+
+.lc-brand-splash .text-stroke {
+  fill: none;
+  stroke: #ffffff;
+  stroke-width: 2px;
+  stroke-dasharray: 400;
+  stroke-dashoffset: 400;
+  animation: lc-draw-outline 3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.lc-brand-splash .text-fill {
+  fill: #ffffff;
+  opacity: 0;
+  animation: lc-fill-characters 3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.lc-brand-splash .text-glow {
+  fill: none;
+  stroke: #ffffff;
+  stroke-width: 4px;
+  filter: blur(8px);
+  opacity: 0;
+  animation: lc-glow-pulse 3s ease-in-out forwards;
+}
+
+@keyframes lc-draw-outline {
+  0% {
+    stroke-dashoffset: 400;
+  }
+  40%,
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes lc-fill-characters {
+  0%,
+  30% {
+    opacity: 0;
+    clip-path: inset(0 100% 0 0);
+  }
+  70%,
+  100% {
+    opacity: 1;
+    clip-path: inset(0 0% 0 0);
+  }
+}
+
+@keyframes lc-glow-pulse {
+  0%,
+  45% {
+    opacity: 0;
+  }
+  60% {
+    opacity: 0.6;
+  }
+  80%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lc-brand-splash .text-stroke {
+    stroke-dashoffset: 0;
+    animation: none;
+  }
+
+  .lc-brand-splash .text-fill {
+    opacity: 1;
+    clip-path: none;
+    animation: none;
+  }
+
+  .lc-brand-splash .text-glow {
+    display: none;
+  }
+}

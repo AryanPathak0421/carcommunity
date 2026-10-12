@@ -1,0 +1,316 @@
+{
+  "Mappto_API_Contract": {
+    "version": "1.0",
+    "description": "Comprehensive mock responses for all APIs to help frontend development."
+  },
+  "endpoints": {
+    "___AUTH_&_USER___": {},
+    "POST /api/v1/auth/send-otp": {
+      "description": "Send OTP for login/register",
+      "request": { "phone": "9876543210" },
+      "response_200": {
+        "success": true,
+        "message": "OTP sent successfully"
+      }
+    },
+    "POST /api/v1/auth/verify-otp": {
+      "description": "Verify OTP and login",
+      "request": { "phone": "9876543210", "otp": "123456", "fcmToken": "optional_token" },
+      "response_200": {
+        "success": true,
+        "data": {
+          "token": "eyJhbGciOiJIUzI1NiIsInR5...",
+          "user": {
+            "_id": "user_123",
+            "phone": "9876543210",
+            "role": "USER",
+            "isProfileComplete": true,
+            "isActive": true
+          }
+        }
+      }
+    },
+    "GET /api/v1/users/me": {
+      "description": "Get logged in user profile",
+      "response_200": {
+        "success": true,
+        "data": {
+          "user": {
+            "_id": "user_123",
+            "name": "Rahul Kumar",
+            "phone": "9876543210",
+            "role": "LABOUR",
+            "profilePic": "https://bucket.s3/profile.jpg",
+            "labourProfile": {
+              "subcategoryIds": ["sub_123", "sub_456"],
+              "minAcceptedPrice": 500,
+              "maxAcceptedPrice": 2000
+            }
+          }
+        }
+      }
+    },
+    "PATCH /api/v1/users/me": {
+      "description": "Update user profile",
+      "request": {
+        "name": "Rahul Kumar",
+        "labourProfile": {
+          "subcategoryIds": ["sub_123"],
+          "minAcceptedPrice": 600
+        }
+      },
+      "response_200": {
+        "success": true,
+        "data": { "user": { "name": "Rahul Kumar" } }
+      }
+    },
+    "___ADMIN_SETTINGS___": {},
+    "GET /api/v1/admin/settings": {
+      "description": "Get global platform settings",
+      "response_200": {
+        "success": true,
+        "data": {
+          "settings": {
+            "platformFee": { "type": "percentage", "value": 5, "isActive": true },
+            "commission": { "type": "global", "globalPercentage": 10, "isActive": true },
+            "walletLimit": 200
+          }
+        }
+      }
+    },
+    "PATCH /api/v1/admin/settings/platform-fees": {
+      "description": "Update platform fee settings",
+      "request": { "type": "percentage", "value": 5, "isActive": true },
+      "response_200": { "success": true, "data": { "settings": { "platformFee": { "value": 5 } } } }
+    },
+    "PATCH /api/v1/admin/settings/commission": {
+      "description": "Update global commission",
+      "request": { "type": "global", "globalPercentage": 10, "isActive": true },
+      "response_200": { "success": true, "data": { "settings": { "commission": { "globalPercentage": 10 } } } }
+    },
+    "PATCH /api/v1/admin/settings/wallet-limit": {
+      "description": "Update wallet liability limit",
+      "request": { "walletLimit": 300 },
+      "response_200": { "success": true, "data": { "settings": { "walletLimit": 300 } } }
+    },
+    "___CATALOG_&_SUBCATEGORIES___": {},
+    "POST /api/v1/admin/labour-subcategories": {
+      "description": "Admin create subcategory",
+      "request": {
+        "categoryId": "cat_123",
+        "name": "Pipe Leakage",
+        "basePrice": 800,
+        "estimatedDurationMins": 45
+      },
+      "response_201": {
+        "success": true,
+        "data": {
+          "subcategory": { "_id": "sub_123", "name": "Pipe Leakage", "basePrice": 800 }
+        }
+      }
+    },
+    "PATCH /api/v1/admin/labour-subcategories/:id": {
+      "description": "Admin update subcategory",
+      "request": { "basePrice": 900, "isActive": false },
+      "response_200": { "success": true, "data": { "subcategory": { "basePrice": 900 } } }
+    },
+    "GET /api/v1/labour-categories/grouped": {
+      "description": "Public catalogue fetch (Customer App)",
+      "response_200": {
+        "success": true,
+        "data": {
+          "groups": [
+            {
+              "_id": "group_1",
+              "name": "Plumbing",
+              "categories": [
+                {
+                  "_id": "cat_1",
+                  "name": "General Plumbing",
+                  "subcategories": [
+                    {
+                      "_id": "sub_1",
+                      "name": "Pipe Leakage",
+                      "basePrice": 800,
+                      "estimatedDurationMins": 45
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "___BOOKINGS___": {},
+    "POST /api/v1/bookings/calculate": {
+      "description": "Calculate bill before checkout",
+      "request": { "subcategoryId": "sub_123" },
+      "response_200": {
+        "success": true,
+        "data": { "basePrice": 800, "platformFee": 40, "totalAmount": 840, "laborShare": 756 }
+      }
+    },
+    "POST /api/v1/bookings": {
+      "description": "Create a new booking",
+      "request": {
+        "subcategoryId": "sub_123",
+        "type": "INSTANT",
+        "locationText": "123 Main St",
+        "paymentMethod": "CASH"
+      },
+      "response_201": {
+        "success": true,
+        "data": {
+          "booking": { "_id": "book_1", "status": "CREATED", "totalAmount": 840, "paymentMethod": "CASH" }
+        }
+      }
+    },
+    "GET /api/v1/bookings/me": {
+      "description": "Fetch active & past bookings for User or Labor",
+      "response_200": {
+        "success": true,
+        "data": {
+          "bookings": [
+            {
+              "_id": "book_1",
+              "status": "COMPLETED",
+              "totalAmount": 840,
+              "subcategoryId": { "name": "Pipe Leakage" },
+              "userId": { "name": "Client Name", "phone": "1111" },
+              "laborId": { "name": "Ramesh", "phone": "9999" }
+            }
+          ]
+        }
+      }
+    },
+    "GET /api/v1/bookings/:id": {
+      "description": "Get specific booking status",
+      "response_200": {
+        "success": true,
+        "data": { "booking": { "_id": "book_1", "status": "EN_ROUTE" } }
+      }
+    },
+    "PATCH /api/v1/bookings/:id/status": {
+      "description": "Labor updates job status",
+      "request": { "status": "STARTED" },
+      "response_200": {
+        "success": true,
+        "data": { "booking": { "status": "STARTED" } }
+      }
+    },
+    "___WALLETS___": {},
+    "GET /api/v1/wallets/me": {
+      "description": "Labor fetches their wallet balance",
+      "response_200": {
+        "success": true,
+        "data": {
+          "wallet": {
+            "selfBalance": 1500,
+            "adminBalance": 80,
+            "isActive": true
+          }
+        }
+      }
+    },
+    "POST /api/v1/wallets/clear": {
+      "description": "Used internally after Razorpay clears admin dues",
+      "request": { "amount": 80 },
+      "response_200": {
+        "success": true,
+        "data": { "wallet": { "adminBalance": 0 } }
+      }
+    },
+    "___PAYMENTS___": {},
+    "POST /api/v1/payments/init": {
+      "description": "Initialize a Razorpay order (for Booking or Wallet)",
+      "request": {
+        "amount": 840,
+        "purpose": "BOOKING",
+        "bookingId": "book_1"
+      },
+      "response_200": {
+        "success": true,
+        "data": {
+          "order": { "id": "order_Hkgfds...", "amount": 84000, "currency": "INR" },
+          "paymentTransactionId": "ptx_id"
+        }
+      }
+    },
+    "POST /api/v1/payments/verify": {
+      "description": "Verify Razorpay success signature",
+      "request": {
+        "razorpayOrderId": "order_xyz",
+        "razorpayPaymentId": "pay_abc",
+        "razorpaySignature": "sig_123"
+      },
+      "response_200": {
+        "success": true,
+        "message": "Payment verified successfully"
+      }
+    },
+    "___BROADCASTS___": {},
+    "POST /api/v1/broadcasts/:logId/accept": {
+      "description": "Labor accepts a job broadcast",
+      "response_200": {
+        "success": true,
+        "message": "Booking accepted successfully"
+      }
+    },
+    "POST /api/v1/broadcasts/:logId/reject": {
+      "description": "Labor rejects a job broadcast",
+      "response_200": {
+        "success": true,
+        "message": "Broadcast rejected"
+      }
+    },
+    "___REVIEWS___": {},
+    "POST /api/v1/reviews": {
+      "description": "Submit a rating for a completed job",
+      "request": { "bookingId": "book_1", "rating": 5, "comment": "Great work" },
+      "response_200": {
+        "success": true,
+        "message": "Review submitted successfully"
+      }
+    },
+    "GET /api/v1/reviews/user/:userId": {
+      "description": "Get reviews for a labor/user profile",
+      "response_200": {
+        "success": true,
+        "data": {
+          "reviews": [{ "rating": 5, "comment": "Great", "reviewerId": { "name": "John" } }],
+          "averageRating": "5.0",
+          "totalReviews": 1
+        }
+      }
+    },
+    "___SOCKET_EVENTS___": {
+      "NEW_BROADCAST": {
+        "direction": "Server -> Labor Client",
+        "payload": {
+          "bookingId": "book_1",
+          "logId": "log_1",
+          "basePrice": 800,
+          "laborShare": 756,
+          "address": "123 Main St",
+          "type": "INSTANT",
+          "timeoutMs": 30000
+        }
+      },
+      "BOOKING_ACCEPTED": {
+        "direction": "Server -> User Client",
+        "payload": {
+          "bookingId": "book_1",
+          "laborId": "labor_123"
+        }
+      },
+      "BOOKING_STATUS_UPDATE": {
+        "direction": "Server -> User Client",
+        "payload": {
+          "bookingId": "book_1",
+          "status": "EN_ROUTE"
+        }
+      }
+    }
+  }
+}

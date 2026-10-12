@@ -1,0 +1,79 @@
+import { Router } from 'express'
+import authRoutes from './authRoutes.js'
+import userRoutes from './userRoutes.js'
+import labourCategoryRoutes from './labourCategoryRoutes.js'
+import adminLabourCategoryRoutes from './adminLabourCategoryRoutes.js'
+import uploadRoutes from './uploadRoutes.js'
+import systemSettingRoutes from './systemSettingRoutes.js'
+import bookingRoutes from './bookingRoutes.js'
+import walletRoutes from './walletRoutes.js'
+import broadcastRoutes from './broadcastRoutes.js'
+import paymentRoutes from './paymentRoutes.js'
+import reviewRoutes from './reviewRoutes.js'
+import userSubscriptionRoutes from './userSubscriptionRoutes.js'
+import termsRoutes from './termsRoutes.js'
+import privacyPolicyRoutes from './privacyPolicyRoutes.js'
+import faqRoutes from './faqRoutes.js'
+import notificationRoutes from './notificationRoutes.js'
+import referralRoutes from './referralRoutes.js'
+import adminReferralRoutes from './adminReferralRoutes.js'
+
+import adminZoneRoutes from './adminZoneRoutes.js'
+import locationRoutes from './locationRoutes.js'
+import adminWalletRoutes from './adminWalletRoutes.js'
+import complaintRoutes from './complaintRoutes.js'
+import adminComplaintRoutes from './adminComplaintRoutes.js'
+import adminDashboardRoutes from './adminDashboardRoutes.js'
+import bannerRoutes from './bannerRoutes.js'
+import adminBannerRoutes from './adminBannerRoutes.js'
+import adminReportsRoutes from './adminReportsRoutes.js'
+import adminBookingRoutes from './adminBookingRoutes.js'
+import adminSubscriptionRoutes from './adminSubscriptionRoutes.js'
+import adminTermsRoutes from './adminTermsRoutes.js'
+import adminPrivacyPolicyRoutes from './adminPrivacyPolicyRoutes.js'
+import adminFaqRoutes from './admin/adminFaqRoutes.js'
+import adminProfileRoutes from './adminProfileRoutes.js'
+
+const router = Router()
+
+router.use('/auth', authRoutes)
+router.use('/users', userRoutes)
+router.use('/uploads', uploadRoutes)
+router.use('/labour-categories', labourCategoryRoutes)
+router.use('/bookings', bookingRoutes)
+router.use('/wallets', walletRoutes)
+router.use('/broadcasts', broadcastRoutes)
+router.use('/payments', paymentRoutes)
+router.use('/reviews', reviewRoutes)
+router.use('/complaints', complaintRoutes)
+router.use('/banners', bannerRoutes)
+router.use('/user-subscriptions', userSubscriptionRoutes)
+router.use('/terms', termsRoutes)
+router.use('/privacy-policy', privacyPolicyRoutes)
+router.use('/faqs', faqRoutes)
+router.use('/notifications', notificationRoutes)
+router.use('/referrals', referralRoutes)
+
+router.use('/admin/settings', systemSettingRoutes)
+router.use('/admin/zones', adminZoneRoutes)
+router.use('/admin/wallets', adminWalletRoutes)
+router.use('/admin/complaints', adminComplaintRoutes)
+router.use('/admin/dashboard', adminDashboardRoutes)
+router.use('/admin/banners', adminBannerRoutes)
+router.use('/admin/reports', adminReportsRoutes)
+router.use('/admin/referrals', adminReferralRoutes)
+router.use('/admin/bookings', adminBookingRoutes)
+router.use('/admin', adminLabourCategoryRoutes)
+router.use('/admin/subscriptions', adminSubscriptionRoutes)
+router.use('/admin/terms', adminTermsRoutes)
+router.use('/admin/privacy-policy', adminPrivacyPolicyRoutes)
+router.use('/admin/faqs', adminFaqRoutes)
+router.use('/admin/profile', adminProfileRoutes)
+router.use('/labour/location', locationRoutes)
+
+import { getCollectedCommissionAmount } from '../controllers/adminWalletController.js'
+import { protect, restrictTo } from '../middleware/auth.js'
+import { USER_ROLES } from '../constants/roles.js'
+router.get('/admin/commission-fee', protect, restrictTo(USER_ROLES.ADMIN), getCollectedCommissionAmount)
+
+export default router

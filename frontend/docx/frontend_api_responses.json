@@ -1,0 +1,73 @@
+{
+  "update_gst_response": {
+    "success": true,
+    "message": "GST percentage updated",
+    "data": {
+      "settings": {
+        "_id": "64a0b...",
+        "configKey": "master_config",
+        "gstPercentage": 18,
+        "cancellationPenalty": 50,
+        "walletLimit": 100,
+        "platformFee": {
+          "type": "fixed",
+          "value": 20,
+          "isActive": true
+        },
+        "commission": {
+          "type": "global",
+          "globalPercentage": 10,
+          "isActive": true
+        }
+      }
+    }
+  },
+  "update_penalty_response": {
+    "success": true,
+    "message": "Cancellation penalty updated",
+    "data": {
+      "settings": {
+        "_id": "64a0b...",
+        "configKey": "master_config",
+        "gstPercentage": 18,
+        "cancellationPenalty": 75,
+        "walletLimit": 100
+      }
+    }
+  },
+  "calculate_bill_response": {
+    "success": true,
+    "data": {
+      "basePrice": 800,
+      "platformFee": 20,
+      "taxes": 147.6,
+      "totalAmount": 967.6,
+      "commissionAmount": 96.76,
+      "laborShare": 723.24
+    }
+  },
+  "create_booking_response": {
+    "success": true,
+    "message": "Booking created successfully",
+    "data": {
+      "booking": {
+        "_id": "65b0f...",
+        "userId": "64f1d...",
+        "subcategoryId": "64d0f...",
+        "type": "INSTANT",
+        "address": {
+          "locationText": "Sector 14, Gurugram"
+        },
+        "basePrice": 800,
+        "platformFee": 20,
+        "taxes": 147.6,
+        "totalAmount": 967.6,
+        "commissionAmount": 96.76,
+        "laborShare": 723.24,
+        "paymentMethod": "CASH",
+        "status": "CREATED",
+        "createdAt": "2026-07-10T12:00:00.000Z"
+      }
+    }
+  }
+}
