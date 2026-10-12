@@ -28,7 +28,9 @@ function shortLocationLabel(address) {
 }
 
 export function AppShell() {
-  const { pathname, search } = useLocation()
+  const { pathname: rawPathname, search } = useLocation()
+  // treat "/app/" and "/app" alike so the home chrome never falls back to the generic header
+  const pathname = rawPathname.length > 1 ? rawPathname.replace(/\/+$/, '') : rawPathname
   const navigate = useNavigate()
   const { logout, user, isGuest } = useAuth()
   const [drawerOpen, setDrawerOpen] = useState(false)

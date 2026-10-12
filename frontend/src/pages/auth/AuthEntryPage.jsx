@@ -288,7 +288,7 @@ export function AuthEntryPage() {
       <MobileShell transparent className="relative z-10 overflow-x-hidden pb-4 min-h-screen">
         <div className="px-6 pt-12 pb-3 flex flex-col items-start">
           <CarCommunityLogo variant="light" size="lg" className="mb-8" />
-          <h1 className="text-[32px] font-bold tracking-tight text-brand mt-4">
+          <h1 className="mt-8 text-[32px] font-extrabold tracking-tight text-navy">
             {step === 'otp' ? 'Verification' : mode === 'login' ? 'Hi there!' : 'Welcome!'}
           </h1>
           <p className="mt-1 text-sm font-medium text-slate-500">
