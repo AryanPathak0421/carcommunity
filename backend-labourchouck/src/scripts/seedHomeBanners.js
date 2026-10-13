@@ -23,14 +23,14 @@ const ASSET_DIR = path.join(__dirname, 'assets', 'banners')
 
 const SEED_BANNERS = [
   {
-    slug: 'mappto-home-book-trusted',
-    file: 'mappto-home-book-trusted.webp',
+    slug: 'carcommunity-home-book-trusted',
+    file: 'carcommunity-home-book-trusted.webp',
     targetUrl: '/app/search',
     sortOrder: 1,
   },
   {
-    slug: 'mappto-home-schedule',
-    file: 'mappto-home-schedule.webp',
+    slug: 'carcommunity-home-schedule',
+    file: 'carcommunity-home-schedule.webp',
     // Opens the Schedule booking picker on the user home screen.
     targetUrl: '/app?book=scheduled',
     sortOrder: 2,

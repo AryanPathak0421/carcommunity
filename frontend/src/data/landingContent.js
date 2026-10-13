@@ -3,8 +3,8 @@
 export const SITE = {
   name: 'CarCommunity',
   tagline: 'Book a trusted car or bike mechanic in minutes',
-  url: 'https://mappto.com',
-  contactEmail: 'hello@mappto.com',
+  url: 'https://carcommunity.com',
+  contactEmail: 'hello@carcommunity.com',
   phone: '+91 98765 43210',
 }
 

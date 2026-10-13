@@ -12,9 +12,9 @@ const schema = {
   description,
   logo: `${SITE.url}/favicon.svg`,
   sameAs: [
-    'https://www.linkedin.com/company/mappto',
-    'https://twitter.com/mappto',
-    'https://www.instagram.com/mappto',
+    'https://www.linkedin.com/company/carcommunity',
+    'https://twitter.com/carcommunity',
+    'https://www.instagram.com/carcommunity',
   ],
   contactPoint: {
     '@type': 'ContactPoint',
@@ -48,13 +48,13 @@ export function SEOMeta() {
       <meta property="og:title" content="CarCommunity — Book a Trusted Car & Bike Mechanic in Minutes" />
       <meta property="og:description" content={description} />
       <meta property="og:url" content={SITE.url} />
-      <meta property="og:image" content={`${SITE.url}/og-mappto.png`} />
+      <meta property="og:image" content={`${SITE.url}/og-carcommunity.png`} />
       <meta property="og:locale" content="en_IN" />
 
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content="CarCommunity — Verified car & bike mechanics, on demand" />
       <meta name="twitter:description" content={description} />
-      <meta name="twitter:image" content={`${SITE.url}/og-mappto.png`} />
+      <meta name="twitter:image" content={`${SITE.url}/og-carcommunity.png`} />
 
       <script type="application/ld+json">{JSON.stringify(schema)}</script>
       <script type="application/ld+json">{JSON.stringify(serviceSchema)}</script>

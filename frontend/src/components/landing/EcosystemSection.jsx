@@ -7,8 +7,8 @@ import { useLandingCta } from '../../hooks/useLandingCta.js'
 import { optimizeImage } from '../../lib/imageUrl.js'
 
 const FALLBACK = {
-  customer: '/assets/images/mappto_hero_worker.jpg',
-  mechanic: '/assets/images/mappto_hero_cleaning_worker.jpg',
+  customer: '/assets/images/carcommunity_hero_worker.jpg',
+  mechanic: '/assets/images/carcommunity_hero_cleaning_worker.jpg',
 }
 
 function pickGroupImage(groups, matcher) {

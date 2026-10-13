@@ -1,6 +1,6 @@
-# Mappto Frontend Developer Guide (Deep Dive)
+# CarCommunity Frontend Developer Guide (Deep Dive)
 
-Welcome to the frontend development phase of Mappto! The backend architecture is fully complete, and the API wrapper functions have already been generated for you in `src/api/`. 
+Welcome to the frontend development phase of CarCommunity! The backend architecture is fully complete, and the API wrapper functions have already been generated for you in `src/api/`. 
 
 This guide details **what** React components need to be built, **how** they should behave, **which APIs** they consume, and provides **code snippets & state management strategies**.
 

@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import './splashBrand.css'
 
-const BRAND_LABEL = 'carcommunity'
+const BRAND_LABEL = 'CarCommunity'
 /** Same 3s timeline as screen.html */
 export const SPLASH_BRAND_ANIMATION_MS = 3000
 

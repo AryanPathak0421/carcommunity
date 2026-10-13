@@ -107,7 +107,7 @@ Creates a new booking, applies GST automatically, and triggers the broadcast seq
     "durationDays": 1,
     "timeSlot": "9:00 AM – 12:00 PM",
     "imageNames": [
-      "https://res.cloudinary.com/mappto/image/upload/v12345/job-posters/abcd.jpg"
+      "https://res.cloudinary.com/carcommunity/image/upload/v12345/job-posters/abcd.jpg"
     ]
   }
   ```

@@ -1,7 +1,7 @@
 /**
  * Refer & Earn link capture.
  *
- * A shared link looks like https://mappto.com/?ref=K7QM4XR2. The code is
+ * A shared link looks like https://carcommunity.com/?ref=K7QM4XR2. The code is
  * pulled off the URL on any public page and parked in localStorage so it
  * survives the walk to the signup screen, then sent with register/verify.
  */

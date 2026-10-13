@@ -1,5 +1,5 @@
 {
-  "Mappto_API_Contract": {
+  "CarCommunity_API_Contract": {
     "version": "1.0",
     "description": "Comprehensive mock responses for all APIs to help frontend development."
   },

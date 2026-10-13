@@ -14,8 +14,8 @@ export const COMPANY = {
   roc: 'Registrar of Companies, Uttar Pradesh',
   address: ['Tower No. CV-2, Office No. 201,', 'Supertech Capetown, Sector 74,', 'Noida, Uttar Pradesh – 201301, India'],
   supportEmail: 'Viratregalgroup.official@gmail.com',
-  grievanceEmail: 'grievance@mappto.com',
-  privacyEmail: 'privacy@mappto.com',
+  grievanceEmail: 'grievance@carcommunity.com',
+  privacyEmail: 'privacy@carcommunity.com',
   /** Fill in to publish the Grievance Officer's name (it is hidden while empty). */
   grievanceOfficerName: '',
 }

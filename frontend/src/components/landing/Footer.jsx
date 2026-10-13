@@ -28,9 +28,9 @@ function IconInstagram(props) {
 }
 
 const social = [
-  { Icon: IconLinkedIn, href: 'https://www.linkedin.com/company/mappto', label: 'LinkedIn' },
-  { Icon: IconX, href: 'https://twitter.com/mappto', label: 'X (Twitter)' },
-  { Icon: IconInstagram, href: 'https://www.instagram.com/mappto', label: 'Instagram' },
+  { Icon: IconLinkedIn, href: 'https://www.linkedin.com/company/carcommunity', label: 'LinkedIn' },
+  { Icon: IconX, href: 'https://twitter.com/carcommunity', label: 'X (Twitter)' },
+  { Icon: IconInstagram, href: 'https://www.instagram.com/carcommunity', label: 'Instagram' },
 ]
 
 export function Footer() {
