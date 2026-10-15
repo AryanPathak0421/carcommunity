@@ -53,6 +53,7 @@ export function AppShell() {
     pathname.startsWith('/app/cars') ||
     pathname.startsWith('/app/accessories') ||
     pathname === '/app/car-wash' ||
+    pathname === '/app/services' ||
     pathname.startsWith('/app/tracking') ||
     pathname.startsWith('/app/sub-category/') ||
     pathname === '/app/search' ||
@@ -365,7 +366,7 @@ export function AppShell() {
       </AnimatePresence>
 
       <div className="relative z-10 mx-auto flex min-h-dvh w-full max-w-lg flex-col">
-        {!isIndividualAppHome && (isLabourAppHome || isLabourNotifications) ? (
+        {!isIndividualAppHome && isLabourNotifications ? (
           <div
             className="pointer-events-none absolute left-1/2 top-0 z-0 h-[min(52vh,26rem)] w-full max-w-lg -translate-x-1/2 rounded-b-[2rem] bg-brand"
             aria-hidden

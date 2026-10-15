@@ -29,6 +29,9 @@ export function assertProductionConfig() {
     problems.push('RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET must be set (payments fail closed without them)')
   }
   if (!process.env.MONGODB_URI) problems.push('MONGODB_URI must be set')
+  if (process.env.OTP_FIXED_CODE) {
+    console.warn('[security] OTP_FIXED_CODE is set: every account accepts that OTP. Remove it once SMS login is live.')
+  }
   if (problems.length) {
     throw new Error(`Unsafe production configuration:\n - ${problems.join('\n - ')}`)
   }

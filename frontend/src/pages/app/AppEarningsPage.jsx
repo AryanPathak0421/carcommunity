@@ -13,6 +13,13 @@ import { formatInrFromPaise } from '../../lib/labourEarningsFlow.js'
 /** Mirrors MIN_WITHDRAWAL_AMOUNT on the server. */
 const MIN_WITHDRAWAL = 100
 
+/** Rupee amount with Indian grouping and always two decimals when it is not a whole number. */
+function inr(n) {
+  const v = Number(n) || 0
+  const whole = Math.abs(v - Math.round(v)) < 0.005
+  return `₹${v.toLocaleString('en-IN', { minimumFractionDigits: whole ? 0 : 2, maximumFractionDigits: whole ? 0 : 2 })}`
+}
+
 export function AppEarningsPage() {
   const navigate = useNavigate()
   const [totalEarnings, setTotalEarnings] = useState(0)
@@ -79,7 +86,8 @@ export function AppEarningsPage() {
       const balance = Number(wallet?.selfBalance) || 0
 
       setDueAmount(balance)
-      setMaxWithdrawable(Math.max(0, balance))
+      // whole paise, rounded down so the form never offers more than the wallet holds
+      setMaxWithdrawable(Math.max(0, Math.floor(balance * 100) / 100))
       setAdminDues(wallet?.adminBalance || 0)
 
     } catch (err) {
@@ -126,7 +134,7 @@ export function AppEarningsPage() {
         throw new Error(`Minimum withdrawal is ₹${MIN_WITHDRAWAL}.`)
       }
       if (numAmount > maxWithdrawable) {
-        throw new Error(`You can only withdraw up to ₹${maxWithdrawable}. Amounts already requested are held until an admin processes them.`)
+        throw new Error(`You can only withdraw up to ${inr(maxWithdrawable)}. Amounts already requested are held until an admin processes them.`)
       }
 
       let qrCodeUrl = qrPreview
@@ -235,7 +243,7 @@ export function AppEarningsPage() {
                   <div className="mt-1 h-6 w-16 animate-pulse rounded bg-white/10"></div>
                 ) : (
                   <p className="mt-1 font-mono text-lg font-black tracking-tight text-emerald-400">
-                    ₹{totalPaid.toLocaleString('en-IN')}
+                    {inr(totalPaid)}
                   </p>
                 )}
               </div>
@@ -246,7 +254,7 @@ export function AppEarningsPage() {
                   <div className="mt-1 h-6 w-16 animate-pulse rounded bg-white/10"></div>
                 ) : (
                   <p className="mt-1 font-mono text-lg font-black tracking-tight text-amber-400">
-                    ₹{dueAmount.toLocaleString('en-IN')}
+                    {inr(dueAmount)}
                   </p>
                 )}
               </div>
@@ -270,14 +278,14 @@ export function AppEarningsPage() {
               {(adminDues > 0 || !loading) && (
                 <div className="flex items-center justify-between gap-4 rounded-xl bg-linear-to-br from-rose-500/10 to-rose-900/20 p-5 border border-rose-500/20 shadow-inner mt-2">
                   <div className="flex-1 min-w-0">
-                    <p className="text-[11px] font-extrabold uppercase tracking-widest text-rose-300 truncate">
-                      Admin Dues (Cash)
+                    <p className="text-[11px] font-extrabold uppercase tracking-widest text-rose-300">
+                      Admin dues (cash)
                     </p>
                     <p className="mt-1 text-[10px] font-medium text-rose-300/60 truncate">
                       Remaining amount to be paid
                     </p>
                     <p className="mt-2 font-mono text-2xl font-black tracking-tight text-rose-400 drop-shadow-sm">
-                      ₹{adminDues.toLocaleString('en-IN')}
+                      {inr(adminDues)}
                     </p>
                   </div>
                   {adminDues > 0 && (
@@ -320,7 +328,7 @@ export function AppEarningsPage() {
             
             <div>
               <label className="mb-1.5 flex items-center gap-2 text-sm font-bold text-slate-700">
-                <Wallet className="h-4 w-4 text-brand" /> Amount to Withdraw (Max ₹{maxWithdrawable})
+                <Wallet className="h-4 w-4 text-brand" /> Amount to Withdraw (Max {inr(maxWithdrawable)})
               </label>
               <div className="relative">
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-slate-500">₹</span>
@@ -331,7 +339,7 @@ export function AppEarningsPage() {
                   max={maxWithdrawable}
                   value={withdrawAmount}
                   onChange={(e) => setWithdrawAmount(e.target.value)}
-                  placeholder={`Min ${MIN_WITHDRAWAL}, up to ${maxWithdrawable}`}
+                  placeholder={`Min ${MIN_WITHDRAWAL}, up to ${inr(maxWithdrawable)}`}
                   className="w-full rounded-xl border border-slate-200 bg-slate-50/50 py-3 pl-8 pr-4 text-sm font-medium outline-none transition focus:border-brand focus:bg-white focus:ring-4 focus:ring-brand/10"
                 />
               </div>
@@ -452,7 +460,7 @@ export function AppEarningsPage() {
               <GlassPanel key={w._id} className="p-4 border-slate-200/80 shadow-sm space-y-3">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="font-bold text-slate-900 text-lg">₹{(w.amount || 0).toLocaleString('en-IN')}</p>
+                    <p className="font-bold text-slate-900 text-lg">{inr(w.amount || 0)}</p>
                     <p className="text-xs text-slate-500 mt-1">{new Date(w.createdAt).toLocaleDateString()}</p>
                   </div>
                   <span className={`px-3 py-1 rounded-full text-xs font-bold ${

@@ -46,8 +46,8 @@ export function formatInrFromPaise(paise) {
   return new Intl.NumberFormat('en-IN', {
     style: 'currency',
     currency: 'INR',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: paise % 100 === 0 ? 0 : 2,
+    minimumFractionDigits: Math.round(paise || 0) % 100 === 0 ? 0 : 2,
+    maximumFractionDigits: Math.round(paise || 0) % 100 === 0 ? 0 : 2,
   }).format((paise || 0) / 100)
 }
 

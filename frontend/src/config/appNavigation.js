@@ -88,6 +88,7 @@ export function getAppNavigation(role) {
 
 export function getAppShellTitle(pathname) {
   if (pathname.startsWith('/app/jobs')) return 'Jobs'
+  if (pathname.startsWith('/app/services')) return 'All services'
   if (pathname.startsWith('/app/earnings')) return 'Earnings'
   if (pathname.startsWith('/app/kyc')) return 'KYC verification'
   if (pathname.startsWith('/app/refer')) return 'Refer & Earn'

@@ -138,6 +138,14 @@ export const createBooking = asyncHandler(async (req, res) => {
     if (durationKind !== 'multi_day' && !endTime) {
       return sendError(res, { message: 'endTime is required for single day SCHEDULED bookings', statusCode: HTTP_STATUS.BAD_REQUEST })
     }
+    const when = parseISTDateTime(scheduledAt, timeSlot)
+    if (!when || Number.isNaN(new Date(when).getTime()) || new Date(when).getTime() < Date.now()) {
+      return sendError(res, {
+        message: 'Choose a date and time slot in the future',
+        statusCode: HTTP_STATUS.BAD_REQUEST,
+        code: 'SCHEDULE_IN_PAST',
+      })
+    }
   }
 
   const service = await LabourService.findById(serviceId)

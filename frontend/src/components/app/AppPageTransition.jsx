@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { useLocation, useOutlet } from 'react-router-dom'
 
@@ -5,6 +6,12 @@ export function AppPageTransition() {
   const location = useLocation()
   const outlet = useOutlet()
   const reduce = useReducedMotion()
+
+  // a new screen always starts at the top (otherwise it opens at the previous page's scroll offset,
+  // which looked like a blank page on short screens)
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [location.pathname])
 
   return (
     <AnimatePresence mode="wait" initial={false}>

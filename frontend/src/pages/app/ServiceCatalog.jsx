@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, useReducedMotion } from 'framer-motion'
 import { ChevronRight, Loader2, Search, Sparkles } from 'lucide-react'
@@ -6,8 +6,6 @@ import { fetchLabourCategoriesGrouped } from '../../api/labourCategoriesApi.js'
 import { ApiError } from '../../api/http.js'
 import { AppStackScreenHeader } from '../../components/app/AppStackScreenHeader.jsx'
 import { GlassPanel } from '../../components/ui/GlassPanel.jsx'
-import { buildBookingFlowPath } from '../../lib/bookingFlowNavigation.js'
-import { readBookingDraft, writeBookingDraft } from '../../lib/individualBookingDraft.js'
 
 export function ServiceCatalog() {
   const navigate = useNavigate()
@@ -16,7 +14,7 @@ export function ServiceCatalog() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [expandedGroup, setExpandedGroup] = useState(null)
-  const [expandedCategory, setExpandedCategory] = useState(null)
+  const [query, setQuery] = useState('')
 
   useEffect(() => {
     let cancelled = false
@@ -34,9 +32,28 @@ export function ServiceCatalog() {
     return () => { cancelled = true }
   }, [])
 
-  const handleSubcategorySelect = useCallback((subcategory, category, group) => {
-    navigate(`/app/sub-category/${subcategory._id}`, { state: { cat: subcategory } })
+  const handleCategorySelect = useCallback((category) => {
+    navigate(`/app/sub-category/${category._id}`, { state: { cat: category } })
   }, [navigate])
+
+  const q = query.trim().toLowerCase()
+  const visibleGroups = useMemo(() => {
+    if (!q) return groups
+    const hit = (t) => String(t || '').toLowerCase().includes(q)
+    return groups
+      .map((g) => {
+        if (hit(g.name)) return g
+        const categories = (g.categories || [])
+          .map((c) => {
+            if (hit(c.name)) return c
+            const subcategories = (c.subcategories || []).filter((s) => hit(s.name))
+            return subcategories.length ? { ...c, subcategories } : null
+          })
+          .filter(Boolean)
+        return categories.length ? { ...g, categories } : null
+      })
+      .filter(Boolean)
+  }, [groups, q])
 
   if (loading) {
     return (
@@ -64,19 +81,25 @@ export function ServiceCatalog() {
     <div className="space-y-4 pb-8">
       <AppStackScreenHeader title="Book a Service" backTo="/app" />
 
-      <GlassPanel className="flex items-center gap-3 border-slate-200/80 px-4 py-3">
-        <Search className="h-4 w-4 text-slate-400" aria-hidden />
-        <p className="text-sm text-slate-500">Browse categories and pick a service</p>
-      </GlassPanel>
+      <label className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm focus-within:border-brand focus-within:ring-2 focus-within:ring-brand/20">
+        <Search className="h-4 w-4 shrink-0 text-slate-400" aria-hidden />
+        <input
+          type="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search services, e.g. wash, AC, tyre"
+          className="min-w-0 flex-1 bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400"
+        />
+      </label>
 
-      {groups.length === 0 ? (
+      {visibleGroups.length === 0 ? (
         <GlassPanel className="p-8 text-center">
           <Sparkles className="mx-auto h-10 w-10 text-slate-300" aria-hidden />
-          <p className="mt-3 text-sm font-semibold text-slate-600">No services available yet</p>
+          <p className="mt-3 text-sm font-semibold text-slate-600">{q ? 'No services match your search' : 'No services available yet'}</p>
         </GlassPanel>
       ) : (
         <div className="space-y-3">
-          {groups.map((group, gi) => (
+          {visibleGroups.map((group, gi) => (
             <motion.div
               key={group._id}
               initial={reduce ? false : { opacity: 0, y: 8 }}
@@ -106,47 +129,35 @@ export function ServiceCatalog() {
                   />
                 </button>
 
-                {expandedGroup === group._id && (
+                {(q || expandedGroup === group._id) && (
                   <div className="border-t border-slate-100 bg-slate-50/50">
-                    {(group.categories || []).map((category) => (
-                      <div key={category._id}>
+                    {(group.categories || []).map((category) => {
+                      const svcs = (category.services || []).filter((x) => x.isActive !== false)
+                      const from = svcs.length ? Math.min(...svcs.map((x) => Number(x.basePrice) || 0)) : null
+                      return (
                         <button
+                          key={category._id}
                           type="button"
-                          onClick={() => setExpandedCategory(expandedCategory === category._id ? null : category._id)}
-                          className="flex w-full items-center justify-between gap-3 px-6 py-3 text-left transition hover:bg-white"
+                          onClick={() => handleCategorySelect(category, group)}
+                          className="flex w-full items-center justify-between gap-3 border-b border-slate-100 px-5 py-3 text-left transition last:border-b-0 hover:bg-white"
                         >
-                          <p className="text-sm font-bold text-slate-800">{category.name}</p>
-                          <ChevronRight
-                            className={`h-4 w-4 text-slate-400 transition ${expandedCategory === category._id ? 'rotate-90' : ''}`}
-                            aria-hidden
-                          />
-                        </button>
-
-                        {expandedCategory === category._id && (
-                          <div className="bg-white pb-2">
-                            {(category.subcategories || []).length === 0 ? (
-                              <p className="px-8 py-2 text-xs text-slate-500">No subcategories</p>
-                            ) : (
-                              (category.subcategories || []).map((sub) => (
-                                <button
-                                  key={sub._id}
-                                  type="button"
-                                  onClick={() => handleSubcategorySelect(sub, category, group)}
-                                  className="flex w-full items-center justify-between gap-3 px-8 py-2.5 text-left transition hover:bg-brand/5"
-                                >
-                                  <div>
-                                    <p className="text-sm font-semibold text-slate-800">{sub.name}</p>
-                                  </div>
-                                  <span className="shrink-0 rounded-lg bg-brand/10 px-2.5 py-1 text-xs font-bold text-brand">
-                                    ₹{sub.basePrice}
-                                  </span>
-                                </button>
-                              ))
-                            )}
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-bold text-slate-800">{category.name}</p>
+                            <p className="text-xs text-slate-500">
+                              {svcs.length} {svcs.length === 1 ? 'service' : 'services'}
+                            </p>
                           </div>
-                        )}
-                      </div>
-                    ))}
+                          <span className="flex shrink-0 items-center gap-2">
+                            {from != null && (
+                              <span className="rounded-lg bg-brand/10 px-2.5 py-1 text-xs font-bold text-brand">
+                                from ₹{from}
+                              </span>
+                            )}
+                            <ChevronRight className="h-4 w-4 text-slate-400" aria-hidden />
+                          </span>
+                        </button>
+                      )
+                    })}
                   </div>
                 )}
               </GlassPanel>

@@ -29,7 +29,18 @@ export function otpFromPhoneLast6(phone) {
   return digits.slice(-6)
 }
 
+/**
+ * Fixed OTP for every account (OTP_FIXED_CODE=123456). Meant for demos / before SMS is live:
+ * anyone who knows a phone number can sign in as it. Honoured in any NODE_ENV when set.
+ */
+export function getFixedOtpCode() {
+  const c = String(process.env.OTP_FIXED_CODE || '').trim()
+  return /^\d{6}$/.test(c) ? c : null
+}
+
 function resolvePlainOtpCode(phone) {
+  const fixed = getFixedOtpCode()
+  if (fixed) return fixed
   const testAccount = getTestAccount(phone)
   if (testAccount) return testAccount.otp
   if (isOtpBypassLast6Enabled()) {
@@ -60,7 +71,7 @@ export async function createOtpChallenge(phone, purpose) {
   }
 
   // No real SMS for test accounts or while demo bypass is active.
-  const skipSms = Boolean(getTestAccount(phone)) || isOtpBypassLast6Enabled()
+  const skipSms = Boolean(getFixedOtpCode()) || Boolean(getTestAccount(phone)) || isOtpBypassLast6Enabled()
   if (!skipSms || process.env.SMS_SEND_ALWAYS === 'true') {
     sendOtpSms(phone, plain).catch((err) =>
       console.error('[otpService] sendOtpSms unexpected error:', err.message),

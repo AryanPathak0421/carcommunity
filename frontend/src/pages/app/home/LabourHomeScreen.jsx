@@ -425,7 +425,7 @@ export function LabourHomeScreen({ user }) {
               />
             </div>
 
-            <div className="mt-4 flex items-stretch gap-2.5 sm:gap-3">
+            <div className="mt-4 flex flex-wrap items-stretch gap-2.5 sm:flex-nowrap sm:gap-3">
               <Link
                 to="/app/profile"
                 className="relative shrink-0 self-center rounded-2xl p-0.5 ring-2 ring-white/40 transition hover:ring-white/70"
@@ -477,7 +477,7 @@ export function LabourHomeScreen({ user }) {
                 </div>
               </div>
 
-              <div className="flex w-[7.4rem] shrink-0 flex-col justify-between rounded-2xl border border-emerald-400/35 bg-linear-to-br from-emerald-500/25 to-white/10 p-2.5 shadow-inner backdrop-blur-md sm:w-[8.25rem] sm:p-3">
+              <div className="flex w-full shrink-0 flex-row items-center justify-between gap-3 rounded-2xl border border-emerald-400/35 bg-linear-to-br from-emerald-500/25 to-white/10 p-3 shadow-inner backdrop-blur-md sm:w-[8.25rem] sm:flex-col sm:items-stretch sm:justify-between">
                 <div>
                   <p className="text-[9px] font-bold uppercase tracking-wider text-emerald-100/90">This month</p>
                   <p className="mt-0.5 font-mono text-base font-black leading-tight tabular-nums text-white sm:text-lg">
@@ -497,7 +497,7 @@ export function LabourHomeScreen({ user }) {
                 </div>
                 <Link
                   to="/app/earnings"
-                  className="mt-2 flex w-full items-center justify-center gap-1 rounded-xl bg-linear-to-r from-brand-bright to-brand py-2 text-[10px] font-black text-white shadow-md shadow-brand/30 transition hover:brightness-110 active:scale-[0.98]"
+                  className="flex shrink-0 items-center justify-center gap-1 rounded-xl bg-linear-to-r from-brand-bright to-brand px-4 py-2 text-[11px] sm:mt-2 sm:w-full sm:px-0 sm:text-[10px] font-black text-white shadow-md shadow-brand/30 transition hover:brightness-110 active:scale-[0.98]"
                 >
                   <Wallet className="h-3.5 w-3.5 shrink-0" aria-hidden />
                   Withdraw
