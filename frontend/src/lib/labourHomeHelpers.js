@@ -2,7 +2,7 @@ import { dayKey, pairedMinutesForDay } from './labourAttendanceStorage.js'
 import { buildLabourEarningsSummary } from './labourEarningsFlow.js'
 import { readWalletState } from './labourWalletStorage.js'
 
-export const LABOUR_SUPPORT_PHONE = '18002580000'
+export const LABOUR_SUPPORT_PHONE = '8668337344'
 export const LABOUR_EMERGENCY_PHONE = '112'
 
 export const SAFETY_BANNERS = [

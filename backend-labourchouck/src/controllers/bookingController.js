@@ -1,4 +1,5 @@
 import crypto from 'crypto'
+import { getActivePaymentMethodIds } from '../services/serviceUiConfigService.js'
 import { Booking } from '../models/Booking.js'
 import { Review } from '../models/Review.js'
 import { LabourSubcategory } from '../models/LabourSubcategory.js'
@@ -98,6 +99,14 @@ export const calculateBill = asyncHandler(async (req, res) => {
 export const createBooking = asyncHandler(async (req, res) => {
   const { serviceId, type, scheduledAt, timeSlot, endTime, locationText, lat, lng, paymentMethod, notes, durationKind = 'full_day', imageNames = [], useWallet = false } = req.body
   const durationDays = Number.parseInt(req.body.durationDays ?? 1, 10)
+
+  if (!['CASH', 'ONLINE'].includes(paymentMethod) || !(await getActivePaymentMethodIds()).includes(paymentMethod)) {
+    return sendError(res, {
+      message: `${paymentMethod === 'ONLINE' ? 'Online' : 'Cash'} payment is not available right now. Please choose another method.`,
+      statusCode: HTTP_STATUS.BAD_REQUEST,
+      code: 'PAYMENT_METHOD_DISABLED',
+    })
+  }
 
   if (!DURATION_KINDS.includes(durationKind)) {
     return sendError(res, { message: 'Invalid durationKind', statusCode: HTTP_STATUS.BAD_REQUEST })
@@ -432,6 +441,14 @@ export const getMyBookings = asyncHandler(async (req, res) => {
 // @access  Private (User)
 export const updatePaymentMethod = asyncHandler(async (req, res) => {
   const { paymentMethod } = req.body
+
+  if (!(await getActivePaymentMethodIds()).includes(paymentMethod)) {
+    return sendError(res, {
+      message: 'This payment method is not available right now',
+      statusCode: HTTP_STATUS.BAD_REQUEST,
+      code: 'PAYMENT_METHOD_DISABLED',
+    })
+  }
 
   // Only the owner, and only while nothing has been paid or settled yet.
   const booking = await Booking.findOneAndUpdate(

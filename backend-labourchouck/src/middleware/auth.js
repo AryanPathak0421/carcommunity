@@ -60,3 +60,21 @@ export function restrictTo(...roles) {
     next()
   }
 }
+
+/** Like `protect`, but anonymous requests pass through (req.user stays undefined). */
+export const optionalAuth = asyncHandler(async (req, _res, next) => {
+  const header = req.headers.authorization
+  if (header?.startsWith('Bearer ')) {
+    try {
+      const payload = verifyAccessToken(header.slice(7))
+      const user = await User.findById(payload.sub)
+      if (user && user.isActive) {
+        req.user = user
+        req.tokenPayload = payload
+      }
+    } catch {
+      // invalid token: treat as anonymous
+    }
+  }
+  next()
+})

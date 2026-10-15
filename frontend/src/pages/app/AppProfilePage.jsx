@@ -15,12 +15,15 @@ import {
   HelpCircle,
   Headset,
   Info,
+  Car,
   Loader2,
   LogOut,
   Menu,
+  MessageSquare,
   Pencil,
   Share2,
   ShieldCheck,
+  ShoppingBag,
   Trash2,
   Wallet,
   Wrench,
@@ -35,6 +38,7 @@ import { AppTextInput } from '../../components/app-ui/inputs/AppTextInput.jsx'
 import { AppButton } from '../../components/app-ui/buttons/AppButton.jsx'
 import { patchCurrentUser, deleteCurrentUser } from '../../api/userProfileApi.js'
 import { referralsApi } from '../../api/referralsApi.js'
+import { carsApi } from '../../api/carsApi.js'
 import { ApiError } from '../../api/http.js'
 import { setUser } from '../../store/slices/authSlice.js'
 
@@ -46,7 +50,7 @@ function formatInr(n) {
   return `₹${Number(n || 0).toLocaleString('en-IN')}`
 }
 
-function MenuRow({ icon: Icon, label, sub, badge, to, onClick, tone = 'default' }) {
+function MenuRow({ icon: Icon, label, sub, badge, count, to, onClick, tone = 'default' }) {
   const labelCls = tone === 'danger' ? 'text-rose-700' : 'text-slate-800'
   const iconCls = tone === 'danger' ? 'text-rose-500' : 'text-slate-500'
   const body = (
@@ -59,6 +63,11 @@ function MenuRow({ icon: Icon, label, sub, badge, to, onClick, tone = 'default' 
             <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-bold text-amber-800">
               <Coins className="h-3 w-3" aria-hidden />
               {badge}
+            </span>
+          ) : null}
+          {count > 0 ? (
+            <span className="inline-flex shrink-0 items-center rounded-full bg-brand px-2 py-0.5 text-[11px] font-black text-white">
+              {count} new
             </span>
           ) : null}
         </span>
@@ -89,7 +98,7 @@ function MenuGroup({ children }) {
 }
 
 export function AppProfilePage() {
-  const { user, logout } = useAuth()
+  const { user, logout, isGuest } = useAuth()
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const reduce = useReducedMotion()
@@ -111,9 +120,11 @@ export function AppProfilePage() {
   const [deleteErr, setDeleteErr] = useState('')
 
   const [referralBadge, setReferralBadge] = useState('')
+  const [carEnquiries, setCarEnquiries] = useState({ received: 0, newReceived: 0, sent: 0 })
 
   const isLabour = user?.role === USER_ROLES.MECHANIC
   const canRefer = user?.role === USER_ROLES.INDIVIDUAL || isLabour
+  const isCustomer = user?.role === USER_ROLES.INDIVIDUAL && !isGuest
   const labourKyc = user?.labourProfile?.kycStatus
   const initials = adminInitials(user)
 
@@ -141,6 +152,26 @@ export function AppProfilePage() {
       cancelled = true
     }
   }, [canRefer])
+
+  // car enquiry counters for the "Car enquiries" section (customers only)
+  useEffect(() => {
+    if (!isCustomer) return undefined
+    let cancelled = false
+    Promise.all([carsApi.received(), carsApi.sent()])
+      .then(([r, s]) => {
+        if (cancelled) return
+        const received = r.data?.inquiries || []
+        setCarEnquiries({
+          received: received.length,
+          newReceived: received.filter((i) => i.status === 'NEW').length,
+          sent: (s.data?.inquiries || []).length,
+        })
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [isCustomer])
 
   const saveProfilePhoto = useCallback(
     async (imageUrl) => {
@@ -345,6 +376,33 @@ export function AppProfilePage() {
           {canRefer ? <MenuRow icon={Wallet} label="My wallet" to="/app/wallet" /> : null}
         </MenuGroup>
 
+        {isCustomer ? (
+          <section aria-label="Car enquiries">
+            <h2 className="mb-1.5 px-1 text-xs font-extrabold uppercase tracking-wide text-slate-500">Car enquiries</h2>
+            <MenuGroup>
+              <MenuRow
+                icon={MessageSquare}
+                label="Enquiries received"
+                sub={
+                  carEnquiries.received
+                    ? `${carEnquiries.received} buyer${carEnquiries.received === 1 ? '' : 's'} interested in your cars`
+                    : 'Buyers interested in your cars'
+                }
+                count={carEnquiries.newReceived}
+                to="/app/cars/enquiries"
+              />
+              <MenuRow
+                icon={MessageSquare}
+                label="Enquiries sent"
+                sub={carEnquiries.sent ? `${carEnquiries.sent} car${carEnquiries.sent === 1 ? '' : 's'} you contacted` : 'Cars you contacted'}
+                to="/app/cars/enquiries?tab=sent"
+              />
+              <MenuRow icon={Car} label="My car ads" sub="Cars you are selling" to="/app/cars/my" />
+              <MenuRow icon={ShoppingBag} label="Accessory requests" sub="Products you asked sellers for" to="/app/accessories/requests" />
+            </MenuGroup>
+          </section>
+        ) : null}
+
         {canRefer ? (
           <MenuGroup>
             <MenuRow icon={Share2} label="Refer & Earn" badge={referralBadge} to="/app/refer" />
@@ -355,6 +413,8 @@ export function AppProfilePage() {
           <MenuGroup>
             <MenuRow icon={Fingerprint} label="Aadhaar KYC" sub={kycSub} to="/app/kyc" />
             <MenuRow icon={Wrench} label="Work types" to="/app/work-categories" />
+            <MenuRow icon={ShoppingBag} label="My products" sub="Sell car accessories" to="/app/accessories/mine" />
+            <MenuRow icon={MessageSquare} label="Customer requests" sub="Who wants your products" to="/app/accessories/leads" />
           </MenuGroup>
         ) : null}
 

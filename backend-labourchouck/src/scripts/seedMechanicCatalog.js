@@ -210,11 +210,26 @@ export const MECHANIC_CATALOG = [
         subtitle: 'Doorstep wash, interior and exterior detailing',
         subcategories: [
           {
+            // Packages are priced per car size. The customer car-wash screen groups services named
+            // "<Package> - <Hatchback|Sedan|SUV>", so admins add a package by adding those services.
             name: 'Car Wash',
-            description: 'Doorstep car wash.',
+            description: 'Doorstep car wash packages for hatchbacks, sedans and SUVs.',
             services: [
-              s('Doorstep Car Wash', 399, 'Exterior wash and interior vacuum.', 45),
-              s('Foam Wash', 599, 'Foam wash with wheel and tyre dressing.', 60),
+              s('Exterior Wash - Hatchback', 299, 'Exterior hand wash, wheels and tyres cleaned, windows wiped.', 40),
+              s('Exterior Wash - Sedan', 349, 'Exterior hand wash, wheels and tyres cleaned, windows wiped.', 45),
+              s('Exterior Wash - SUV', 449, 'Exterior hand wash, wheels and tyres cleaned, windows wiped.', 55),
+              s('Foam Wash - Hatchback', 449, 'Snow-foam pre-wash, exterior wash, tyre dressing, dashboard wipe.', 50),
+              s('Foam Wash - Sedan', 549, 'Snow-foam pre-wash, exterior wash, tyre dressing, dashboard wipe.', 60),
+              s('Foam Wash - SUV', 649, 'Snow-foam pre-wash, exterior wash, tyre dressing, dashboard wipe.', 70),
+              s('Interior Cleaning - Hatchback', 449, 'Seats and mats vacuum, carpet clean, dashboard and door-pad polish.', 60),
+              s('Interior Cleaning - Sedan', 549, 'Seats and mats vacuum, carpet clean, dashboard and door-pad polish.', 70),
+              s('Interior Cleaning - SUV', 699, 'Seats and mats vacuum, carpet clean, dashboard and door-pad polish.', 80),
+              s('Complete Wash - Hatchback', 699, 'Foam wash, full interior vacuum, dashboard polish, tyre dressing.', 80),
+              s('Complete Wash - Sedan', 849, 'Foam wash, full interior vacuum, dashboard polish, tyre dressing.', 90),
+              s('Complete Wash - SUV', 999, 'Foam wash, full interior vacuum, dashboard polish, tyre dressing.', 105),
+              s('Premium Wash & Wax - Hatchback', 999, 'Complete wash with hand wax polish and tyre and trim dressing.', 110),
+              s('Premium Wash & Wax - Sedan', 1199, 'Complete wash with hand wax polish and tyre and trim dressing.', 120),
+              s('Premium Wash & Wax - SUV', 1449, 'Complete wash with hand wax polish and tyre and trim dressing.', 140),
             ],
           },
           {
@@ -224,6 +239,46 @@ export const MECHANIC_CATALOG = [
               s('Interior Deep Cleaning', 1999, 'Seats, carpet, dashboard and roof deep clean.', 180),
               s('Exterior Detailing & Wax', 1499, 'Clay, polish and wax finish.', 150),
               s('Engine Bay Cleaning', 699, 'Engine bay degrease and dressing.', 45),
+            ],
+          },
+        ],
+      },
+      {
+        name: 'Car Coating',
+        subtitle: 'Ceramic, PPF and Teflon coating for long-lasting shine',
+        subcategories: [
+          {
+            name: 'Ceramic Coating',
+            description: 'Hydrophobic ceramic coating for paint protection and gloss.',
+            services: [
+              s('Ceramic Coating - Hatchback', 9999, 'Full-body ceramic coating after paint prep (hatchback).', 360),
+              s('Ceramic Coating - Sedan', 12999, 'Full-body ceramic coating after paint prep (sedan).', 420),
+              s('Ceramic Coating - SUV', 15999, 'Full-body ceramic coating after paint prep (SUV).', 480),
+            ],
+          },
+          {
+            name: 'Graphene Coating',
+            description: 'Graphene coating: higher hardness, heat resistance and long-lasting gloss.',
+            services: [
+              s('Graphene Coating - Hatchback', 14999, 'Full-body graphene coating after paint prep (hatchback).', 420),
+              s('Graphene Coating - Sedan', 17999, 'Full-body graphene coating after paint prep (sedan).', 480),
+              s('Graphene Coating - SUV', 21999, 'Full-body graphene coating after paint prep (SUV).', 540),
+            ],
+          },
+          {
+            name: 'PPF Coating',
+            description: 'Paint Protection Film against stone chips, scratches and fading.',
+            services: [
+              s('PPF - Front Bumper & Bonnet', 14999, 'Paint protection film on bonnet, bumper and fenders.', 300),
+              s('PPF - Full Body', 59999, 'Full-body paint protection film installation.', 1200),
+            ],
+          },
+          {
+            name: 'Teflon Coating',
+            description: 'Teflon (PTFE) coating for gloss and easy cleaning.',
+            services: [
+              s('Teflon Coating - Hatchback', 3499, 'Teflon paint protection coating (hatchback).', 180),
+              s('Teflon Coating - Sedan / SUV', 4499, 'Teflon paint protection coating (sedan / SUV).', 210),
             ],
           },
         ],

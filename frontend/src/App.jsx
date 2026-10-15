@@ -20,6 +20,9 @@ import { AdminSettingsPage } from './pages/admin/AdminSettingsPage.jsx'
 import { AdminReportsPage } from './pages/admin/AdminReportsPage.jsx'
 import { AdminUserSubscriptionsPage } from './pages/admin/AdminUserSubscriptionsPage.jsx'
 import { AdminBannersPage } from './pages/admin/AdminBannersPage.jsx'
+import { AdminCarListingsPage } from './pages/admin/AdminCarListingsPage.jsx'
+import { AdminAccessoriesPage } from './pages/admin/AdminAccessoriesPage.jsx'
+import { AdminServiceSettingsPage } from './pages/admin/AdminServiceSettingsPage.jsx'
 import { AdminComplaintsPage } from './pages/admin/AdminComplaintsPage.jsx'
 import { AdminProfilePage } from './pages/admin/AdminProfilePage.jsx'
 import { AdminZonesPage } from './pages/admin/AdminZonesPage.jsx'
@@ -98,6 +101,9 @@ function App() {
             <Route path="labour" element={<AdminLabourPage />} />
             <Route path="bookings" element={<AdminBookingsPage />} />
             <Route path="banners" element={<AdminBannersPage />} />
+            <Route path="cars" element={<AdminCarListingsPage />} />
+            <Route path="accessories" element={<AdminAccessoriesPage />} />
+            <Route path="service-settings" element={<AdminServiceSettingsPage />} />
             <Route path="complaints" element={<AdminComplaintsPage />} />
             <Route path="profile" element={<AdminProfilePage />} />
             <Route path="reports" element={<AdminReportsPage />} />

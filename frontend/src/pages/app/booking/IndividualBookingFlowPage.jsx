@@ -36,6 +36,7 @@ import { BookingReviewModal } from '../../../components/app/booking/BookingRevie
 import { SavedAddressPicker } from '../../../components/app/SavedAddressPicker.jsx'
 import { useBookingSocket } from '../../../hooks/useBookingSocket.js'
 import { useAuth } from '../../../hooks/useAuth.js'
+import { useServiceUiConfig } from '../../../hooks/useServiceUiConfig.js'
 import { paymentsApi } from '../../../api/paymentsApi.js'
 import {
   PAYMENT_METHODS,
@@ -79,6 +80,10 @@ function BookingPrimaryButton({ children, className = '', ...rest }) {
 }
 
 export function IndividualBookingFlowPage() {
+  // admin-managed payment methods and duration labels
+  const uiConfig = useServiceUiConfig()
+  const paymentOptions = uiConfig.paymentMethods.filter((m) => m.isActive !== false)
+  const durationLabel = (kind) => uiConfig.durationOptions.find((d) => d.id === kind)?.label || durationKindLabel(kind)
   const navigate = useNavigate()
   const { realUser } = useAuth()
   const location = useLocation()
@@ -565,7 +570,9 @@ export function IndividualBookingFlowPage() {
         locationText: draft.address.trim(),
         lat: draft.lat || 28.6139,
         lng: draft.lng || 77.2090,
-        paymentMethod: draft.paymentMethod || 'CASH',
+        paymentMethod: paymentOptions.some((m) => m.id === (draft.paymentMethod || 'CASH'))
+          ? draft.paymentMethod || 'CASH'
+          : paymentOptions[0]?.id || 'CASH',
         notes: draft.notes,
         durationKind: draft.durationKind,
         durationDays: days,
@@ -633,7 +640,7 @@ export function IndividualBookingFlowPage() {
     return (
       <div className="pb-8">
         <AppStackScreenHeader title="Matching mechanic" onBack={() => goStep('summary')} />
-        <BookingServiceHighlight categoryName={draft.categoryName} groupName={draft.groupName} />
+        <BookingServiceHighlight categoryName={draft.serviceName || draft.categoryName} groupName={draft.groupName} />
 
         <div className="px-4 mt-6">
           <div className="lc-booking-flow-card">
@@ -660,7 +667,7 @@ export function IndividualBookingFlowPage() {
         </div>
 
         <BookingFindingScreen
-          categoryLabel={draft.categoryName}
+          categoryLabel={draft.serviceName || draft.categoryName}
           onComplete={() => { }}
           onNoMatch={() => { }}
         />
@@ -716,7 +723,7 @@ export function IndividualBookingFlowPage() {
           title={step === 'payment' ? 'Payment' : 'Mechanic on the way'}
           onBack={() => (step === 'payment' ? goStep('active') : navigate('/app/my-bookings', { replace: true }))}
         />
-        <BookingServiceHighlight categoryName={draft.categoryName} groupName={draft.groupName} />
+        <BookingServiceHighlight categoryName={draft.serviceName || draft.categoryName} groupName={draft.groupName} />
 
         {worker ? (
           <GlassPanel className="overflow-hidden border-slate-200/90 p-0">
@@ -729,7 +736,7 @@ export function IndividualBookingFlowPage() {
               <div className="min-w-0 flex-1">
                 <p className="text-lg font-black text-slate-900">{worker.fullName || 'Unknown'}</p>
                 <p className="text-xs font-semibold text-brand">{worker.phone}</p>
-                <p className="mt-1 text-[11px] text-slate-500">{draft.categoryName}</p>
+                <p className="mt-1 text-[11px] text-slate-500">{draft.serviceName || draft.categoryName}</p>
               </div>
             </motion.div>
             <div className="grid grid-cols-1 gap-2 border-t border-slate-100 bg-slate-50/80 p-3">
@@ -813,10 +820,7 @@ export function IndividualBookingFlowPage() {
           <motion.div className="space-y-4">
             <FieldLabel>Select Payment Method</FieldLabel>
             <motion.div className="grid grid-cols-2 gap-2">
-              {[
-                { id: 'CASH', label: 'Cash' },
-                { id: 'ONLINE', label: 'Online' }
-              ].map((m) => (
+              {paymentOptions.map((m) => (
                 <button
                   key={m.id}
                   type="button"
@@ -1034,7 +1038,7 @@ export function IndividualBookingFlowPage() {
       />
 
       <div className="space-y-4 px-4">
-        <BookingServiceHighlight categoryName={draft.categoryName} groupName={draft.groupName} />
+        <BookingServiceHighlight categoryName={draft.serviceName || draft.categoryName} groupName={draft.groupName} />
 
         {step !== 'searching' ? (
           <div className="lc-booking-flow-card py-3">
@@ -1175,10 +1179,9 @@ export function IndividualBookingFlowPage() {
               <motion.div>
                 <FieldLabel>Working duration</FieldLabel>
                 <div className="flex flex-wrap gap-2">
-                  {[
-                    { id: 'few_hours', label: 'Few hours' },
-                    { id: 'multi_day', label: 'Multi day' },
-                  ].map((d) => (
+                  {uiConfig.durationOptions
+                    .filter((d) => d.isActive !== false && d.id !== 'full_day')
+                    .map((d) => (
                     <button
                       key={d.id}
                       type="button"
@@ -1311,7 +1314,7 @@ export function IndividualBookingFlowPage() {
                 <div className="flex justify-between gap-2">
                   <span className="lc-booking-flow-muted">Service</span>
                   <span className="text-right font-bold text-black">
-                    <span className="lc-booking-highlight-title block text-base">{draft.categoryName}</span>
+                    <span className="lc-booking-highlight-title block text-base">{draft.serviceName || draft.categoryName}</span>
                     {draft.groupName ? <span className="text-xs font-semibold">{draft.groupName}</span> : null}
                   </span>
                 </div>
@@ -1329,12 +1332,12 @@ export function IndividualBookingFlowPage() {
                 </div>
                 <div className="flex justify-between">
                   <span className="lc-booking-flow-muted">Duration</span>
-                  <span className="font-bold text-black">{durationKindLabel(draft.durationKind)}</span>
+                  <span className="font-bold text-black">{durationLabel(draft.durationKind)}</span>
                 </div>
                 <div className="flex justify-between gap-2">
                   <span className="shrink-0 lc-booking-flow-muted">Mechanic</span>
                   <span className="text-right font-bold text-black">
-                    Flash Broadcast Match
+                    Nearest available mechanic
                   </span>
                 </div>
                 <p className="flex items-start gap-2 font-medium text-black">
@@ -1384,29 +1387,28 @@ export function IndividualBookingFlowPage() {
 
               <div className="lc-booking-flow-card space-y-3">
                 <p className="lc-booking-flow-label font-bold text-slate-800">Payment Method</p>
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => syncDraft({ paymentMethod: 'CASH' })}
-                    className={`flex items-center justify-center gap-2 rounded-xl border-2 px-4 py-3 font-bold transition-all ${(draft.paymentMethod || 'CASH') === 'CASH'
-                        ? 'border-brand bg-brand/5 text-brand'
-                        : 'border-slate-200 text-slate-500 hover:border-brand/30 hover:bg-slate-50'
-                      }`}
-                  >
-                    <IndianRupee className="h-5 w-5" />
-                    Cash
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => syncDraft({ paymentMethod: 'ONLINE' })}
-                    className={`flex items-center justify-center gap-2 rounded-xl border-2 px-4 py-3 font-bold transition-all ${draft.paymentMethod === 'ONLINE'
-                        ? 'border-brand bg-brand/5 text-brand'
-                        : 'border-slate-200 text-slate-500 hover:border-brand/30 hover:bg-slate-50'
-                      }`}
-                  >
-                    <Zap className="h-5 w-5" />
-                    Online
-                  </button>
+                <div className={`grid gap-3 ${paymentOptions.length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                  {paymentOptions.map((m) => {
+                    const current = paymentOptions.some((o) => o.id === (draft.paymentMethod || 'CASH'))
+                      ? draft.paymentMethod || 'CASH'
+                      : paymentOptions[0]?.id
+                    const Icon = m.id === 'ONLINE' ? Zap : IndianRupee
+                    return (
+                      <button
+                        key={m.id}
+                        type="button"
+                        onClick={() => syncDraft({ paymentMethod: m.id })}
+                        className={`flex items-center justify-center gap-2 rounded-xl border-2 px-4 py-3 font-bold transition-all ${
+                          current === m.id
+                            ? 'border-brand bg-brand/5 text-brand'
+                            : 'border-slate-200 text-slate-500 hover:border-brand/30 hover:bg-slate-50'
+                        }`}
+                      >
+                        <Icon className="h-5 w-5" />
+                        {m.label}
+                      </button>
+                    )
+                  })}
                 </div>
               </div>
 
@@ -1415,7 +1417,7 @@ export function IndividualBookingFlowPage() {
                   Edit details
                 </button>
                 <BookingPrimaryButton type="button" className="flex-1" onClick={confirmBooking} disabled={isCreating}>
-                  {isCreating ? 'Sending req...' : 'Send req'}
+                  {isCreating ? 'Placing booking…' : 'Confirm booking'}
                   <CheckCircle2 className="h-4 w-4" aria-hidden />
                 </BookingPrimaryButton>
               </div>
@@ -1478,7 +1480,7 @@ export function IndividualBookingFlowPage() {
           open={typeSheetOpen}
           onClose={() => setTypeSheetOpen(false)}
           value={draft.bookingType}
-          categoryLabel={draft.categoryName}
+          categoryLabel={draft.serviceName || draft.categoryName}
           onSelect={(id) => {
             syncDraft({ bookingType: id })
             setTypeSheetOpen(false)

@@ -2,6 +2,8 @@
  * Admin sidebar — Super Control Panel modules for the mechanic booking platform.
  */
 import {
+  Car,
+  ShoppingBag,
   LayoutDashboard,
   Users,
   IdCard,
@@ -73,6 +75,8 @@ export const ADMIN_NAV_SECTIONS = [
     title: 'Operations',
     items: [
       { to: '/admin/bookings', label: 'Bookings', icon: ClipboardList },
+      { to: '/admin/cars', label: 'Buy / Sell Cars', icon: Car },
+      { to: '/admin/accessories', label: 'Car Accessories', icon: ShoppingBag },
       { to: '/admin/complaints', label: 'Complaints', icon: MessageSquare },
       { to: '/admin/zones', label: 'Manage Radius', icon: Map },
     ],
@@ -106,6 +110,7 @@ export const ADMIN_NAV_SECTIONS = [
     items: [
       { to: '/admin/profile', label: 'Profile', icon: UserCog },
       { to: '/admin/settings', label: 'Settings', icon: Settings },
+      { to: '/admin/service-settings', label: 'Service app settings', icon: Settings },
       { to: '/admin/reviews', label: 'Reviews & Ratings', icon: Star },
     ],
   },
@@ -116,6 +121,7 @@ const ROUTE_TITLES = [
   { prefix: '/admin/referrals', title: 'Refer & Earn' },
   { prefix: '/admin/profile', title: 'Profile' },
   { prefix: '/admin/complaints', title: 'Complaints' },
+  { prefix: '/admin/service-settings', title: 'Service app settings' },
   { prefix: '/admin/settings', title: 'Settings' },
   { prefix: '/admin/banners', title: 'Banners' },
   { prefix: '/admin/terms', title: 'Terms & Conditions' },
@@ -128,6 +134,8 @@ const ROUTE_TITLES = [
   { prefix: '/admin/cash-management', title: 'Cash Management' },
   { prefix: '/admin/reviews', title: 'Reviews & Ratings' },
   { prefix: '/admin/bookings', title: 'Bookings' },
+  { prefix: '/admin/cars', title: 'Buy / Sell Cars' },
+  { prefix: '/admin/accessories', title: 'Car Accessories' },
   { prefix: '/admin/services', title: 'Services' },
   { prefix: '/admin/sub-categories', title: 'Sub-Categories' },
   { prefix: '/admin/categories', title: 'Categories' },

@@ -33,6 +33,11 @@ import adminTermsRoutes from './adminTermsRoutes.js'
 import adminPrivacyPolicyRoutes from './adminPrivacyPolicyRoutes.js'
 import adminFaqRoutes from './admin/adminFaqRoutes.js'
 import adminProfileRoutes from './adminProfileRoutes.js'
+import carListingRoutes from './carListingRoutes.js'
+import adminCarListingRoutes from './adminCarListingRoutes.js'
+import accessoryRoutes from './accessoryRoutes.js'
+import adminAccessoryRoutes from './adminAccessoryRoutes.js'
+import { publicServiceUiRoutes, adminServiceUiRoutes } from './serviceUiConfigRoutes.js'
 
 const router = Router()
 
@@ -53,6 +58,9 @@ router.use('/privacy-policy', privacyPolicyRoutes)
 router.use('/faqs', faqRoutes)
 router.use('/notifications', notificationRoutes)
 router.use('/referrals', referralRoutes)
+router.use('/cars', carListingRoutes)
+router.use('/accessories', accessoryRoutes)
+router.use('/app-config', publicServiceUiRoutes)
 
 router.use('/admin/settings', systemSettingRoutes)
 router.use('/admin/zones', adminZoneRoutes)
@@ -69,6 +77,9 @@ router.use('/admin/terms', adminTermsRoutes)
 router.use('/admin/privacy-policy', adminPrivacyPolicyRoutes)
 router.use('/admin/faqs', adminFaqRoutes)
 router.use('/admin/profile', adminProfileRoutes)
+router.use('/admin/cars', adminCarListingRoutes)
+router.use('/admin/accessories', adminAccessoryRoutes)
+router.use('/admin/service-config', adminServiceUiRoutes)
 router.use('/labour/location', locationRoutes)
 
 import { getCollectedCommissionAmount } from '../controllers/adminWalletController.js'

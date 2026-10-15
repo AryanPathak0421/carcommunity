@@ -166,7 +166,8 @@ export async function settleBookingIfReady(bookingId) {
         onlineRefundedAt: { $exists: false },
         $or: [{ paymentMethod: 'CASH' }, { paymentMethod: 'ONLINE', paymentStatus: 'PAID' }],
       },
-      { $set: { settledAt: new Date() } },
+      // a completed cash job is paid once the mechanic has collected it; online is already PAID
+      { $set: { settledAt: new Date(), paymentStatus: 'PAID' } },
       { new: true },
     )
     if (!claimed) return false

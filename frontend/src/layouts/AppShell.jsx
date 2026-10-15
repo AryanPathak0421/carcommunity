@@ -50,6 +50,9 @@ export function AppShell() {
   const isLabourKyc = user?.role === USER_ROLES.MECHANIC && pathname === '/app/kyc'
   const hideShellHeader =
     pathname.startsWith('/app/booking/flow') ||
+    pathname.startsWith('/app/cars') ||
+    pathname.startsWith('/app/accessories') ||
+    pathname === '/app/car-wash' ||
     pathname.startsWith('/app/tracking') ||
     pathname.startsWith('/app/sub-category/') ||
     pathname === '/app/search' ||

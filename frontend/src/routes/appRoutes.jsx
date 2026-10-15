@@ -25,11 +25,134 @@ import { ActiveJob } from '../pages/app/ActiveJob.jsx'
 import { AppSubCategoryServicePage } from '../pages/app/AppSubCategoryServicePage.jsx'
 import { AppSubscriptionPage } from '../pages/app/AppSubscriptionPage.jsx'
 import { MyVehiclesPage } from '../pages/app/MyVehiclesPage.jsx'
+import { CarsMarketplacePage } from '../pages/app/cars/CarsMarketplacePage.jsx'
+import { CarDetailPage } from '../pages/app/cars/CarDetailPage.jsx'
+import { SellCarPage } from '../pages/app/cars/SellCarPage.jsx'
+import { MyCarsPage } from '../pages/app/cars/MyCarsPage.jsx'
+import { CarEnquiriesPage } from '../pages/app/cars/CarEnquiriesPage.jsx'
+import { CarWashPage } from '../pages/app/carwash/CarWashPage.jsx'
+import { AccessoriesPage } from '../pages/app/accessories/AccessoriesPage.jsx'
+import { AccessoryDetailPage } from '../pages/app/accessories/AccessoryDetailPage.jsx'
+import { MyAccessoriesPage } from '../pages/app/accessories/MyAccessoriesPage.jsx'
+import { AccessoryFormPage } from '../pages/app/accessories/AccessoryFormPage.jsx'
+import { AccessoryLeadsPage, AccessoryRequestsPage } from '../pages/app/accessories/AccessoryRequestsPages.jsx'
 import { USER_ROLES } from '../constants/userRoles.js'
 
 export const appShellChildRoutes = (
   <>
     <Route index element={<AppHomePage />} />
+    <Route
+      path="cars"
+      element={
+        <RoleRoute allow={[USER_ROLES.INDIVIDUAL]} allowGuest>
+          <CarsMarketplacePage />
+        </RoleRoute>
+      }
+    />
+    <Route
+      path="car-wash"
+      element={
+        <RoleRoute allow={[USER_ROLES.INDIVIDUAL]} allowGuest>
+          <CarWashPage />
+        </RoleRoute>
+      }
+    />
+    <Route
+      path="accessories"
+      element={
+        <RoleRoute allow={[USER_ROLES.INDIVIDUAL, USER_ROLES.MECHANIC]} allowGuest>
+          <AccessoriesPage />
+        </RoleRoute>
+      }
+    />
+    <Route
+      path="accessories/requests"
+      element={
+        <RoleRoute allow={[USER_ROLES.INDIVIDUAL]}>
+          <AccessoryRequestsPage />
+        </RoleRoute>
+      }
+    />
+    <Route
+      path="accessories/mine"
+      element={
+        <RoleRoute allow={[USER_ROLES.MECHANIC]}>
+          <MyAccessoriesPage />
+        </RoleRoute>
+      }
+    />
+    <Route
+      path="accessories/leads"
+      element={
+        <RoleRoute allow={[USER_ROLES.MECHANIC]}>
+          <AccessoryLeadsPage />
+        </RoleRoute>
+      }
+    />
+    <Route
+      path="accessories/new"
+      element={
+        <RoleRoute allow={[USER_ROLES.MECHANIC]}>
+          <AccessoryFormPage />
+        </RoleRoute>
+      }
+    />
+    <Route
+      path="accessories/edit/:id"
+      element={
+        <RoleRoute allow={[USER_ROLES.MECHANIC]}>
+          <AccessoryFormPage />
+        </RoleRoute>
+      }
+    />
+    <Route
+      path="accessories/:id"
+      element={
+        <RoleRoute allow={[USER_ROLES.INDIVIDUAL, USER_ROLES.MECHANIC]} allowGuest>
+          <AccessoryDetailPage />
+        </RoleRoute>
+      }
+    />
+    <Route
+      path="cars/enquiries"
+      element={
+        <RoleRoute allow={[USER_ROLES.INDIVIDUAL]}>
+          <CarEnquiriesPage />
+        </RoleRoute>
+      }
+    />
+    <Route
+      path="cars/my"
+      element={
+        <RoleRoute allow={[USER_ROLES.INDIVIDUAL]}>
+          <MyCarsPage />
+        </RoleRoute>
+      }
+    />
+    <Route
+      path="cars/sell"
+      element={
+        <RoleRoute allow={[USER_ROLES.INDIVIDUAL]}>
+          <SellCarPage />
+        </RoleRoute>
+      }
+    />
+    <Route
+      path="cars/sell/:id"
+      element={
+        <RoleRoute allow={[USER_ROLES.INDIVIDUAL]}>
+          <SellCarPage />
+        </RoleRoute>
+      }
+    />
+    <Route
+      path="cars/:id"
+      element={
+        <RoleRoute allow={[USER_ROLES.INDIVIDUAL]} allowGuest>
+          <CarDetailPage />
+        </RoleRoute>
+      }
+    />
     <Route path="discover/labours" element={<Navigate to="/app" replace />} />
     <Route
       path="booking/flow"

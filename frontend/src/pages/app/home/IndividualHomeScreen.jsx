@@ -1,8 +1,10 @@
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ChevronRight, Shield } from 'lucide-react'
+import { CarFront, ChevronRight, Droplets, Shield, ShoppingBag, Tag } from 'lucide-react'
 import { fetchLabourCategoriesGrouped } from '../../../api/labourCategoriesApi.js'
+import { accessoriesApi } from '../../../api/accessoriesApi.js'
+import { ProductCard } from '../accessories/AccessoriesPage.jsx'
 import { IndividualHomeHeroCarousel } from '../../../components/app/individual/IndividualHomeHeroCarousel.jsx'
 import { IndividualHomeWorkerCarousel } from '../../../components/app/individual/IndividualHomeWorkerCarousel.jsx'
 import { HomeStickyBar } from '../../../components/app/individual/home/HomeStickyBar.jsx'
@@ -31,6 +33,7 @@ import { useAuth } from '../../../hooks/useAuth.js'
 import { LabourPublicDetailSheet } from '../labour/LabourPublicDetailSheet.jsx'
 import { enrichDiscoverLabourUi } from '../../../lib/discoverLabourDummyUi.js'
 import { getCategoryImageUrl, getGroupImageUrl } from '../../../lib/labourCategoryDisplay.js'
+import { fallbackArtDataUrl } from '../../../lib/fallbackArt.js'
 
 const ACTIVE_STATUSES = ['CREATED', 'BROADCASTING', 'ACCEPTED', 'ASSIGNED', 'EN_ROUTE', 'STARTED']
 
@@ -151,6 +154,8 @@ export function IndividualHomeScreen({ user }) {
   const signedIn = Boolean(user) && !isGuest
 
   const [tradeGroups, setTradeGroups] = useState([])
+  // newest approved accessories for the home rail (hidden when there are none yet)
+  const [accessories, setAccessories] = useState([])
   const [groupsLoading, setGroupsLoading] = useState(true)
   const [activeTradeId, setActiveTradeId] = useState(null)
 
@@ -195,6 +200,18 @@ export function IndividualHomeScreen({ user }) {
   }, [tradeGroups])
 
   const bikeGroup = useMemo(() => tradeGroups.find((g) => /bike/i.test(g.name)) || null, [tradeGroups])
+  // Ceramic / PPF / Teflon coating lives in its own "Car Coating" catalogue group.
+  // Doorstep car wash has its own size -> package screen; the banner shows the cheapest package.
+  const washFromPrice = useMemo(() => {
+    const g = tradeGroups.find((x) => /wash/i.test(x.name) && !/bike/i.test(x.name))
+    const prices = (g?.categories || [])
+      .flatMap((c) => c.services || [])
+      .filter((sv) => sv.isActive !== false && /\s-\s(Hatchback|Sedan|SUV)$/i.test(sv.name || ''))
+      .map((sv) => Number(sv.basePrice))
+      .filter((n) => n > 0)
+    return prices.length ? Math.min(...prices) : null
+  }, [tradeGroups])
+  const coatingGroup = useMemo(() => tradeGroups.find((g) => /coating/i.test(g.name)) || null, [tradeGroups])
 
   // Deep link into the picker: admin banners can point at /app?book=instant|scheduled.
   const [searchParams, setSearchParams] = useSearchParams()
@@ -223,6 +240,17 @@ export function IndividualHomeScreen({ user }) {
     const available = enriched.filter((l) => String(l?._ui?.workHoursLabel || '').toLowerCase().includes('available'))
     return (available.length ? available : enriched).slice(0, 5)
   }, [labours])
+
+  useEffect(() => {
+    let alive = true
+    accessoriesApi
+      .list({ limit: 8, sort: 'newest', inStock: 'true' })
+      .then((res) => alive && setAccessories(res.data?.products || []))
+      .catch(() => {})
+    return () => {
+      alive = false
+    }
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -414,6 +442,112 @@ export function IndividualHomeScreen({ user }) {
                     label: g.name,
                     imageUrl: getGroupImageUrl(g),
                     onClick: () => selectTrade(String(g._id)),
+                  }))}
+                />
+              </section>
+            ) : null}
+
+            <section aria-label="Buy and sell cars" className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => navigate('/app/cars')}
+                className="relative flex min-h-[8.5rem] flex-col items-start overflow-hidden rounded-2xl bg-linear-to-br from-sky-50 to-blue-100 p-3.5 text-left ring-1 ring-sky-100 transition active:scale-[0.97]"
+              >
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-blue-600 shadow-sm">
+                  <CarFront className="h-5 w-5" aria-hidden />
+                </span>
+                <span className="mt-2 text-[15px] font-black text-navy">Buy a Car</span>
+                <span className="max-w-[6rem] text-[11px] font-semibold text-slate-600">Used cars near you</span>
+                <img
+                  src="/assets/images/buy-car.webp"
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                  className="pointer-events-none absolute -bottom-1 -right-3 w-[72%] max-w-[9.5rem] object-contain drop-shadow-[0_6px_6px_rgba(15,23,42,0.18)]"
+                />
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate('/app/cars/sell')}
+                className="relative flex min-h-[8.5rem] flex-col items-start overflow-hidden rounded-2xl bg-linear-to-br from-orange-50 to-amber-100 p-3.5 text-left ring-1 ring-orange-100 transition active:scale-[0.97]"
+              >
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-brand shadow-sm">
+                  <Tag className="h-5 w-5" aria-hidden />
+                </span>
+                <span className="mt-2 text-[15px] font-black text-navy">Sell your Car</span>
+                <span className="max-w-[6rem] text-[11px] font-semibold text-slate-600">List it free in minutes</span>
+                <img
+                  src="/assets/images/sell-car.webp"
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                  className="pointer-events-none absolute -bottom-1 -right-3 w-[56%] max-w-[7.5rem] object-contain drop-shadow-[0_6px_6px_rgba(15,23,42,0.18)]"
+                />
+              </button>
+            </section>
+
+            {washFromPrice ? (
+              <button
+                type="button"
+                onClick={() => navigate('/app/car-wash')}
+                className="flex w-full items-center gap-3 rounded-2xl bg-linear-to-r from-sky-500 to-cyan-400 p-3.5 text-left text-white shadow-md shadow-sky-500/25 transition active:scale-[0.98]"
+              >
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/25">
+                  <Droplets className="h-5 w-5" aria-hidden />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[15px] font-black">Doorstep Car Wash</span>
+                  <span className="block text-[11px] font-semibold text-white/90">Foam wash, interior cleaning &amp; more · from ₹{washFromPrice.toLocaleString('en-IN')}</span>
+                </span>
+                <ChevronRight className="h-5 w-5 shrink-0 text-white/80" aria-hidden />
+              </button>
+            ) : null}
+
+            {accessories.length > 0 ? (
+              <section aria-label="Car accessories">
+                <HomeSectionHeader
+                  title="Car Accessories"
+                  actionLabel="See all"
+                  onAction={() => navigate('/app/accessories')}
+                />
+                <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                  {accessories.map((p) => (
+                    <div key={p._id} className="w-40 shrink-0">
+                      <ProductCard product={p} />
+                    </div>
+                  ))}
+                </div>
+              </section>
+            ) : (
+            <button
+              type="button"
+              onClick={() => navigate('/app/accessories')}
+              className="flex w-full items-center gap-3 rounded-2xl bg-linear-to-r from-violet-50 to-fuchsia-100 p-3.5 text-left ring-1 ring-violet-100 transition active:scale-[0.98]"
+            >
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white text-violet-600 shadow-sm">
+                <ShoppingBag className="h-5 w-5" aria-hidden />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-[15px] font-black text-navy">Car Accessories</span>
+                <span className="block text-[11px] font-semibold text-slate-600">Seat covers, mats, lights &amp; more from verified mechanics</span>
+              </span>
+              <ChevronRight className="h-5 w-5 shrink-0 text-slate-400" aria-hidden />
+            </button>
+            )}
+
+            {coatingGroup && (coatingGroup.categories?.length ?? 0) > 0 ? (
+              <section aria-label="Car coating">
+                <HomeSectionHeader
+                  title="Car Coating"
+                  actionLabel="See all"
+                  onAction={() => selectTrade(String(coatingGroup._id))}
+                />
+                <HomeServiceTiles
+                  items={coatingGroup.categories.slice(0, 4).map((cat) => ({
+                    key: String(cat._id),
+                    label: cat.name,
+                    imageUrl: cat.imageUrl ? getCategoryImageUrl(cat) : fallbackArtDataUrl(cat.name),
+                    onClick: () => openSkill(coatingGroup, cat),
                   }))}
                 />
               </section>

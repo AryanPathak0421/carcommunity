@@ -1,6 +1,9 @@
 import { useState, useCallback, useMemo } from 'react'
 import { useLocation, useNavigate, Navigate } from 'react-router-dom'
-import { ArrowLeft, Wrench, Clock, ShieldCheck, BadgeCheck, ChevronDown, Zap } from 'lucide-react'
+import { ArrowLeft, Wrench, Clock, ShieldCheck, BadgeCheck, ChevronDown, Zap, Wallet } from 'lucide-react'
+import { useServiceUiConfig } from '../../hooks/useServiceUiConfig.js'
+
+const CHIP_ICON = { badge: BadgeCheck, zap: Zap, shield: ShieldCheck, clock: Clock, wallet: Wallet }
 import { getCategoryImageUrl } from '../../lib/labourCategoryDisplay.js'
 import { BookingTypeSheet } from '../../components/app/booking/BookingTypeSheet.jsx'
 import { readBookingDraft, writeBookingDraft } from '../../lib/individualBookingDraft.js'
@@ -84,6 +87,7 @@ function ServiceRow({ service, fallbackImage, expanded, onToggle, onBook }) {
 }
 
 export function AppSubCategoryServicePage() {
+  const trustChips = useServiceUiConfig().trustChips
   const location = useLocation()
   const navigate = useNavigate()
 
@@ -166,11 +170,9 @@ export function AppSubCategoryServicePage() {
         {cat.subtitle ? <p className="text-sm leading-relaxed text-slate-600">{cat.subtitle}</p> : null}
 
         <div className="grid grid-cols-3 gap-2">
-          {[
-            { icon: BadgeCheck, label: 'Verified mechanics' },
-            { icon: Zap, label: 'Quick matching' },
-            { icon: ShieldCheck, label: 'Clear pricing' },
-          ].map(({ icon: Icon, label }) => (
+          {trustChips.map(({ icon, label }) => {
+            const Icon = CHIP_ICON[icon] || BadgeCheck
+            return (
             <div
               key={label}
               className="flex flex-col items-center gap-1 rounded-xl bg-white px-1 py-2.5 text-center ring-1 ring-slate-200/70"
@@ -178,7 +180,8 @@ export function AppSubCategoryServicePage() {
               <Icon className="h-4 w-4 text-brand" aria-hidden />
               <span className="text-[10px] font-bold leading-tight text-slate-600">{label}</span>
             </div>
-          ))}
+            )
+          })}
         </div>
 
         <section className="space-y-3">

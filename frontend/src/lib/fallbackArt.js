@@ -11,6 +11,10 @@ const RULES = [
   [/tow|roadside|recovery|jump|lockout|fuel|breakdown/i, 'truck', '#FFF1D6', '#D97706'],
   [/puncture|tyre|tire|wheel|alignment|balanc/i, 'circle-dot', '#FFE9EC', '#F43F5E'],
   [/battery|electrical|alternator|starter|lights?|wiring/i, 'battery-charging', '#F1E9FF', '#7C3AED'],
+  [/ppf|paint protection|film/i, 'shield-check', '#E4EEFF', '#1D4ED8'],
+  [/teflon|ptfe/i, 'droplets', '#F1E9FF', '#7C3AED'],
+  [/graphene/i, 'sparkles', '#DDF7F1', '#0F766E'],
+  [/ceramic|coating|coat/i, 'sparkles', '#FFF4CC', '#CA8A04'],
   [/wash|detail|clean|polish/i, 'droplets', '#E3F5FF', '#0284C7'],
   [/dent|paint|body|scratch/i, 'paintbrush', '#FFE8F3', '#DB2777'],
   [/\bac\b|air.?con|cooling|compressor/i, 'snowflake', '#E0F7FA', '#0891B2'],
@@ -89,6 +93,8 @@ const DEFAULT_PHOTO = '/assets/images/car-repair.webp'
 /** @param {string} name */
 export function fallbackPhotoUrl(name) {
   const text = String(name || '')
+  // no shipped photo for coating services yet: use the generated coating pictogram, not an engine-bay photo
+  if (/ceramic|coating|ppf|teflon|paint protection/i.test(text)) return fallbackArtDataUrl(text)
   for (const [re, url] of PHOTO_RULES) if (re.test(text)) return url
   return DEFAULT_PHOTO
 }
