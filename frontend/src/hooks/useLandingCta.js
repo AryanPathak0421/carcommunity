@@ -1,28 +1,28 @@
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from './useAuth.js'
 import { USER_ROLES } from '../constants/userRoles.js'
 import { writeBootRole } from '../lib/bootPersona.js'
 
 /**
- * Shared CTA handlers for the landing page. Entries reuse the guest
- * "boot persona" flow (customer or mechanic).
+ * Shared CTA handlers for the landing page. A signed-in user of the same role goes straight to
+ * the app; everyone else is taken to sign-in / sign-up with that role preselected.
  */
 export function useLandingCta() {
-  const { user, logout } = useAuth()
+  const { user } = useAuth()
+  const navigate = useNavigate()
 
-  const enterAsBootRole = (role) => (e) => {
+  const enter = (role) => (e) => {
     if (e && e.preventDefault) e.preventDefault()
     if (user && user.role === role) {
-      window.location.href = '/app'
+      navigate('/app')
       return
     }
-    logout().finally(() => {
-      writeBootRole(role)
-      window.location.href = '/app'
-    })
+    writeBootRole(role)
+    navigate('/b2c/auth', { state: { defaultRole: role } })
   }
 
   return {
-    bookMechanic: enterAsBootRole(USER_ROLES.INDIVIDUAL),
-    registerMechanic: enterAsBootRole(USER_ROLES.MECHANIC),
+    bookMechanic: enter(USER_ROLES.INDIVIDUAL),
+    registerMechanic: enter(USER_ROLES.MECHANIC),
   }
 }

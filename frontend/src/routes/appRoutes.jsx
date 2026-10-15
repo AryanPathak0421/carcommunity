@@ -44,7 +44,7 @@ export const appShellChildRoutes = (
     <Route
       path="cars"
       element={
-        <RoleRoute allow={[USER_ROLES.INDIVIDUAL]} allowGuest>
+        <RoleRoute allow={[USER_ROLES.INDIVIDUAL]}>
           <CarsMarketplacePage />
         </RoleRoute>
       }
@@ -52,7 +52,7 @@ export const appShellChildRoutes = (
     <Route
       path="car-wash"
       element={
-        <RoleRoute allow={[USER_ROLES.INDIVIDUAL]} allowGuest>
+        <RoleRoute allow={[USER_ROLES.INDIVIDUAL]}>
           <CarWashPage />
         </RoleRoute>
       }
@@ -60,7 +60,7 @@ export const appShellChildRoutes = (
     <Route
       path="accessories"
       element={
-        <RoleRoute allow={[USER_ROLES.INDIVIDUAL, USER_ROLES.MECHANIC]} allowGuest>
+        <RoleRoute allow={[USER_ROLES.INDIVIDUAL, USER_ROLES.MECHANIC]}>
           <AccessoriesPage />
         </RoleRoute>
       }
@@ -108,7 +108,7 @@ export const appShellChildRoutes = (
     <Route
       path="accessories/:id"
       element={
-        <RoleRoute allow={[USER_ROLES.INDIVIDUAL, USER_ROLES.MECHANIC]} allowGuest>
+        <RoleRoute allow={[USER_ROLES.INDIVIDUAL, USER_ROLES.MECHANIC]}>
           <AccessoryDetailPage />
         </RoleRoute>
       }
@@ -148,7 +148,7 @@ export const appShellChildRoutes = (
     <Route
       path="cars/:id"
       element={
-        <RoleRoute allow={[USER_ROLES.INDIVIDUAL]} allowGuest>
+        <RoleRoute allow={[USER_ROLES.INDIVIDUAL]}>
           <CarDetailPage />
         </RoleRoute>
       }
@@ -157,7 +157,7 @@ export const appShellChildRoutes = (
     <Route
       path="booking/flow"
       element={
-        <RoleRoute allow={[USER_ROLES.INDIVIDUAL, USER_ROLES.MECHANIC]} allowGuest>
+        <RoleRoute allow={[USER_ROLES.INDIVIDUAL, USER_ROLES.MECHANIC]}>
           <IndividualBookingFlowPage />
         </RoleRoute>
       }
@@ -173,7 +173,7 @@ export const appShellChildRoutes = (
     <Route
       path="search"
       element={
-        <RoleRoute allow={[USER_ROLES.INDIVIDUAL]} allowGuest>
+        <RoleRoute allow={[USER_ROLES.INDIVIDUAL]}>
           <AppIndividualSearchPage />
         </RoleRoute>
       }
@@ -181,7 +181,7 @@ export const appShellChildRoutes = (
     <Route
       path="services"
       element={
-        <RoleRoute allow={[USER_ROLES.INDIVIDUAL]} allowGuest>
+        <RoleRoute allow={[USER_ROLES.INDIVIDUAL]}>
           <ServiceCatalog />
         </RoleRoute>
       }
@@ -189,7 +189,7 @@ export const appShellChildRoutes = (
     <Route
       path="sub-category/:id"
       element={
-        <RoleRoute allow={[USER_ROLES.INDIVIDUAL]} allowGuest>
+        <RoleRoute allow={[USER_ROLES.INDIVIDUAL]}>
           <AppSubCategoryServicePage />
         </RoleRoute>
       }
@@ -197,7 +197,7 @@ export const appShellChildRoutes = (
     <Route
       path="checkout"
       element={
-        <RoleRoute allow={[USER_ROLES.INDIVIDUAL]} allowGuest>
+        <RoleRoute allow={[USER_ROLES.INDIVIDUAL]}>
           <Checkout />
         </RoleRoute>
       }

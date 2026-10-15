@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { buildGuestUser, clearBootRole, readBootRole, writeBootRole } from '../lib/bootPersona.js'
+import { clearBootRole, readBootRole, writeBootRole } from '../lib/bootPersona.js'
 import { clearSession, setCredentials } from '../store/slices/authSlice.js'
 import { baseApi } from '../store/api/baseApi.js'
 import { apiRequest } from '../api/http.js'
@@ -10,17 +10,13 @@ export function useAuth() {
   const { token, user: realUser, loading } = useSelector((s) => s.auth)
   const [bootRole, setBootRoleState] = useState(() => readBootRole())
 
-  const effectiveUser = useMemo(() => {
-    if (realUser) return realUser
-    if (bootRole) return buildGuestUser(bootRole)
-    return null
-  }, [realUser, bootRole])
+  // Guest browsing is gone: only a real signed-in session counts. `bootRole` is just the role
+  // someone picked on the first screen, used as the default on the sign-in page.
+  const effectiveUser = useMemo(() => realUser || null, [realUser])
 
-  const isGuest = Boolean(!token && !realUser && bootRole)
+  const isGuest = false
 
-  const isAuthenticated = Boolean(
-    (token && realUser) || (!token && bootRole && effectiveUser),
-  )
+  const isAuthenticated = Boolean(token && realUser)
 
   const setBootRole = useCallback((role) => {
     writeBootRole(role)

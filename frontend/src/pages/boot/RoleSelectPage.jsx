@@ -44,12 +44,8 @@ export function RoleSelectPage() {
   }, [isAuthenticated, loading, navigate, realUser?.role, token, user?.role])
 
   function handleSelect(role) {
-    if (role === USER_ROLES.MECHANIC) {
-      navigate('/b2c/auth', { replace: true, state: { defaultRole: role } })
-      return
-    }
     setBootRole(role)
-    navigate(getRoleHomePath(role), { replace: true })
+    navigate('/b2c/auth', { replace: true, state: { defaultRole: role } })
   }
 
   if (loading) {

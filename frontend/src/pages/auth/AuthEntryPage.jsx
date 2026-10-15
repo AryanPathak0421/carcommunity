@@ -2,7 +2,8 @@ import { CarCommunityLogo } from '../../components/brand/CarCommunityLogo.jsx'
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { Car, Gift, Wrench } from 'lucide-react'
+import { ArrowLeft, ArrowRight, BadgeCheck, Car, Gift, Loader2, Lock, Phone, ShieldCheck, User, Wrench, Zap } from 'lucide-react'
+import workerImg from '../../assets/user_home_images/carcommunity_worker.webp'
 import { MobileShell } from '../../layouts/MobileShell.jsx'
 import { AppAmbientBackground } from '../../components/app/AppAmbientBackground.jsx'
 import { LabourCategorySetup } from '../../components/auth/LabourCategorySetup.jsx'
@@ -61,21 +62,6 @@ function FeedbackBanner({ variant, children }) {
   )
 }
 
-function AuthField({ label, hint, children }) {
-  return (
-    <div className="mt-2">
-      <div className="mb-1 flex items-baseline justify-between gap-2">
-        <label className="text-[12px] font-medium text-slate-400">{label}</label>
-        {hint}
-      </div>
-      {children}
-    </div>
-  )
-}
-
-const inputClass =
-  'w-full border-b-2 border-slate-200 bg-transparent py-2 text-base font-semibold text-slate-900 transition-colors focus:border-brand focus:outline-none placeholder:text-slate-300'
-
 export function AuthEntryPage() {
   const navigate = useNavigate()
   const location = useLocation()
@@ -98,6 +84,7 @@ export function AuthEntryPage() {
   const [challengeId, setChallengeId] = useState(null)
   const [busy, setBusy] = useState(false)
   const [banner, setBanner] = useState(null)
+  const [resendIn, setResendIn] = useState(0)
 
   const p = isValidIndianMobile(phone) ? phone : null
   const code = otpCells.join('')
@@ -131,6 +118,13 @@ export function AuthEntryPage() {
       otpInputRefs.current[0]?.focus()
     })
   }, [step])
+
+  // "Resend OTP" becomes available 30 s after the code was sent
+  useEffect(() => {
+    if (resendIn <= 0) return undefined
+    const t = setTimeout(() => setResendIn((s) => s - 1), 1000)
+    return () => clearTimeout(t)
+  }, [resendIn])
 
   function setPhoneDigits(value) {
     const digits = String(value).replace(/\D/g, '').slice(0, 10)
@@ -179,6 +173,7 @@ export function AuthEntryPage() {
         setChallengeId(res.data?.challengeId ?? null)
       }
       setOtpCells(Array(6).fill(''))
+      setResendIn(30)
       setStep('otp')
       // Test-account hint is dev-only: never shown (and tree-shaken) in production builds.
       const testAcc = import.meta.env.DEV && p ? HARDCODED_TEST_ACCOUNTS[p] : null
@@ -278,293 +273,329 @@ export function AuthEntryPage() {
     )
   }
 
+  const isLogin = mode === 'login'
+  const phoneError = banner?.variant === 'error' && phone.length > 0 && !phoneComplete
+
+  const fieldShell = (extra = '') =>
+    `flex items-center gap-2.5 rounded-2xl border-2 bg-slate-50 px-3.5 transition-colors focus-within:border-brand focus-within:bg-white ${extra || 'border-slate-200'}`
+
   return (
-    <>
-      <div className="absolute inset-x-0 top-0 -z-10">
-        <svg viewBox="0 0 375 220" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-auto text-brand fill-current drop-shadow-sm">
-          <path d="M0 0H375V150C375 150 310 200 250 180C190 160 130 140 70 170C30 190 0 150 0 150V0Z" />
-        </svg>
-      </div>
-      <MobileShell transparent className="relative z-10 overflow-x-hidden pb-4 min-h-screen">
-        <div className="px-6 pt-12 pb-3 flex flex-col items-start">
-          <CarCommunityLogo variant="light" size="lg" className="mb-8" />
-          <h1 className="mt-8 text-[32px] font-extrabold tracking-tight text-navy">
-            {step === 'otp' ? 'Verification' : mode === 'login' ? 'Hi there!' : 'Welcome!'}
-          </h1>
-          <p className="mt-1 text-sm font-medium text-slate-500">
-            {step === 'otp'
-              ? 'Enter the code sent to your number'
-              : mode === 'login'
-              ? 'Welcome back.'
-              : 'Sign up to continue.'}
-          </p>
-        </div>
+    <div className="min-h-dvh bg-slate-50">
+      <div className="mx-auto flex min-h-dvh w-full max-w-lg flex-col bg-white shadow-[0_0_60px_-30px_rgba(15,23,42,0.35)]">
+        {/* hero */}
+        <header className="relative min-h-[17rem] overflow-hidden bg-linear-to-br from-brand via-orange-500 to-amber-500 px-6 pb-16 pt-[max(1.25rem,env(safe-area-inset-top))] text-white">
+          <span className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full bg-white/10" aria-hidden />
+          <span className="pointer-events-none absolute -left-8 bottom-2 h-28 w-28 rounded-full bg-white/10" aria-hidden />
+          <div className="relative z-20 flex items-center justify-between">
+            {step === 'otp' ? (
+              <button
+                type="button"
+                onClick={resetFlowToForm}
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20 text-white transition active:scale-95"
+                aria-label="Change mobile number"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </button>
+            ) : (
+              <CarCommunityLogo variant="light" size="md" tagline={false} />
+            )}
+            <span className="hidden min-[340px]:flex items-center gap-1 whitespace-nowrap rounded-full bg-white/20 px-3 py-1 text-[11px] font-bold">
+              <ShieldCheck className="h-3.5 w-3.5" aria-hidden />
+              Secure login
+            </span>
+          </div>
 
-        <AnimatePresence mode="wait">
-          {step === 'form' ? (
-            <motion.div
-              key="form"
-              initial={reduce ? false : { opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={reduce ? false : { opacity: 0, y: -8 }}
-              className="space-y-3"
-            >
-              {mode === 'register' ? (
-                <div className="px-6 mb-3">
-                  <p className="mb-2 text-[12px] font-medium text-slate-400">I am a</p>
-                  <div className="grid grid-cols-2 gap-3">
-                    {ROLE_OPTIONS.map((opt) => {
-                      const Icon = opt.icon
-                      const active = role === opt.role
-                      return (
-                        <button
-                          key={opt.role}
-                          type="button"
-                          onClick={() => setRole(opt.role)}
-                          className={`group relative flex flex-col items-center justify-center gap-1.5 rounded-[1rem] border p-2 text-center transition-all duration-300 active:scale-95 ${
-                            active
-                              ? 'border-brand bg-brand/5 shadow-sm shadow-brand/10'
-                              : 'border-slate-200/60 bg-transparent hover:border-brand/30'
-                          }`}
-                        >
-                          <span
-                            className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors duration-300 ${
-                              active ? 'bg-brand text-white shadow-sm shadow-brand/20' : 'bg-slate-100 text-slate-500 group-hover:bg-brand/10 group-hover:text-brand'
-                            }`}
-                          >
-                            <Icon className="h-5 w-5" aria-hidden />
-                          </span>
-                          <span className="text-[12px] font-bold text-slate-800 leading-tight">{ROLE_LABELS[opt.role]}</span>
-                          {active && (
-                            <motion.div
-                              layoutId="role-active-indicator"
-                              className="absolute inset-0 rounded-[1.25rem] border-2 border-brand"
-                              initial={false}
-                              transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
-                            />
-                          )}
-                        </button>
-                      )
-                    })}
-                  </div>
-                  {role === USER_ROLES.MECHANIC ? (
-                    <p className="mt-2 rounded-xl bg-brand/5 px-3 py-2 text-[11px] leading-relaxed text-slate-600 ring-1 ring-brand/15">
-                      After OTP, you&apos;ll pick the services you offer on this screen.
-                    </p>
-                  ) : null}
+          <div className="relative z-20 mt-6 max-w-[58%]">
+            <h1 className="text-[27px] font-black leading-[1.1] tracking-tight">
+              {step === 'otp' ? 'Verify your number' : isLogin ? 'Welcome back!' : 'Create your account'}
+            </h1>
+            <p className="mt-2 text-[13px] font-semibold leading-snug text-white/90">
+              {step === 'otp'
+                ? 'Enter the 6-digit code we sent you'
+                : isLogin
+                ? 'Sign in to book trusted car & bike mechanics'
+                : 'Join CarCommunity in less than a minute'}
+            </p>
+          </div>
+          <img
+            src={workerImg}
+            alt=""
+            decoding="async"
+            className="pointer-events-none absolute -bottom-1 right-1 z-10 h-40 w-auto select-none object-contain drop-shadow-[0_8px_10px_rgba(0,0,0,0.25)]"
+          />
+        </header>
+
+        {/* sheet */}
+        <main className="relative z-10 -mt-8 flex-1 rounded-t-[2rem] bg-white px-6 pb-8 pt-6 shadow-[0_-14px_30px_-20px_rgba(0,0,0,0.35)]">
+          <AnimatePresence mode="wait">
+            {step === 'form' ? (
+              <motion.div
+                key="form"
+                initial={reduce ? false : { opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={reduce ? false : { opacity: 0, y: -8 }}
+                className="space-y-5"
+              >
+                <div className="grid grid-cols-2 gap-1 rounded-2xl bg-slate-100 p-1" role="tablist" aria-label="Sign in or sign up">
+                  {[
+                    ['login', 'Sign in'],
+                    ['register', 'Sign up'],
+                  ].map(([id, label]) => (
+                    <button
+                      key={id}
+                      type="button"
+                      role="tab"
+                      aria-selected={mode === id}
+                      onClick={() => mode !== id && switchMode(id)}
+                      className={`rounded-xl py-2.5 text-sm font-extrabold transition ${
+                        mode === id ? 'bg-white text-navy shadow-sm' : 'text-slate-500'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
                 </div>
-              ) : null}
 
-              <div className="space-y-3 px-6">
-                <AuthField
-                  label="Mobile Number"
-                  hint={
-                    mode === 'register' ? (
-                      <span className={`text-xs tabular-nums ${phoneComplete ? 'font-bold text-brand' : 'text-slate-400'}`}>
-                        {phone.length}/10
-                      </span>
-                    ) : null
-                  }
-                >
-                  <div
-                    className={`flex items-end border-b-2 transition-colors duration-300 ${
-                      banner?.variant === 'error' && phone.length > 0 && !phoneComplete
-                        ? 'border-amber-400'
-                        : 'border-slate-200 focus-within:border-brand'
-                    }`}
-                  >
-                    <span className="mb-2 mr-2 text-[15px] font-bold text-slate-600">
-                      +91
-                    </span>
-                    <input
-                      id="auth-phone"
-                      type="tel"
-                      inputMode="numeric"
-                      autoComplete="tel-national"
-                      maxLength={10}
-                      placeholder="9876543210"
-                      className="w-full bg-transparent py-2 text-base font-semibold tracking-wide text-slate-900 outline-none placeholder:font-medium placeholder:text-slate-300"
-                      value={phone}
-                      onChange={(e) => setPhoneDigits(e.target.value)}
-                      onKeyDown={(e) => {
-                        const allowed = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'Home', 'End']
-                        if (allowed.includes(e.key)) return
-                        if (e.ctrlKey || e.metaKey) return
-                        if (!/^\d$/.test(e.key)) e.preventDefault()
-                      }}
-                    />
-                  </div>
-
-                  {/* Quick Test Logins — hidden from UI. Logic (HARDCODED_TEST_ACCOUNTS) is kept; uncomment to restore the shortcuts.
-                  {mode === 'login' ? (
-                    <div className="pt-2.5">
-                      <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
-                        Quick Test Logins (OTP: 123456)
-                      </p>
-                      <div className="grid grid-cols-2 gap-2">
-                        {Object.entries(HARDCODED_TEST_ACCOUNTS).map(([num, info]) => (
+                {mode === 'register' ? (
+                  <div>
+                    <p className="mb-2 text-[12px] font-bold text-slate-500">I want to</p>
+                    <div className="grid grid-cols-2 gap-3">
+                      {ROLE_OPTIONS.map((opt) => {
+                        const Icon = opt.icon
+                        const active = role === opt.role
+                        return (
                           <button
-                            key={num}
+                            key={opt.role}
                             type="button"
-                            onClick={() => {
-                              setPhoneDigits(num)
-                              clearOtpError()
-                            }}
-                            className={`flex items-center justify-between rounded-xl border px-3 py-2 text-left text-xs transition-all ${
-                              phone === num
-                                ? 'border-brand bg-brand/10 font-bold text-brand shadow-sm shadow-brand/10'
-                                : 'border-slate-200 bg-white/70 text-slate-700 hover:border-brand/30 hover:bg-slate-50'
+                            onClick={() => setRole(opt.role)}
+                            aria-pressed={active}
+                            className={`flex items-center gap-2.5 rounded-2xl border-2 p-3 text-left transition active:scale-[0.98] ${
+                              active ? 'border-brand bg-orange-50' : 'border-slate-200 bg-white hover:border-brand/40'
                             }`}
                           >
-                            <span className="font-semibold">{info.label}</span>
-                            <span className="font-mono text-[11px] text-slate-500">{num}</span>
+                            <span
+                              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
+                                active ? 'bg-brand text-white' : 'bg-slate-100 text-slate-500'
+                              }`}
+                            >
+                              <Icon className="h-5 w-5" aria-hidden />
+                            </span>
+                            <span className="min-w-0">
+                              <span className="block text-[13px] font-black leading-tight text-navy">
+                                {opt.role === USER_ROLES.MECHANIC ? 'Work as mechanic' : 'Book a mechanic'}
+                              </span>
+                              <span className="block text-[11px] font-semibold text-slate-500">{ROLE_LABELS[opt.role]}</span>
+                            </span>
                           </button>
-                        ))}
+                        )
+                      })}
+                    </div>
+                    {role === USER_ROLES.MECHANIC ? (
+                      <p className="mt-2 rounded-xl bg-orange-50 px-3 py-2 text-[11px] font-semibold leading-relaxed text-slate-600 ring-1 ring-brand/15">
+                        After OTP, you&apos;ll pick the services you offer.
+                      </p>
+                    ) : null}
+                  </div>
+                ) : null}
+
+                <div className="space-y-4">
+                  {mode === 'register' ? (
+                    <div>
+                      <label htmlFor="auth-name" className="mb-1.5 block text-[12px] font-bold text-slate-500">
+                        Full name
+                      </label>
+                      <div className={fieldShell()}>
+                        <User className="h-[18px] w-[18px] shrink-0 text-slate-400" aria-hidden />
+                        <input
+                          id="auth-name"
+                          type="text"
+                          autoComplete="name"
+                          placeholder="As on your ID"
+                          className="w-full bg-transparent py-3.5 text-[15px] font-semibold text-slate-900 outline-none placeholder:font-medium placeholder:text-slate-400"
+                          value={fullName}
+                          onChange={(e) => setFullName(e.target.value)}
+                        />
                       </div>
                     </div>
                   ) : null}
-                  */}
-                </AuthField>
 
-                {mode === 'register' ? (
-                  <>
-                    <AuthField label="Full name">
+                  <div>
+                    <div className="mb-1.5 flex items-baseline justify-between">
+                      <label htmlFor="auth-phone" className="text-[12px] font-bold text-slate-500">
+                        Mobile number
+                      </label>
+                      <span className={`text-xs tabular-nums ${phoneComplete ? 'font-bold text-brand' : 'text-slate-400'}`}>
+                        {phone.length}/10
+                      </span>
+                    </div>
+                    <div className={fieldShell(phoneError ? 'border-amber-400' : 'border-slate-200')}>
+                      <Phone className="h-[18px] w-[18px] shrink-0 text-slate-400" aria-hidden />
+                      <span className="shrink-0 border-r border-slate-200 pr-2.5 text-[15px] font-black text-slate-700">+91</span>
                       <input
-                        type="text"
-                        className={inputClass}
-                        value={fullName}
-                        onChange={(e) => setFullName(e.target.value)}
-                        placeholder="As on your ID"
-                        autoComplete="name"
-                      />
-                    </AuthField>
-                    <AuthField label="Referral code (optional)">
-                      <input
-                        type="text"
-                        maxLength={16}
-                        placeholder="Enter a friend's code"
-                        className={inputClass}
-                        value={referralCode}
-                        onChange={(e) => {
-                          const next = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '')
-                          setReferralCode(next)
-                          setReferralCheck(null)
-                          storeReferralCode(next)
-                        }}
-                        onBlur={async () => {
-                          const value = referralCode.trim()
-                          if (value.length < 4) {
-                            setReferralCheck(null)
+                        id="auth-phone"
+                        type="tel"
+                        inputMode="numeric"
+                        autoComplete="tel-national"
+                        maxLength={10}
+                        placeholder="98765 43210"
+                        className="w-full bg-transparent py-3.5 text-[16px] font-bold tracking-wide text-slate-900 outline-none placeholder:font-medium placeholder:text-slate-400"
+                        value={phone}
+                        onChange={(e) => setPhoneDigits(e.target.value)}
+                        onKeyDown={(e) => {
+                          const allowed = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'Home', 'End', 'Enter']
+                          if (e.key === 'Enter' && !busy) {
+                            e.preventDefault()
+                            void handleSendOtp()
                             return
                           }
-                          try {
-                            const res = await referralsApi.validateCode(value)
-                            setReferralCheck(res.data || null)
-                          } catch {
-                            setReferralCheck(null)
-                          }
+                          if (allowed.includes(e.key)) return
+                          if (e.ctrlKey || e.metaKey) return
+                          if (!/^\d$/.test(e.key)) e.preventDefault()
                         }}
                       />
-                      {referralCheck ? (
-                        <p
-                          className={`mt-1.5 flex items-center gap-1.5 text-[11px] font-semibold ${
-                            referralCheck.valid ? 'text-emerald-700' : 'text-rose-700'
-                          }`}
-                        >
-                          <Gift className="h-3.5 w-3.5" aria-hidden />
-                          {referralCheck.valid
-                            ? `Invited by ${referralCheck.referrerName}${
-                                referralCheck.refereeReward > 0
-                                  ? ` · ₹${referralCheck.refereeReward} joining bonus`
-                                  : ''
-                              }`
-                            : 'That referral code is not valid'}
-                        </p>
-                      ) : null}
-                    </AuthField>
-                    <div className="flex items-start gap-2 pt-2">
-                      <input
-                        type="checkbox"
-                        id="terms"
-                        className="mt-1 h-4 w-4 rounded border-slate-300 text-brand focus:ring-brand"
-                        checked={termsAccepted}
-                        onChange={(e) => setTermsAccepted(e.target.checked)}
-                      />
-                      <label htmlFor="terms" className="text-[13px] text-slate-500">
-                        I agree to the{' '}
-                        <Link to="/terms" target="_blank" className="font-medium text-brand hover:underline">
-                          Terms & Conditions
-                        </Link>{' '}
-                        and{' '}
-                        <Link to="/privacy" target="_blank" className="font-medium text-brand hover:underline">
-                          Privacy Policy
-                        </Link>
-                      </label>
                     </div>
-                  </>
-                ) : null}
-              </div>
+                  </div>
 
-              <div className="px-6 pt-3 pb-2">
-                <FeedbackBanner variant={banner?.variant}>{banner?.message}</FeedbackBanner>
-                <button 
-                  type="button" 
-                  disabled={busy} 
-                  className="mt-3 w-full rounded-full bg-brand py-3 text-[15px] font-bold text-white shadow-md shadow-brand/20 transition-all hover:bg-brand-active active:scale-95 disabled:opacity-70" 
-                  onClick={() => void handleSendOtp()}
-                >
-                  {busy ? 'Please wait…' : mode === 'login' ? 'Sign In' : 'Sign Up'}
-                </button>
-                
-                <div className="mt-4 text-left">
-                  <p className="text-[13px] font-medium text-slate-400">
-                    {mode === 'login' ? 'New member?' : 'Already a member?'}
-                  </p>
+                  {mode === 'register' ? (
+                    <>
+                      <div>
+                        <label htmlFor="auth-ref" className="mb-1.5 block text-[12px] font-bold text-slate-500">
+                          Referral code <span className="font-medium text-slate-400">(optional)</span>
+                        </label>
+                        <div className={fieldShell()}>
+                          <Gift className="h-[18px] w-[18px] shrink-0 text-slate-400" aria-hidden />
+                          <input
+                            id="auth-ref"
+                            type="text"
+                            maxLength={16}
+                            placeholder="Enter a friend's code"
+                            className="w-full bg-transparent py-3.5 text-[15px] font-semibold uppercase tracking-wider text-slate-900 outline-none placeholder:font-medium placeholder:normal-case placeholder:tracking-normal placeholder:text-slate-400"
+                            value={referralCode}
+                            onChange={(e) => {
+                              const next = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '')
+                              setReferralCode(next)
+                              setReferralCheck(null)
+                              storeReferralCode(next)
+                            }}
+                            onBlur={async () => {
+                              const value = referralCode.trim()
+                              if (value.length < 4) {
+                                setReferralCheck(null)
+                                return
+                              }
+                              try {
+                                const res = await referralsApi.validateCode(value)
+                                setReferralCheck(res.data || null)
+                              } catch {
+                                setReferralCheck(null)
+                              }
+                            }}
+                          />
+                        </div>
+                        {referralCheck ? (
+                          <p
+                            className={`mt-1.5 flex items-center gap-1.5 text-[11px] font-semibold ${
+                              referralCheck.valid ? 'text-emerald-700' : 'text-rose-700'
+                            }`}
+                          >
+                            <Gift className="h-3.5 w-3.5" aria-hidden />
+                            {referralCheck.valid
+                              ? `Invited by ${referralCheck.referrerName}${
+                                  referralCheck.refereeReward > 0 ? ` · ₹${referralCheck.refereeReward} joining bonus` : ''
+                                }`
+                              : 'That referral code is not valid'}
+                          </p>
+                        ) : null}
+                      </div>
+
+                      <label htmlFor="terms" className="flex cursor-pointer items-start gap-2.5 rounded-2xl bg-slate-50 p-3">
+                        <input
+                          type="checkbox"
+                          id="terms"
+                          className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 accent-orange-500"
+                          checked={termsAccepted}
+                          onChange={(e) => setTermsAccepted(e.target.checked)}
+                        />
+                        <span className="text-[12px] font-medium leading-snug text-slate-600">
+                          I agree to the{' '}
+                          <Link to="/terms" target="_blank" className="font-bold text-brand hover:underline">
+                            Terms &amp; Conditions
+                          </Link>{' '}
+                          and{' '}
+                          <Link to="/privacy" target="_blank" className="font-bold text-brand hover:underline">
+                            Privacy Policy
+                          </Link>
+                        </span>
+                      </label>
+                    </>
+                  ) : null}
+                </div>
+
+                <div>
+                  <FeedbackBanner variant={banner?.variant}>{banner?.message}</FeedbackBanner>
                   <button
                     type="button"
-                    onClick={() => switchMode(mode === 'login' ? 'register' : 'login')}
-                    className="mt-1 text-[15px] font-bold text-brand transition-colors hover:text-brand-active"
+                    disabled={busy}
+                    onClick={() => void handleSendOtp()}
+                    className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-brand py-4 text-base font-black text-white shadow-lg shadow-brand/30 transition active:scale-[0.98] disabled:opacity-70"
                   >
-                    {mode === 'login' ? 'Sign Up' : 'Sign In'}
+                    {busy ? (
+                      <>
+                        <Loader2 className="h-5 w-5 animate-spin" aria-hidden /> Sending OTP…
+                      </>
+                    ) : (
+                      <>
+                        {isLogin ? 'Get OTP' : 'Create account'} <ArrowRight className="h-5 w-5" aria-hidden />
+                      </>
+                    )}
                   </button>
-                </div>
-              </div>
-            </motion.div>
-          ) : (
-            <motion.div
-              key="otp"
-              initial={reduce ? false : { opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={reduce ? false : { opacity: 0, y: -8 }}
-              className="space-y-4"
-            >
-              <div className="px-6 pt-4 space-y-6">
-                <p className="text-[14px] font-medium text-slate-500">
-                  Code sent to <span className="font-bold text-slate-900">+91 {phone}</span>
-                </p>
-                {/* Test-account OTP banner hidden from UI (kept for logic). */}
-                {false && HARDCODED_TEST_ACCOUNTS[phone] ? (
-                  <div className="rounded-2xl border border-brand/25 bg-brand/5 p-3 text-center space-y-1.5 shadow-sm">
-                    <p className="text-[13px] font-bold text-brand">
-                      {HARDCODED_TEST_ACCOUNTS[phone].title} Test Account — OTP: <span className="font-mono tracking-wider">{HARDCODED_TEST_ACCOUNTS[phone].otp}</span>
-                    </p>
+                  <p className="mt-3 text-center text-[12px] font-medium text-slate-500">
+                    {isLogin ? "Don't have an account?" : 'Already have an account?'}{' '}
                     <button
                       type="button"
-                      onClick={() => {
-                        setOtpCells(HARDCODED_TEST_ACCOUNTS[phone].otp.split(''))
-                        clearOtpError()
-                      }}
-                      className="inline-flex items-center gap-1 text-xs font-bold text-brand underline decoration-brand/50 hover:text-brand-active hover:decoration-brand"
+                      onClick={() => switchMode(isLogin ? 'register' : 'login')}
+                      className="font-extrabold text-brand hover:underline"
                     >
-                      Auto-fill OTP ({HARDCODED_TEST_ACCOUNTS[phone].otp})
+                      {isLogin ? 'Sign up' : 'Sign in'}
                     </button>
-                  </div>
-                ) : OTP_BYPASS_HINT && p ? (
-                  <p className="rounded-xl border border-brand/20 bg-brand/5 px-3 py-2 text-[13px] font-semibold text-brand">
+                  </p>
+                </div>
+
+                <ul className="grid grid-cols-3 gap-2 border-t border-slate-100 pt-4 text-center">
+                  {[
+                    [BadgeCheck, 'Verified mechanics'],
+                    [Zap, 'Quick matching'],
+                    [Lock, 'Safe & secure'],
+                  ].map(([Icon, text]) => (
+                    <li key={text} className="flex flex-col items-center gap-1">
+                      <Icon className="h-[18px] w-[18px] text-brand" aria-hidden />
+                      <span className="text-[10px] font-bold leading-tight text-slate-500">{text}</span>
+                    </li>
+                  ))}
+                </ul>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="otp"
+                initial={reduce ? false : { opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={reduce ? false : { opacity: 0, y: -8 }}
+                className="space-y-5"
+              >
+                <p className="text-[14px] font-medium text-slate-500">
+                  Code sent to <span className="font-black text-navy">+91 {phone}</span>{' '}
+                  <button type="button" onClick={resetFlowToForm} className="ml-1 text-[12px] font-extrabold text-brand hover:underline">
+                    Change
+                  </button>
+                </p>
+
+                {OTP_BYPASS_HINT && p ? (
+                  <p className="rounded-xl border border-brand/20 bg-orange-50 px-3 py-2 text-[13px] font-semibold text-brand">
                     Demo: OTP is {demoOtpFromPhone(p)}
                   </p>
                 ) : null}
-                <div className="mt-6 flex justify-between gap-2" onPaste={handleOtpPaste}>
+
+                <div className="flex justify-between gap-2" onPaste={handleOtpPaste}>
                   {otpCells.map((digit, i) => (
                     <input
                       key={i}
@@ -576,7 +607,9 @@ export function AuthEntryPage() {
                       autoComplete={i === 0 ? 'one-time-code' : 'off'}
                       maxLength={1}
                       aria-label={`OTP digit ${i + 1} of 6`}
-                      className="h-12 w-11 border-b-2 border-slate-200 bg-transparent text-center font-mono text-2xl font-bold tabular-nums text-slate-900 outline-none transition-colors focus:border-brand"
+                      className={`h-14 w-full min-w-0 rounded-xl border-2 bg-slate-50 text-center font-mono text-2xl font-black tabular-nums text-navy outline-none transition-colors focus:border-brand focus:bg-white ${
+                        digit ? 'border-brand/50' : 'border-slate-200'
+                      }`}
                       value={digit}
                       onPaste={handleOtpPaste}
                       onChange={(e) => {
@@ -631,37 +664,53 @@ export function AuthEntryPage() {
                     />
                   ))}
                 </div>
-              </div>
 
-              <div className="px-6 pt-4 pb-2">
-                <FeedbackBanner variant={banner?.variant}>{banner?.message}</FeedbackBanner>
-                <button
-                  type="button"
-                  disabled={busy}
-                  className="mt-4 w-full rounded-full bg-brand py-3 text-[15px] font-bold text-white shadow-md shadow-brand/20 transition-all hover:bg-brand-active active:scale-95 disabled:opacity-70"
-                  onClick={() => void handleVerifyOtp()}
-                >
-                  {busy ? 'Verifying…' : 'Verify'}
-                </button>
-                <button
-                  type="button"
-                  className="mt-4 w-full py-2 text-[14px] font-bold text-brand transition-colors hover:text-brand-active"
-                  onClick={resetFlowToForm}
-                >
-                  Change mobile number
-                </button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+                <div>
+                  <FeedbackBanner variant={banner?.variant}>{banner?.message}</FeedbackBanner>
+                  <button
+                    type="button"
+                    disabled={busy || code.length !== 6}
+                    onClick={() => void handleVerifyOtp()}
+                    className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-brand py-4 text-base font-black text-white shadow-lg shadow-brand/30 transition active:scale-[0.98] disabled:opacity-60"
+                  >
+                    {busy ? (
+                      <>
+                        <Loader2 className="h-5 w-5 animate-spin" aria-hidden /> Verifying…
+                      </>
+                    ) : (
+                      <>
+                        Verify &amp; continue <ArrowRight className="h-5 w-5" aria-hidden />
+                      </>
+                    )}
+                  </button>
+                  <p className="mt-4 text-center text-[13px] font-medium text-slate-500">
+                    Did not get the code?{' '}
+                    {resendIn > 0 ? (
+                      <span className="font-bold text-slate-400">Resend in {resendIn}s</span>
+                    ) : (
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() => void handleSendOtp()}
+                        className="font-extrabold text-brand hover:underline disabled:opacity-60"
+                      >
+                        Resend OTP
+                      </button>
+                    )}
+                  </p>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-        <p className="mt-4 text-center text-[12px] text-slate-500">
-          Admin?{' '}
-          <Link to="/admin/login" className="font-bold text-brand hover:underline">
-            Web login
-          </Link>
-        </p>
-      </MobileShell>
-    </>
+          <p className="mt-8 text-center text-[12px] text-slate-400">
+            Admin?{' '}
+            <Link to="/admin/login" className="font-bold text-brand hover:underline">
+              Web login
+            </Link>
+          </p>
+        </main>
+      </div>
+    </div>
   )
 }
