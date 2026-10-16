@@ -28,8 +28,12 @@ export const carsApi = {
   sellerContact: (id) => apiRequest(`/cars/${id}/seller-contact`),
   received: () => apiRequest('/cars/inquiries/received'),
   sent: () => apiRequest('/cars/inquiries/sent'),
-  setInquiryStatus: (inquiryId, status) =>
-    apiRequest(`/cars/inquiries/${inquiryId}`, { method: 'PATCH', body: { status } }),
+  /** Seller: change the status and/or send the buyer a written reply (the buyer is notified). */
+  setInquiryStatus: (inquiryId, status, reply) =>
+    apiRequest(`/cars/inquiries/${inquiryId}`, {
+      method: 'PATCH',
+      body: { ...(status ? { status } : {}), ...(reply ? { reply } : {}) },
+    }),
 }
 
 /** Upload one photo to the car-listings folder and return its URL. */

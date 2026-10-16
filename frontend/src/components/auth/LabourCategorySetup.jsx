@@ -21,6 +21,9 @@ import { fetchLabourCategoriesGrouped } from '../../api/labourCategoriesApi.js'
 import { updateMyLabourCategories } from '../../api/userLabourApi.js'
 import { ApiError } from '../../api/http.js'
 
+/** A mechanic can offer up to this many services (matching still works per service). */
+export const MAX_SKILLS = 15
+
 function categoryId(c) {
   return String(c._id)
 }
@@ -268,14 +271,15 @@ export function LabourCategorySetup({ variant = 'app', onComplete }) {
 
   function toggle(id) {
     const key = String(id)
+    if (!selected.has(key) && selected.size >= MAX_SKILLS) {
+      setError(`You can choose up to ${MAX_SKILLS} skills. Remove one to add another.`)
+      return
+    }
+    setError('')
     setSelected((prev) => {
       const next = new Map(prev)
-      if (next.has(key)) {
-        next.delete(key)
-      } else {
-        next.clear()
-        next.set(key, { minPrice: '', maxPrice: '' })
-      }
+      if (next.has(key)) next.delete(key)
+      else next.set(key, { minPrice: '', maxPrice: '' })
       return next
     })
   }
@@ -397,7 +401,7 @@ export function LabourCategorySetup({ variant = 'app', onComplete }) {
           </div>
 
           <span className="shrink-0 rounded-full bg-brand/10 px-2.5 py-1 text-[11px] font-black text-brand ring-1 ring-brand/20">
-            {hasTradeSelected ? tradeSelectedCount : '0'}
+            {tradeSelectedCount}/{MAX_SKILLS}
           </span>
         </div>
 
@@ -422,8 +426,8 @@ export function LabourCategorySetup({ variant = 'app', onComplete }) {
         {step === 'areas' ? (
           <p className="mt-2 text-xs leading-relaxed text-slate-600">
             {variant === 'auth'
-              ? 'Pick the service you specialise in. We use this to match you to nearby car and bike jobs. You can only select one.'
-              : 'Open a category, then choose the single service you specialise in. You can only select one.'}
+              ? `Pick the services you offer (up to ${MAX_SKILLS}). We use these to match you to nearby car and bike jobs.`
+              : `Open a category and tick every service you offer — up to ${MAX_SKILLS} in total.`}
           </p>
         ) : activeGroup?.description ? (
           <p className="mt-2 text-xs leading-relaxed text-slate-600">{activeGroup.description}</p>

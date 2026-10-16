@@ -44,12 +44,23 @@ export function CarEnquiriesPage() {
     }
   }, [isGuest])
 
-  const setStatus = async (inq, status) => {
+  /** Returns true when the change was saved, so a card can clear its reply box. */
+  const setStatus = async (inq, status, reply) => {
     try {
-      await carsApi.setInquiryStatus(inq._id, status)
-      setReceived((list) => list.map((x) => (x._id === inq._id ? { ...x, status } : x)))
+      setError('')
+      const res = await carsApi.setInquiryStatus(inq._id, status, reply)
+      const saved = res.data?.inquiry
+      setReceived((list) =>
+        list.map((x) =>
+          x._id === inq._id
+            ? { ...x, status: saved?.status || status || x.status, sellerReply: saved?.sellerReply ?? x.sellerReply, repliedAt: saved?.repliedAt ?? x.repliedAt }
+            : x,
+        ),
+      )
+      return true
     } catch (e) {
-      setError(e.message)
+      setError(e.message || 'Could not update the enquiry')
+      return false
     }
   }
 

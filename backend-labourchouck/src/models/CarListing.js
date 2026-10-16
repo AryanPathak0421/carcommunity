@@ -62,6 +62,9 @@ const carInquirySchema = new mongoose.Schema(
     message: { type: String, trim: true, maxlength: 500, default: '' },
     offerPrice: { type: Number, min: 0, default: null },
     status: { type: String, enum: ['NEW', 'CONTACTED', 'CLOSED'], default: 'NEW', index: true },
+    /** The seller's written answer to the buyer (shown in the buyer's "Sent" enquiries). */
+    sellerReply: { type: String, trim: true, maxlength: 500, default: '' },
+    repliedAt: Date,
   },
   { timestamps: true },
 )

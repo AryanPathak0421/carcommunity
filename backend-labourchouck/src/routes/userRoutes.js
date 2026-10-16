@@ -77,7 +77,7 @@ router.patch(
 router.patch(
   '/me/labour-categories',
   [
-    body('services').isArray({ min: 1 }).withMessage('Select at least one category'),
+    body('services').isArray({ min: 1, max: 15 }).withMessage('Select between 1 and 15 skills'),
     body('services.*.serviceId').isMongoId().withMessage('Invalid service ID'),
     body('services.*.subcategoryId').optional().isMongoId(),
     body('services.*.minPrice').optional().isNumeric(),

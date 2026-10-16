@@ -373,24 +373,60 @@ export const getReceivedInquiries = asyncHandler(async (req, res) => {
         message: i.message,
         offerPrice: i.offerPrice,
         status: i.status,
+        sellerReply: i.sellerReply || '',
+        repliedAt: i.repliedAt || null,
         createdAt: i.createdAt,
       })),
     },
   })
 })
 
+/**
+ * Seller updates an enquiry: change its status and/or send the buyer a written reply.
+ * The buyer is told about every real change (in-app notification, socket and push).
+ */
 export const setInquiryStatus = asyncHandler(async (req, res) => {
-  const status = str(req.body.status).toUpperCase()
-  if (!['NEW', 'CONTACTED', 'CLOSED'].includes(status)) {
-    return sendError(res, { message: 'Invalid status', statusCode: HTTP_STATUS.BAD_REQUEST })
+  const hasStatus = req.body.status !== undefined && str(req.body.status) !== ''
+  const reply = str(req.body.reply).slice(0, 500)
+  if (!hasStatus && !reply) {
+    return sendError(res, { message: 'Send a reply or choose a status', statusCode: HTTP_STATUS.BAD_REQUEST })
   }
-  const inquiry = await CarInquiry.findOneAndUpdate(
-    { _id: req.params.inquiryId, sellerId: req.user._id },
-    { $set: { status } },
-    { new: true },
-  )
-  if (!inquiry) return sendError(res, { message: 'Inquiry not found', statusCode: HTTP_STATUS.NOT_FOUND })
-  return sendSuccess(res, { message: 'Inquiry updated', data: { inquiry } })
+
+  const before = await CarInquiry.findOne({ _id: req.params.inquiryId, sellerId: req.user._id })
+  if (!before) return sendError(res, { message: 'Inquiry not found', statusCode: HTTP_STATUS.NOT_FOUND })
+
+  let status = before.status
+  if (hasStatus) {
+    status = str(req.body.status).toUpperCase()
+    if (!['NEW', 'CONTACTED', 'CLOSED'].includes(status)) {
+      return sendError(res, { message: 'Invalid status', statusCode: HTTP_STATUS.BAD_REQUEST })
+    }
+  }
+  // Answering a buyer means the enquiry has been dealt with (unless the seller is closing it).
+  if (reply && status === 'NEW') status = 'CONTACTED'
+
+  const set = { status }
+  if (reply) {
+    set.sellerReply = reply
+    set.repliedAt = new Date()
+  }
+  const inquiry = await CarInquiry.findOneAndUpdate({ _id: before._id }, { $set: set }, { new: true })
+
+  const statusChanged = status !== before.status
+  if (reply || (statusChanged && status !== 'NEW')) {
+    const listing = await CarListing.findById(inquiry.listingId).select('title').lean()
+    const title = listing?.title || 'your enquiry'
+    const seller = await User.findById(req.user._id).select('fullName').lean()
+    const who = seller?.fullName || 'The seller'
+    sendToUser(inquiry.buyerId, {
+      title: reply ? `${who} replied about ${title}` : status === 'CLOSED' ? `Enquiry closed: ${title}` : `${who} has seen your enquiry`,
+      body: reply || (status === 'CLOSED' ? 'The seller closed this enquiry.' : `${who} will contact you about ${title}.`),
+      type: reply ? 'CAR_INQUIRY_REPLY' : 'CAR_INQUIRY_UPDATE',
+      data: { listingId: String(inquiry.listingId), inquiryId: String(inquiry._id), link: '/app/cars/enquiries?tab=sent' },
+    })
+  }
+
+  return sendSuccess(res, { message: reply ? 'Reply sent to the buyer' : 'Inquiry updated', data: { inquiry } })
 })
 
 // ---------------------------------------------------------------------------
@@ -490,6 +526,8 @@ export const getMyInquiries = asyncHandler(async (req, res) => {
         message: i.message,
         offerPrice: i.offerPrice,
         status: i.status,
+        sellerReply: i.sellerReply || '',
+        repliedAt: i.repliedAt || null,
         createdAt: i.createdAt,
       })),
     },
