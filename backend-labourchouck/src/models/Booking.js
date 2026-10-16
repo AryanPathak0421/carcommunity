@@ -92,6 +92,8 @@ const bookingSchema = new mongoose.Schema(
       },
     ],
     partsTotal: { type: Number, default: 0, min: 0 },
+    /** Why a booking ended as FAILED (shown to admins), e.g. nobody accepted it in time */
+    failureReason: { type: String, trim: true, maxlength: 200 },
     /** Set once reserved parts were put back on the shelf after a cancellation/failure */
     partsReleasedAt: Date,
     /** Set once the discount has been returned to the wallet after a cancellation */

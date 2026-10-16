@@ -118,7 +118,7 @@ export const rejectBroadcast = asyncHandler(async (req, res) => {
     // Atomic: loses cleanly if someone accepted in the meantime.
     const failed = await Booking.findOneAndUpdate(
       { _id: booking._id, status: 'BROADCASTING' },
-      { $set: { status: 'FAILED' } },
+      { $set: { status: 'FAILED', failureReason: 'All nearby mechanics declined' } },
       { new: true },
     )
     if (failed) {

@@ -30,6 +30,7 @@ export async function startBroadcastCycle(bookingId) {
   if (!bookingLng || !bookingLat) {
     console.error(`Booking ${bookingId} FAILED: Invalid coordinates for zone broadcast.`)
     booking.status = 'FAILED'
+    booking.failureReason = 'Invalid location'
     await booking.save()
     await refundBookingWalletDiscount(booking, 'could not be matched')
     // Emit to customer
@@ -209,7 +210,7 @@ export async function startBroadcastCycle(bookingId) {
     // Atomic: only expires it if nobody accepted in the meantime.
     const currentBooking = await Booking.findOneAndUpdate(
       { _id: booking._id, status: 'BROADCASTING' },
-      { $set: { status: 'FAILED' } },
+      { $set: { status: 'FAILED', failureReason: 'No mechanic accepted in time' } },
       { new: true },
     )
     if (currentBooking) {
@@ -238,6 +239,7 @@ export async function startBroadcastCycle(bookingId) {
 
 async function markBookingFailed(booking, reason) {
   booking.status = 'FAILED'
+  booking.failureReason = String(reason || '').slice(0, 200)
   await booking.save()
   await refundBookingWalletDiscount(booking, 'could not be matched')
   console.log(`Booking ${booking._id} FAILED: ${reason}`)

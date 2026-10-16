@@ -22,7 +22,7 @@ export function initBroadcastCron() {
           // Atomic per booking: skip it if a mechanic accepted it in the meantime.
           const failed = await Booking.findOneAndUpdate(
             { _id: stuck._id, status: 'BROADCASTING' },
-            { $set: { status: 'FAILED' } },
+            { $set: { status: 'FAILED', failureReason: 'No mechanic accepted in time' } },
             { new: true },
           )
           if (!failed) continue

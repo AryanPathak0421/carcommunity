@@ -8,8 +8,11 @@ import {
   useDeleteAdminBookingMutation
 } from '../../store/api/adminBookingApi.js'
 
+const PAGE_SIZE = 15
+
 const BOOKING_STATUS_FILTERS = [
   { value: 'ALL', label: 'All' },
+  { value: 'NOT_ACCEPTED', label: 'Never accepted' },
   { value: 'CREATED', label: 'Created' },
   { value: 'BROADCASTING', label: 'Finding mechanic' },
   { value: 'ACCEPTED', label: 'Accepted' },
@@ -21,6 +24,34 @@ const BOOKING_STATUS_FILTERS = [
   { value: 'FAILED', label: 'Failed' },
   { value: 'REFUNDED', label: 'Refunded' },
 ]
+
+/**
+ * For bookings that no mechanic ever accepted: a short reason plus how far the search got.
+ * Returns null for bookings that did have a mechanic.
+ */
+function notAcceptedInfo(b) {
+  if (!b || b.laborId) return null
+  if (!['FAILED', 'CANCELLED', 'BROADCASTING', 'CREATED'].includes(b.status)) return null
+  const offered = b.eligibleLabourIds?.length ?? 0
+  const declined = b.rejectedBy?.length ?? 0
+  let reason
+  if (b.status === 'FAILED') {
+    reason =
+      b.failureReason ||
+      (offered === 0
+        ? 'No mechanic was available nearby'
+        : declined >= offered
+          ? 'All nearby mechanics declined'
+          : 'No mechanic accepted in time')
+  } else if (b.status === 'CANCELLED') {
+    reason = 'Cancelled before any mechanic accepted'
+  } else if (b.status === 'BROADCASTING') {
+    reason = 'Still searching for a mechanic'
+  } else {
+    reason = b.type === 'SCHEDULED' ? 'Waiting for its scheduled time' : 'Not sent to mechanics yet'
+  }
+  return { reason, offered, declined, failed: b.status === 'FAILED' }
+}
 
 /** Statuses during which the assigned mechanic's position is streamed. */
 const LIVE_STATUSES = ['ACCEPTED', 'ASSIGNED', 'EN_ROUTE', 'STARTED']
@@ -119,6 +150,16 @@ function BookingDetailsModal({ booking, location, now, onClose }) {
               <p className="text-slate-500 text-xs">Status</p>
               <p className="font-bold text-brand">{booking.status}</p>
             </div>
+            {notAcceptedInfo(booking) ? (
+              <div className="col-span-2 rounded-xl bg-amber-50 px-3 py-2 ring-1 ring-amber-200">
+                <p className="text-xs font-extrabold text-amber-900">No mechanic accepted this booking</p>
+                <p className="text-xs text-amber-900/90">
+                  {notAcceptedInfo(booking).reason} · offered to {notAcceptedInfo(booking).offered} mechanic
+                  {notAcceptedInfo(booking).offered === 1 ? '' : 's'}
+                  {notAcceptedInfo(booking).declined ? ' · ' + notAcceptedInfo(booking).declined + ' declined' : ''}
+                </p>
+              </div>
+            ) : null}
             <div>
               <p className="text-slate-500 text-xs">Payment Method</p>
               <p className="font-semibold">{booking.paymentMethod}</p>
@@ -227,6 +268,7 @@ function BookingDetailsModal({ booking, location, now, onClose }) {
 
 function IndividualBookingsTab() {
   const [statusFilter, setStatusFilter] = useState('ALL')
+  const [page, setPage] = useState(1)
   const [selectedId, setSelectedId] = useState(null)
   const [liveLocations, setLiveLocations] = useState({})
   const socket = useSocket()
@@ -235,12 +277,14 @@ function IndividualBookingsTab() {
 
   // Poll as a fallback; socket events below make live changes show up immediately.
   const { data, isLoading, isError, refetch } = useGetAdminBookingsQuery(
-    { status: statusFilter },
+    { status: statusFilter, page, limit: PAGE_SIZE },
     { pollingInterval: 15000 },
   )
   const [deleteAdminBooking] = useDeleteAdminBookingMutation()
 
   const bookings = data?.bookings ?? []
+  const pagination = data?.pagination
+  const notAcceptedCount = data?.counts?.notAccepted ?? 0
   const selectedBooking = bookings.find((b) => b._id === selectedId) ?? null
   const now = useNow(bookings.some(isLive))
 
@@ -284,7 +328,10 @@ function IndividualBookingsTab() {
             <button
               key={f.value}
               type="button"
-              onClick={() => setStatusFilter(f.value)}
+              onClick={() => {
+                setStatusFilter(f.value)
+                setPage(1)
+              }}
               className={`rounded-full px-3 py-1.5 text-xs font-bold ring-1 transition ${
                 statusFilter === f.value
                   ? 'bg-brand text-white ring-brand'
@@ -292,6 +339,9 @@ function IndividualBookingsTab() {
               }`}
             >
               {f.label}
+              {f.value === 'NOT_ACCEPTED' && notAcceptedCount > 0 ? (
+                <span className="ml-1.5 rounded-full bg-rose-500 px-1.5 py-0.5 text-[10px] font-black text-white">{notAcceptedCount}</span>
+              ) : null}
             </button>
           ))}
         </div>
@@ -318,7 +368,7 @@ function IndividualBookingsTab() {
 
       <ul className="space-y-4">
         {bookings.map((b) => {
-          if (b.status === 'FAILED') return null;
+          const unaccepted = notAcceptedInfo(b)
           return (
           <li key={b._id}>
             <GlassPanel className="space-y-4 p-5">
@@ -342,6 +392,19 @@ function IndividualBookingsTab() {
                       </span>
                     ) : null}
                   </p>
+                  {unaccepted ? (
+                    <p
+                      className={`mt-1.5 inline-flex flex-wrap items-center gap-x-2 rounded-lg px-2.5 py-1 text-[11px] font-bold ring-1 ${
+                        unaccepted.failed ? 'bg-rose-50 text-rose-800 ring-rose-200' : 'bg-amber-50 text-amber-900 ring-amber-200'
+                      }`}
+                    >
+                      <span>No mechanic accepted: {unaccepted.reason}</span>
+                      <span className="font-semibold opacity-80">
+                        Offered to {unaccepted.offered} mechanic{unaccepted.offered === 1 ? '' : 's'}
+                        {unaccepted.declined ? ` · ${unaccepted.declined} declined` : ''}
+                      </span>
+                    </p>
+                  ) : null}
                   {isLive(b) ? (
                     <p className="mt-1 text-xs text-slate-500">
                       Mechanic: {b.laborId?.fullName || '—'}
@@ -378,6 +441,33 @@ function IndividualBookingsTab() {
           )
         })}
       </ul>
+
+      {pagination && pagination.totalPages > 1 ? (
+        <nav className="flex items-center justify-between gap-3" aria-label="Bookings pages">
+          <p className="text-xs font-semibold text-slate-500">
+            Showing {(pagination.page - 1) * pagination.limit + 1}–
+            {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total}
+          </p>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              disabled={pagination.page <= 1}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 disabled:opacity-40"
+            >
+              Previous
+            </button>
+            <button
+              type="button"
+              disabled={pagination.page >= pagination.totalPages}
+              onClick={() => setPage((p) => p + 1)}
+              className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 disabled:opacity-40"
+            >
+              Next
+            </button>
+          </div>
+        </nav>
+      ) : null}
 
       {selectedBooking && (
         <BookingDetailsModal

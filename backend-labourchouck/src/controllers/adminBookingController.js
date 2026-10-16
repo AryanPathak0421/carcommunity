@@ -5,19 +5,33 @@ import { asyncHandler } from '../utils/asyncHandler.js'
 import { HTTP_STATUS, sendError, sendSuccess } from '../utils/apiResponse.js'
 
 export const getAllBookings = asyncHandler(async (req, res) => {
-  const { page = 1, limit = 10, status, search } = req.query
+  const { status } = req.query
+  const page = Math.max(1, Number.parseInt(req.query.page, 10) || 1)
+  const limit = Math.min(100, Math.max(1, Number.parseInt(req.query.limit, 10) || 10))
   const skip = (page - 1) * limit
-  
+
+  // Bookings no mechanic ever took: failed/expired searches, still-searching ones, and cancellations
+  // that happened before anybody accepted.
+  const NOT_ACCEPTED = {
+    $or: [{ laborId: null }, { laborId: { $exists: false } }],
+    status: { $in: ['FAILED', 'CANCELLED', 'BROADCASTING', 'CREATED'] },
+  }
+
   const query = {}
 
-  if (status && status !== 'ALL') {
+  if (status === 'NOT_ACCEPTED') {
+    Object.assign(query, NOT_ACCEPTED)
+  } else if (status && status !== 'ALL') {
     query.status = status
   }
 
   // Populate users beforehand if search exists, though typical simple search just matches IDs
   // To keep it simple, we'll just filter by status for now.
 
-  const total = await Booking.countDocuments(query)
+  const [total, notAccepted] = await Promise.all([
+    Booking.countDocuments(query),
+    Booking.countDocuments(NOT_ACCEPTED),
+  ])
   const bookings = await Booking.find(query)
     .populate('userId', 'fullName phone email profileImageUrl')
     .populate('laborId', 'fullName phone email profileImageUrl')
@@ -36,7 +50,8 @@ export const getAllBookings = asyncHandler(async (req, res) => {
         page: Number(page),
         limit: Number(limit),
         totalPages: Math.ceil(total / limit)
-      }
+      },
+      counts: { notAccepted },
     }
   })
 })
