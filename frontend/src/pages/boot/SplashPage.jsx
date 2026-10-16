@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { HardHat } from 'lucide-react'
 import { SplashAnimatedBrand } from '../../components/boot/splash/SplashAnimatedBrand.jsx'
 import { AppRouteLoader } from '../../components/app/AppRouteLoader.jsx'
 import { BOOT_ROUTES } from '../../constants/bootFlow.js'
@@ -70,8 +69,8 @@ export function SplashPage() {
   return (
     <div className="lc-splash-page relative min-h-dvh w-full overflow-hidden">
       <div className="relative z-10 mx-auto flex min-h-dvh w-full max-w-lg flex-col items-center justify-center px-6 pb-[max(6rem,env(safe-area-inset-bottom))] pt-[max(1.5rem,env(safe-area-inset-top))]">
-        <span className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/15 text-white ring-2 ring-white/30">
-          <HardHat className="h-8 w-8" strokeWidth={2} aria-hidden />
+        <span className="mb-5 flex h-20 w-20 items-center justify-center rounded-3xl bg-white p-2 shadow-lg">
+          <img src="/logo-icon.png?v=3" alt="CarCommunity" className="h-full w-full object-contain" />
         </span>
 
         <p className="text-sm font-semibold tracking-wide text-white/90">Welcome to</p>
