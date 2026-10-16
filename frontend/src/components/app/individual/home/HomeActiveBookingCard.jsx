@@ -14,7 +14,13 @@ export function HomeActiveBookingCard({ booking, extraCount = 0, formatDay }) {
   const ui = STATUS_UI[booking.status] || STATUS_UI.CREATED
   const Icon = ui.icon
   const name = booking.serviceId?.name || booking.subcategoryId?.name || 'Your booking'
-  const when = formatDay(booking.scheduledAt || booking.createdAt)
+  const isScheduled = booking.type === 'SCHEDULED'
+  // Scheduled jobs show their booked day and time; instant ones show the search window.
+  const when = isScheduled
+    ? `${formatDay(booking.scheduledAt || booking.createdAt)}${booking.timeSlot ? ' · ' + booking.timeSlot : ''}`
+    : booking.status === 'BROADCASTING' || booking.status === 'CREATED'
+      ? 'Searching up to 5 min'
+      : formatDay(booking.createdAt)
 
   return (
     <section aria-label="Ongoing booking">
@@ -35,7 +41,7 @@ export function HomeActiveBookingCard({ booking, extraCount = 0, formatDay }) {
           <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold ${ui.tone}`}>{ui.label}</span>
           <span className="mt-1 block truncate text-sm font-extrabold text-slate-900">{name}</span>
           <span className="block truncate text-[11px] font-medium text-slate-500">
-            {when} · {booking.type === 'SCHEDULED' ? 'Scheduled' : 'Instant'}
+            {when} · {isScheduled ? 'Scheduled' : 'Instant'}
             {extraCount > 0 ? ` · +${extraCount} more active` : ''}
           </span>
         </span>

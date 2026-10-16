@@ -550,6 +550,22 @@ export function IndividualBookingFlowPage() {
     }
     writeAppUserLocation({ address: draft.address.trim(), lat: draft.lat, lng: draft.lng })
 
+    // Already searching for a mechanic for an earlier tap on "Confirm"? Don't book it a second time:
+    // take the customer back to that search instead.
+    if (draft.bookingType !== 'scheduled' && activeBookingId) {
+      try {
+        const cur = await bookingsApi.getBookingStatus(activeBookingId)
+        const existing = cur.data?.booking
+        if (existing?.type === 'INSTANT' && ['CREATED', 'BROADCASTING'].includes(existing.status)) {
+          setNoMatch(false)
+          goStep('searching')
+          return
+        }
+      } catch {
+        /* status lookup is best effort — fall through and create the booking */
+      }
+    }
+
     try {
       const uploadedImageUrls = []
       for (const file of imageFiles) {
@@ -639,7 +655,8 @@ export function IndividualBookingFlowPage() {
   if (step === 'searching' && !noMatch) {
     return (
       <div className="pb-8">
-        <AppStackScreenHeader title="Matching mechanic" onBack={() => goStep('summary')} />
+        {/* Back leaves to Home: the search keeps running and shows there as an active booking. */}
+        <AppStackScreenHeader title="Matching mechanic" onBack={leaveFlow} />
         <BookingServiceHighlight categoryName={draft.serviceName || draft.categoryName} groupName={draft.groupName} />
 
         <div className="px-4 mt-6">

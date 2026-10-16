@@ -1,5 +1,6 @@
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useSocket } from '../../../context/SocketContext.jsx'
 import { AnimatePresence, motion } from 'framer-motion'
 import { CarFront, ChevronRight, Droplets, Shield, ShoppingBag, Tag } from 'lucide-react'
 import { fetchLabourCategoriesGrouped } from '../../../api/labourCategoriesApi.js'
@@ -167,6 +168,7 @@ export function IndividualHomeScreen({ user }) {
   const [detailLoading, setDetailLoading] = useState(false)
 
   const [bookings, setBookings] = useState([])
+  const socket = useSocket()
   const [activeSubscription, setActiveSubscription] = useState(null)
   const [referralReward, setReferralReward] = useState(0)
 
@@ -296,15 +298,17 @@ export function IndividualHomeScreen({ user }) {
     return () => cancelAnimationFrame(id)
   }, [])
 
+  const loadBookings = useCallback(() => {
+    return bookingsApi
+      .getMyBookings()
+      .then((res) => setBookings(res.data?.bookings || []))
+      .catch(() => {})
+  }, [])
+
   useEffect(() => {
     if (!signedIn) return undefined
     let cancelled = false
-    bookingsApi
-      .getMyBookings()
-      .then((res) => {
-        if (!cancelled) setBookings(res.data?.bookings || [])
-      })
-      .catch(() => {})
+    loadBookings()
     userSubscriptionApi
       .getMySubscription()
       .then((res) => {
@@ -321,7 +325,22 @@ export function IndividualHomeScreen({ user }) {
     return () => {
       cancelled = true
     }
-  }, [signedIn])
+  }, [signedIn, loadBookings])
+
+  // Keep the ongoing-booking cards current while the customer sits on Home: refresh when the server
+  // reports a change, and every 15 s as a fallback (a search can end without any customer action).
+  const hasOngoing = bookings.some((b) => ACTIVE_STATUSES.includes(b?.status))
+  useEffect(() => {
+    if (!signedIn) return undefined
+    const events = ['BOOKING_ACCEPTED', 'BOOKING_STATUS_UPDATE', 'BOOKING_FAILED', 'BOOKING_BROADCAST_STARTED']
+    const refresh = () => loadBookings()
+    if (socket) events.forEach((e) => socket.on(e, refresh))
+    const timer = hasOngoing ? window.setInterval(refresh, 15000) : null
+    return () => {
+      if (socket) events.forEach((e) => socket.off(e, refresh))
+      if (timer) window.clearInterval(timer)
+    }
+  }, [signedIn, socket, hasOngoing, loadBookings])
 
   useEffect(() => {
     let cancelled = false
@@ -410,13 +429,14 @@ export function IndividualHomeScreen({ user }) {
 
             {ongoingBookings.length > 0 || activeSubscription ? (
               <div className="space-y-3">
-                {ongoingBookings.length > 0 ? (
+                {ongoingBookings.slice(0, 3).map((b, i) => (
                   <HomeActiveBookingCard
-                    booking={ongoingBookings[0]}
-                    extraCount={ongoingBookings.length - 1}
+                    key={b._id}
+                    booking={b}
+                    extraCount={i === 2 ? ongoingBookings.length - 3 : 0}
                     formatDay={formatBookingDay}
                   />
-                ) : null}
+                ))}
                 {activeSubscription ? (
                   <ActivePlanCard subscription={activeSubscription} onManage={() => navigate('/app/subscriptions')} />
                 ) : null}
