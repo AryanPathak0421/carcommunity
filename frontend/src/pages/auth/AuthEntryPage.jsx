@@ -2,12 +2,12 @@ import { CarCommunityLogo } from '../../components/brand/CarCommunityLogo.jsx'
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { ArrowLeft, ArrowRight, BadgeCheck, Car, Gift, Loader2, Lock, Phone, ShieldCheck, User, Wrench, Zap } from 'lucide-react'
+import { ArrowLeft, ArrowRight, BadgeCheck, Briefcase, Gift, Loader2, Lock, MapPin, Phone, ShieldCheck, User, Wallet, Zap } from 'lucide-react'
 import workerImg from '../../assets/user_home_images/carcommunity_worker.webp'
 import { MobileShell } from '../../layouts/MobileShell.jsx'
 import { AppAmbientBackground } from '../../components/app/AppAmbientBackground.jsx'
 import { LabourCategorySetup } from '../../components/auth/LabourCategorySetup.jsx'
-import { ROLE_LABELS, USER_ROLES } from '../../constants/userRoles.js'
+import { USER_ROLES } from '../../constants/userRoles.js'
 import { getRoleHomePath } from '../../lib/roleHomePath.js'
 import { requestLoginOtp, requestRegisterOtp, verifyLogin, verifyRegister } from '../../api/authApi.js'
 import { useAuth } from '../../hooks/useAuth.js'
@@ -20,22 +20,56 @@ import {
   storeReferralCode,
 } from '../../lib/referralCapture.js'
 
-const ROLE_OPTIONS = [
-  {
-    role: USER_ROLES.INDIVIDUAL,
-    icon: Car,
-    desc: 'Book verified mechanics for your car or bike',
+/** Each audience has its own sign-in / sign-up page (`/user/auth`, `/mechanic/auth`). */
+const AUDIENCES = {
+  [USER_ROLES.INDIVIDUAL]: {
+    label: 'Customer',
+    heroClass: 'bg-linear-to-br from-brand via-orange-500 to-amber-500',
+    loginTitle: 'Welcome back!',
+    loginSubtitle: 'Sign in to book trusted car & bike mechanics',
+    registerTitle: 'Create your account',
+    registerSubtitle: 'Join CarCommunity in less than a minute',
+    namePlaceholder: 'As on your ID',
+    perks: [
+      [BadgeCheck, 'Verified mechanics'],
+      [Zap, 'Quick matching'],
+      [Lock, 'Safe & secure'],
+    ],
+    otherPath: '/mechanic/auth',
+    otherPrompt: 'Are you a mechanic?',
+    otherLink: 'Mechanic login',
   },
-  {
-    role: USER_ROLES.MECHANIC,
-    icon: Wrench,
-    desc: 'Get matched to jobs near you',
+  [USER_ROLES.MECHANIC]: {
+    label: 'Mechanic',
+    heroClass: 'bg-linear-to-br from-navy via-slate-800 to-slate-900',
+    loginTitle: 'Mechanic sign in',
+    loginSubtitle: 'Sign in to receive jobs near you',
+    registerTitle: 'Become a mechanic partner',
+    registerSubtitle: 'Register once, then pick the services you offer',
+    namePlaceholder: 'Your full name',
+    perks: [
+      [MapPin, 'Jobs near you'],
+      [Wallet, 'Your earnings wallet'],
+      [Briefcase, 'Choose your services'],
+    ],
+    otherPath: '/user/auth',
+    otherPrompt: 'Looking to book a mechanic?',
+    otherLink: 'Customer login',
   },
-]
+}
 
 export const HARDCODED_TEST_ACCOUNTS = {
   '1111111111': { otp: '123456', role: USER_ROLES.INDIVIDUAL, label: 'User', title: 'Customer / User' },
   '2222222222': { otp: '123456', role: USER_ROLES.MECHANIC, label: 'Mechanic', title: 'Mechanic' },
+}
+
+/** Mechanics who have not finished verification go through onboarding first. */
+function postAuthPath(user, from) {
+  const lp = user?.labourProfile
+  if (user?.role === USER_ROLES.MECHANIC && lp?.kycStatus !== 'verified' && !lp?.kycSubmittedAt) {
+    return '/mechanic/onboarding'
+  }
+  return from || getRoleHomePath(user?.role)
 }
 
 function isValidIndianMobile(digits) {
@@ -62,7 +96,9 @@ function FeedbackBanner({ variant, children }) {
   )
 }
 
-export function AuthEntryPage() {
+export function AuthEntryPage({ audience = USER_ROLES.INDIVIDUAL }) {
+  const copy = AUDIENCES[audience] ?? AUDIENCES[USER_ROLES.INDIVIDUAL]
+  const role = AUDIENCES[audience] ? audience : USER_ROLES.INDIVIDUAL
   const navigate = useNavigate()
   const location = useLocation()
   const { applySession } = useAuth()
@@ -71,7 +107,6 @@ export function AuthEntryPage() {
 
   const [mode, setMode] = useState('login')
   const [step, setStep] = useState('form')
-  const [role, setRole] = useState(location.state?.defaultRole || USER_ROLES.INDIVIDUAL)
   const [phone, setPhone] = useState('')
   const [fullName, setFullName] = useState('')
   const [termsAccepted, setTermsAccepted] = useState(false)
@@ -215,6 +250,20 @@ export function AuthEntryPage() {
       if (mode === 'login') {
         const res = await verifyLogin({ phone: p, code, challengeId })
         const { token, user } = res.data
+        if (user.role !== role) {
+          // Keep the two audiences apart: this number belongs to the other kind of account.
+          const other = AUDIENCES[user.role]
+          setBanner({
+            variant: 'error',
+            message: other
+              ? `This number is registered as a ${other.label.toLowerCase()}. Please use the ${other.label.toLowerCase()} login instead.`
+              : 'This account cannot sign in here.',
+          })
+          setStep('form')
+          setChallengeId(null)
+          setOtpCells(Array(6).fill(''))
+          return
+        }
         applySession(token, user)
         signedInUser = user
       } else {
@@ -246,8 +295,7 @@ export function AuthEntryPage() {
         setStep('work-setup')
         setBanner(null)
       } else {
-        const returnPath = location.state?.from || getRoleHomePath(signedInUser.role)
-        navigate(returnPath, { replace: true })
+        navigate(postAuthPath(signedInUser, location.state?.from), { replace: true })
       }
     } catch (e) {
       setBanner({
@@ -265,8 +313,7 @@ export function AuthEntryPage() {
         <AppAmbientBackground />
         <MobileShell transparent className="pb-0 pt-4">
           <LabourCategorySetup variant="auth" onComplete={() => {
-            const returnPath = location.state?.from || getRoleHomePath(USER_ROLES.MECHANIC)
-            navigate(returnPath, { replace: true })
+            navigate(postAuthPath({ role: USER_ROLES.MECHANIC }, location.state?.from), { replace: true })
           }} />
         </MobileShell>
       </>
@@ -283,7 +330,7 @@ export function AuthEntryPage() {
     <div className="min-h-dvh bg-slate-50">
       <div className="mx-auto flex min-h-dvh w-full max-w-lg flex-col bg-white shadow-[0_0_60px_-30px_rgba(15,23,42,0.35)]">
         {/* hero */}
-        <header className="relative min-h-[17rem] overflow-hidden bg-linear-to-br from-brand via-orange-500 to-amber-500 px-6 pb-16 pt-[max(1.25rem,env(safe-area-inset-top))] text-white">
+        <header className={`relative min-h-[17rem] overflow-hidden ${copy.heroClass} px-6 pb-16 pt-[max(1.25rem,env(safe-area-inset-top))] text-white`}>
           <span className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full bg-white/10" aria-hidden />
           <span className="pointer-events-none absolute -left-8 bottom-2 h-28 w-28 rounded-full bg-white/10" aria-hidden />
           <div className="relative z-20 flex items-center justify-between">
@@ -301,20 +348,20 @@ export function AuthEntryPage() {
             )}
             <span className="hidden min-[340px]:flex items-center gap-1 whitespace-nowrap rounded-full bg-white/20 px-3 py-1 text-[11px] font-bold">
               <ShieldCheck className="h-3.5 w-3.5" aria-hidden />
-              Secure login
+              {copy.label} login
             </span>
           </div>
 
           <div className="relative z-20 mt-6 max-w-[58%]">
             <h1 className="text-[27px] font-black leading-[1.1] tracking-tight">
-              {step === 'otp' ? 'Verify your number' : isLogin ? 'Welcome back!' : 'Create your account'}
+              {step === 'otp' ? 'Verify your number' : isLogin ? copy.loginTitle : copy.registerTitle}
             </h1>
             <p className="mt-2 text-[13px] font-semibold leading-snug text-white/90">
               {step === 'otp'
                 ? 'Enter the 6-digit code we sent you'
                 : isLogin
-                ? 'Sign in to book trusted car & bike mechanics'
-                : 'Join CarCommunity in less than a minute'}
+                ? copy.loginSubtitle
+                : copy.registerSubtitle}
             </p>
           </div>
           <img
@@ -356,46 +403,10 @@ export function AuthEntryPage() {
                   ))}
                 </div>
 
-                {mode === 'register' ? (
-                  <div>
-                    <p className="mb-2 text-[12px] font-bold text-slate-500">I want to</p>
-                    <div className="grid grid-cols-2 gap-3">
-                      {ROLE_OPTIONS.map((opt) => {
-                        const Icon = opt.icon
-                        const active = role === opt.role
-                        return (
-                          <button
-                            key={opt.role}
-                            type="button"
-                            onClick={() => setRole(opt.role)}
-                            aria-pressed={active}
-                            className={`flex items-center gap-2.5 rounded-2xl border-2 p-3 text-left transition active:scale-[0.98] ${
-                              active ? 'border-brand bg-orange-50' : 'border-slate-200 bg-white hover:border-brand/40'
-                            }`}
-                          >
-                            <span
-                              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
-                                active ? 'bg-brand text-white' : 'bg-slate-100 text-slate-500'
-                              }`}
-                            >
-                              <Icon className="h-5 w-5" aria-hidden />
-                            </span>
-                            <span className="min-w-0">
-                              <span className="block text-[13px] font-black leading-tight text-navy">
-                                {opt.role === USER_ROLES.MECHANIC ? 'Work as mechanic' : 'Book a mechanic'}
-                              </span>
-                              <span className="block text-[11px] font-semibold text-slate-500">{ROLE_LABELS[opt.role]}</span>
-                            </span>
-                          </button>
-                        )
-                      })}
-                    </div>
-                    {role === USER_ROLES.MECHANIC ? (
-                      <p className="mt-2 rounded-xl bg-orange-50 px-3 py-2 text-[11px] font-semibold leading-relaxed text-slate-600 ring-1 ring-brand/15">
-                        After OTP, you&apos;ll pick the services you offer.
-                      </p>
-                    ) : null}
-                  </div>
+                {mode === 'register' && role === USER_ROLES.MECHANIC ? (
+                  <p className="rounded-xl bg-orange-50 px-3 py-2 text-[11px] font-semibold leading-relaxed text-slate-600 ring-1 ring-brand/15">
+                    After OTP, you&apos;ll pick the services you offer.
+                  </p>
                 ) : null}
 
                 <div className="space-y-4">
@@ -410,7 +421,7 @@ export function AuthEntryPage() {
                           id="auth-name"
                           type="text"
                           autoComplete="name"
-                          placeholder="As on your ID"
+                          placeholder={copy.namePlaceholder}
                           className="w-full bg-transparent py-3.5 text-[15px] font-semibold text-slate-900 outline-none placeholder:font-medium placeholder:text-slate-400"
                           value={fullName}
                           onChange={(e) => setFullName(e.target.value)}
@@ -562,11 +573,7 @@ export function AuthEntryPage() {
                 </div>
 
                 <ul className="grid grid-cols-3 gap-2 border-t border-slate-100 pt-4 text-center">
-                  {[
-                    [BadgeCheck, 'Verified mechanics'],
-                    [Zap, 'Quick matching'],
-                    [Lock, 'Safe & secure'],
-                  ].map(([Icon, text]) => (
+                  {copy.perks.map(([Icon, text]) => (
                     <li key={text} className="flex flex-col items-center gap-1">
                       <Icon className="h-[18px] w-[18px] text-brand" aria-hidden />
                       <span className="text-[10px] font-bold leading-tight text-slate-500">{text}</span>
@@ -703,7 +710,13 @@ export function AuthEntryPage() {
             )}
           </AnimatePresence>
 
-          <p className="mt-8 text-center text-[12px] text-slate-400">
+          <p className="mt-8 text-center text-[12px] text-slate-500">
+            {copy.otherPrompt}{' '}
+            <Link to={copy.otherPath} state={location.state} replace className="font-bold text-brand hover:underline">
+              {copy.otherLink}
+            </Link>
+          </p>
+          <p className="mt-2 text-center text-[12px] text-slate-400">
             Admin?{' '}
             <Link to="/admin/login" className="font-bold text-brand hover:underline">
               Web login

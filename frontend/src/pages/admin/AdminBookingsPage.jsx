@@ -1,6 +1,8 @@
-import { useState } from 'react'
-import { ClipboardList, Trash2, XCircle } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { ClipboardList, Navigation, Radio, Trash2, XCircle } from 'lucide-react'
 import { GlassPanel } from '../../components/ui/GlassPanel.jsx'
+import { LiveTrackingMap } from '../../components/app/tracking/LiveTrackingMap.jsx'
+import { useSocket } from '../../context/SocketContext.jsx'
 import {
   useGetAdminBookingsQuery,
   useDeleteAdminBookingMutation
@@ -9,7 +11,10 @@ import {
 const BOOKING_STATUS_FILTERS = [
   { value: 'ALL', label: 'All' },
   { value: 'CREATED', label: 'Created' },
+  { value: 'BROADCASTING', label: 'Finding mechanic' },
+  { value: 'ACCEPTED', label: 'Accepted' },
   { value: 'ASSIGNED', label: 'Assigned' },
+  { value: 'EN_ROUTE', label: 'On the way' },
   { value: 'STARTED', label: 'Started' },
   { value: 'COMPLETED', label: 'Completed' },
   { value: 'CANCELLED', label: 'Cancelled' },
@@ -17,7 +22,77 @@ const BOOKING_STATUS_FILTERS = [
   { value: 'REFUNDED', label: 'Refunded' },
 ]
 
-function BookingDetailsModal({ booking, onClose }) {
+/** Statuses during which the assigned mechanic's position is streamed. */
+const LIVE_STATUSES = ['ACCEPTED', 'ASSIGNED', 'EN_ROUTE', 'STARTED']
+const isLive = (b) => LIVE_STATUSES.includes(b?.status)
+
+function bookingDestination(b) {
+  const c = b?.address?.coordinates?.coordinates
+  return Array.isArray(c) && (c[0] || c[1]) ? { lat: c[1], lng: c[0] } : null
+}
+
+function agoLabel(at, now) {
+  if (!at) return null
+  const secs = Math.max(0, Math.round((now - new Date(at).getTime()) / 1000))
+  if (secs < 60) return `${secs}s ago`
+  if (secs < 3600) return `${Math.round(secs / 60)} min ago`
+  return new Date(at).toLocaleTimeString()
+}
+
+function useNow(active) {
+  const [now, setNow] = useState(() => Date.now())
+  useEffect(() => {
+    if (!active) return undefined
+    const t = setInterval(() => setNow(Date.now()), 5000)
+    return () => clearInterval(t)
+  }, [active])
+  return now
+}
+
+function LiveTrackingPanel({ booking, location, now }) {
+  const [eta, setEta] = useState(null)
+  const destination = bookingDestination(booking)
+  const mechanic = location && Number.isFinite(location.lat) ? { lat: location.lat, lng: location.lng } : null
+
+  return (
+    <div className="border-t border-slate-100 pt-4">
+      <div className="mb-2 flex items-center justify-between">
+        <p className="flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wide text-slate-700">
+          <Radio className="h-3.5 w-3.5 text-emerald-600" aria-hidden /> Live tracking
+        </p>
+        {mechanic ? (
+          <p className="text-[11px] font-semibold text-slate-500">
+            Updated {agoLabel(location.at, now)}
+            {eta ? ` · ETA ${eta.minutes} min (${eta.km.toFixed(1)} km)` : ''}
+          </p>
+        ) : null}
+      </div>
+      {destination ? (
+        <div className="h-72 overflow-hidden rounded-xl border border-slate-200" data-testid="admin-live-map">
+          <LiveTrackingMap destination={destination} mechanic={mechanic} onEta={setEta} />
+        </div>
+      ) : (
+        <p className="rounded-xl bg-slate-50 px-3 py-2 text-xs text-slate-500">This booking has no map coordinates.</p>
+      )}
+      {mechanic ? (
+        <a
+          className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-brand hover:underline"
+          href={`https://www.google.com/maps/dir/?api=1&origin=${mechanic.lat},${mechanic.lng}&destination=${destination?.lat},${destination?.lng}`}
+          target="_blank"
+          rel="noreferrer"
+        >
+          <Navigation className="h-3.5 w-3.5" aria-hidden /> Open route in Google Maps
+        </a>
+      ) : (
+        <p className="mt-2 rounded-xl bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-900">
+          Waiting for the mechanic's first location update…
+        </p>
+      )}
+    </div>
+  )
+}
+
+function BookingDetailsModal({ booking, location, now, onClose }) {
   if (!booking) return null
 
   return (
@@ -73,6 +148,8 @@ function BookingDetailsModal({ booking, onClose }) {
             </div>
           )}
 
+          {isLive(booking) ? <LiveTrackingPanel booking={booking} location={location} now={now} /> : null}
+
           <div className="border-t border-slate-100 pt-4 grid grid-cols-2 gap-4">
             <div>
               <p className="text-slate-500 text-xs">Start OTP</p>
@@ -113,6 +190,14 @@ function BookingDetailsModal({ booking, onClose }) {
               <span>Base Price:</span>
               <span className="font-semibold text-slate-900">₹{booking.basePrice}</span>
             </div>
+            {(booking.parts || []).map((p) => (
+              <div key={p.partId || p.name} className="flex justify-between text-xs text-slate-600 py-1">
+                <span>
+                  Part: {p.name} × {p.quantity}
+                </span>
+                <span className="font-semibold text-slate-900">₹{p.lineTotal}</span>
+              </div>
+            ))}
             <div className="flex justify-between text-xs text-slate-600 py-1">
               <span>Platform Fee:</span>
               <span className="font-semibold text-slate-900">₹{booking.platformFee}</span>
@@ -130,8 +215,8 @@ function BookingDetailsModal({ booking, onClose }) {
               <span className="font-semibold text-brand">₹{booking.commissionAmount}</span>
             </div>
             <div className="flex justify-between text-xs text-slate-600 py-1">
-              <span>Mechanic Share:</span>
-              <span className="font-semibold text-green-600">₹{booking.laborShare}</span>
+              <span>Mechanic Share{booking.partsTotal > 0 ? ' (incl. parts)' : ''}:</span>
+              <span className="font-semibold text-green-600">₹{(booking.laborShare || 0) + (booking.partsTotal || 0)}</span>
             </div>
           </div>
         </div>
@@ -142,16 +227,39 @@ function BookingDetailsModal({ booking, onClose }) {
 
 function IndividualBookingsTab() {
   const [statusFilter, setStatusFilter] = useState('ALL')
-  const [selectedBooking, setSelectedBooking] = useState(null)
+  const [selectedId, setSelectedId] = useState(null)
+  const [liveLocations, setLiveLocations] = useState({})
+  const socket = useSocket()
   const [deleteConfirmId, setDeleteConfirmId] = useState(null)
   const [isDeleting, setIsDeleting] = useState(false)
 
+  // Poll as a fallback; socket events below make live changes show up immediately.
   const { data, isLoading, isError, refetch } = useGetAdminBookingsQuery(
     { status: statusFilter },
+    { pollingInterval: 15000 },
   )
   const [deleteAdminBooking] = useDeleteAdminBookingMutation()
 
   const bookings = data?.bookings ?? []
+  const selectedBooking = bookings.find((b) => b._id === selectedId) ?? null
+  const now = useNow(bookings.some(isLive))
+
+  useEffect(() => {
+    if (!socket) return undefined
+    const onLocation = (p) => {
+      if (!p?.bookingId) return
+      setLiveLocations((prev) => ({ ...prev, [p.bookingId]: { lat: p.lat, lng: p.lng, at: p.at } }))
+    }
+    const onStatus = () => refetch()
+    socket.on('LABOUR_LOCATION_UPDATE', onLocation)
+    socket.on('BOOKING_STATUS_UPDATE', onStatus)
+    return () => {
+      socket.off('LABOUR_LOCATION_UPDATE', onLocation)
+      socket.off('BOOKING_STATUS_UPDATE', onStatus)
+    }
+  }, [socket, refetch])
+
+  const locationFor = (b) => liveLocations[b._id] ?? b.liveLocation ?? null
 
   const confirmDelete = async () => {
     if (!deleteConfirmId) return
@@ -226,9 +334,20 @@ function IndividualBookingsTab() {
                   <p className="mt-1 text-xs text-slate-500">
                     Date: {new Date(b.createdAt).toLocaleDateString()}
                   </p>
-                  <p className="mt-1 text-xs font-bold text-slate-700">
+                  <p className="mt-1 flex flex-wrap items-center gap-2 text-xs font-bold text-slate-700">
                     Status: {b.status}
+                    {isLive(b) ? (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[9px] uppercase tracking-wider text-emerald-800">
+                        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" aria-hidden /> Live
+                      </span>
+                    ) : null}
                   </p>
+                  {isLive(b) ? (
+                    <p className="mt-1 text-xs text-slate-500">
+                      Mechanic: {b.laborId?.fullName || '—'}
+                      {locationFor(b)?.at ? ` · location ${agoLabel(locationFor(b).at, now)}` : ' · waiting for location'}
+                    </p>
+                  ) : null}
                   <p className="mt-1 text-xs font-bold text-slate-700 flex items-center gap-1.5">
                     Payment Status: 
                     <span className={`inline-block rounded-full px-2 py-0.5 text-[9px] uppercase tracking-wider ${b.paymentStatus === 'PAID' ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-amber-50 text-amber-700 border border-amber-200'}`}>
@@ -247,10 +366,10 @@ function IndividualBookingsTab() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => setSelectedBooking(b)}
+                    onClick={() => setSelectedId(b._id)}
                     className="flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-[12px] font-bold text-brand hover:border-brand/30 hover:bg-brand/5 transition"
                   >
-                    View Details
+                    {isLive(b) ? 'Track live' : 'View Details'}
                   </button>
                 </div>
               </div>
@@ -261,9 +380,11 @@ function IndividualBookingsTab() {
       </ul>
 
       {selectedBooking && (
-        <BookingDetailsModal 
-          booking={selectedBooking} 
-          onClose={() => setSelectedBooking(null)} 
+        <BookingDetailsModal
+          booking={selectedBooking}
+          location={locationFor(selectedBooking)}
+          now={now}
+          onClose={() => setSelectedId(null)}
         />
       )}
 

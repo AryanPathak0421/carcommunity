@@ -235,7 +235,7 @@ export function MechanicNavigationScreen({
 
         <span className="absolute right-4 top-[max(1.25rem,env(safe-area-inset-top))] flex items-center gap-1 rounded-full bg-navy px-3 py-1.5 text-[11px] font-extrabold text-white shadow-lg">
           <IndianRupee className="h-3.5 w-3.5" aria-hidden />
-          You earn ₹{Number(booking.laborShare || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 })}
+          You earn ₹{(Number(booking.laborShare || 0) + Number(booking.partsTotal || 0)).toLocaleString('en-IN', { maximumFractionDigits: 2 })}
         </span>
 
         {gpsNote ? (
@@ -306,6 +306,19 @@ export function MechanicNavigationScreen({
               {collect.label} ₹{Number(collect.amount || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 })}
             </span>
           </div>
+          {booking.parts?.length > 0 ? (
+            <div className="mt-2.5 rounded-xl bg-orange-50 p-2.5 text-xs ring-1 ring-orange-100">
+              <p className="font-extrabold text-orange-700">Parts to bring (₹{booking.partsTotal} is yours)</p>
+              <ul className="mt-1 space-y-0.5 font-semibold text-slate-700">
+                {booking.parts.map((p) => (
+                  <li key={p.partId || p.name}>
+                    {p.name} × {p.quantity}
+                    {p.brand ? <span className="font-medium text-slate-500"> · {p.brand}</span> : null}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
         </div>
 
         {updateError ? (

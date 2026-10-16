@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from './useAuth.js'
 import { USER_ROLES } from '../constants/userRoles.js'
+import { AUTH_PATHS } from '../constants/bootFlow.js'
 import { writeBootRole } from '../lib/bootPersona.js'
 
 /**
@@ -18,7 +19,7 @@ export function useLandingCta() {
       return
     }
     writeBootRole(role)
-    navigate('/b2c/auth', { state: { defaultRole: role } })
+    navigate(role === USER_ROLES.MECHANIC ? AUTH_PATHS.MECHANIC : AUTH_PATHS.USER)
   }
 
   return {

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { motion, useReducedMotion } from 'framer-motion'
 import { ArrowLeft, Car, Wrench } from 'lucide-react'
 import { AppRouteLoader } from '../../components/app/AppRouteLoader.jsx'
-import { BOOT_ROUTES } from '../../constants/bootFlow.js'
+import { AUTH_PATHS, BOOT_ROUTES } from '../../constants/bootFlow.js'
 import { USER_ROLES } from '../../constants/userRoles.js'
 import { useAuth } from '../../hooks/useAuth.js'
 import { getRoleHomePath } from '../../lib/roleHomePath.js'
@@ -45,7 +45,7 @@ export function RoleSelectPage() {
 
   function handleSelect(role) {
     setBootRole(role)
-    navigate('/b2c/auth', { replace: true, state: { defaultRole: role } })
+    navigate(role === USER_ROLES.MECHANIC ? AUTH_PATHS.MECHANIC : AUTH_PATHS.USER, { replace: true })
   }
 
   if (loading) {

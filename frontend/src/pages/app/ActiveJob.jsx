@@ -475,6 +475,27 @@ export function ActiveJob() {
         </GlassPanel>
       )}
 
+      {/* Parts the customer ordered — the mechanic brings these and keeps the money for them */}
+      {booking.parts?.length > 0 && (
+        <GlassPanel className="border-orange-200/80 bg-orange-50/50 p-4 text-sm">
+          <p className="text-xs font-bold uppercase tracking-wider text-orange-700">Parts to bring</p>
+          <ul className="mt-2 space-y-1.5">
+            {booking.parts.map((p) => (
+              <li key={p.partId || p.name} className="flex justify-between gap-3">
+                <span className="font-semibold text-slate-900">
+                  {p.name} <span className="font-medium text-slate-500">× {p.quantity}</span>
+                  {p.brand ? <span className="block text-[11px] font-medium text-slate-500">{p.brand}</span> : null}
+                </span>
+                <span className="shrink-0 font-bold text-slate-900">₹{p.lineTotal}</span>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-2 border-t border-orange-200/70 pt-2 text-xs font-semibold text-slate-600">
+            Parts total ₹{booking.partsTotal} — this is yours, no commission is taken on it.
+          </p>
+        </GlassPanel>
+      )}
+
       {/* Booking Details */}
       <GlassPanel className="p-4 text-sm">
         {booking.totalAmount && (

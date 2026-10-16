@@ -427,7 +427,7 @@ export function AdminLabourPage() {
                               onClick={() => setReviewUserId(u._id)}
                               className="rounded-lg border border-brand/30 bg-brand/10 px-2.5 py-1.5 text-[11px] font-bold text-brand transition hover:bg-brand/15"
                             >
-                              Review video KYC
+                              Review KYC
                             </button>
                           ) : (
                             <span className="text-xs text-slate-400">Not submitted</span>
@@ -481,7 +481,7 @@ export function AdminLabourPage() {
                     onClick={() => setReviewUserId(u._id)}
                     className="mt-2 w-full rounded-xl border border-brand/30 bg-brand/10 py-2 text-xs font-bold text-brand transition hover:bg-brand/15"
                   >
-                    Review video KYC
+                    Review KYC
                   </button>
                 ) : null}
                 {u.labourProfile?.aadhaarMasked ? (
@@ -544,7 +544,7 @@ export function AdminLabourPage() {
             className="relative z-10 max-h-[92vh] w-full max-w-lg overflow-y-auto rounded-t-3xl border border-slate-200/90 bg-white shadow-2xl sm:rounded-3xl"
           >
             <div className="sticky top-0 flex items-center justify-between border-b border-slate-100 bg-white/95 px-4 py-3 backdrop-blur-sm">
-              <p className="text-sm font-extrabold text-slate-900">Video KYC review</p>
+              <p className="text-sm font-extrabold text-slate-900">KYC review</p>
               <button
                 type="button"
                 disabled={reviewBusy}
@@ -575,6 +575,14 @@ export function AdminLabourPage() {
                     {detailUser.labourProfile?.panMasked ? (
                       <p className="mt-1 font-mono text-sm text-slate-800">PAN: {detailUser.labourProfile.panMasked}</p>
                     ) : null}
+                    {detailUser.labourProfile?.dlNumberMasked ? (
+                      <p className="mt-1 font-mono text-sm text-slate-800">
+                        Driving licence: {detailUser.labourProfile.dlNumberMasked}
+                        {detailUser.labourProfile.dlExpiry
+                          ? ` · valid until ${new Date(detailUser.labourProfile.dlExpiry).toLocaleDateString(undefined, { timeZone: 'UTC', dateStyle: 'medium' })}`
+                          : ''}
+                      </p>
+                    ) : null}
                     {detailUser.labourProfile?.kycSubmittedAt ? (
                       <p className="mt-1 text-xs text-slate-500">
                         Submitted{' '}
@@ -585,6 +593,65 @@ export function AdminLabourPage() {
                       </p>
                     ) : null}
                   </div>
+                  {detailUser.labourProfile?.onboarding?.serviceCity ? (
+                    <div className="rounded-xl border border-slate-200/90 bg-slate-50 px-3 py-2.5 text-xs text-slate-700">
+                      <p className="mb-1 text-[11px] font-bold uppercase text-slate-500">Work details</p>
+                      <p>
+                        {detailUser.labourProfile.onboarding.experienceYears} yrs experience
+                        {detailUser.labourProfile.onboarding.workshopName
+                          ? ` · ${detailUser.labourProfile.onboarding.workshopName}`
+                          : ''}
+                      </p>
+                      <p>
+                        {detailUser.labourProfile.onboarding.serviceAddress}, {detailUser.labourProfile.onboarding.serviceCity}{' '}
+                        {detailUser.labourProfile.onboarding.servicePincode}
+                      </p>
+                      {detailUser.labourProfile.onboarding.ownVehicleType &&
+                      detailUser.labourProfile.onboarding.ownVehicleType !== 'none' ? (
+                        <p>
+                          Vehicle: {detailUser.labourProfile.onboarding.ownVehicleType}{' '}
+                          {detailUser.labourProfile.onboarding.ownVehicleRegNo}
+                        </p>
+                      ) : null}
+                      <p>
+                        Emergency contact: {detailUser.labourProfile.onboarding.emergencyContactName} ·{' '}
+                        {detailUser.labourProfile.onboarding.emergencyContactPhone}
+                      </p>
+                    </div>
+                  ) : null}
+                  {detailUser.labourProfile?.kycDocs ? (
+                    <div>
+                      <p className="mb-1 text-[11px] font-bold uppercase text-slate-500">Document photos</p>
+                      <div className="grid grid-cols-3 gap-2">
+                        {[
+                          ['selfieUrl', 'Selfie'],
+                          ['aadhaarFrontUrl', 'Aadhaar front'],
+                          ['aadhaarBackUrl', 'Aadhaar back'],
+                          ['panImageUrl', 'PAN'],
+                          ['dlFrontUrl', 'Licence front'],
+                          ['dlBackUrl', 'Licence back'],
+                        ].map(([key, label]) =>
+                          detailUser.labourProfile.kycDocs[key] ? (
+                            <a
+                              key={key}
+                              href={detailUser.labourProfile.kycDocs[key]}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="block overflow-hidden rounded-xl border border-slate-200/90 bg-slate-50"
+                            >
+                              <img
+                                src={detailUser.labourProfile.kycDocs[key]}
+                                alt={label}
+                                loading="lazy"
+                                className="aspect-4/3 w-full object-cover"
+                              />
+                              <span className="block px-1.5 py-1 text-center text-[10px] font-bold text-slate-600">{label}</span>
+                            </a>
+                          ) : null,
+                        )}
+                      </div>
+                    </div>
+                  ) : null}
                   <div>
                     <p className="mb-1 text-[11px] font-bold uppercase text-slate-500">Recorded KYC video</p>
                     {detailUser.labourProfile?.kycVideoUrl ? (

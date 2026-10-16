@@ -13,7 +13,15 @@ export function ProtectedRoute({ children, roles }) {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/b2c/auth" replace state={{ from: location.pathname + location.search }} />
+    // Mechanic-only areas send visitors to the mechanic login; everything else to the customer one.
+    const defaultRole = roles?.length === 1 ? roles[0] : undefined
+    return (
+      <Navigate
+        to="/b2c/auth"
+        replace
+        state={{ from: location.pathname + location.search, defaultRole }}
+      />
+    )
   }
 
   if (isAuthenticated && roles?.length && role && !roles.includes(role)) {

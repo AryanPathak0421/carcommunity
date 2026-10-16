@@ -29,6 +29,31 @@ const labourProfileSchema = new mongoose.Schema(
     kycFrontImageDataUrl: { type: String },
     kycBackImageDataUrl: { type: String },
     kycReviewNote: { type: String, trim: true, maxlength: 500 },
+    /** Driving licence (number kept masked, like Aadhaar / PAN) */
+    dlNumberMasked: String,
+    dlExpiry: Date,
+    /** Uploaded document photos for admin review — hidden from API output unless includeLabourKycImages */
+    kycDocs: {
+      aadhaarFrontUrl: { type: String, maxlength: 2048 },
+      aadhaarBackUrl: { type: String, maxlength: 2048 },
+      panImageUrl: { type: String, maxlength: 2048 },
+      dlFrontUrl: { type: String, maxlength: 2048 },
+      dlBackUrl: { type: String, maxlength: 2048 },
+      selfieUrl: { type: String, maxlength: 2048 },
+    },
+    /** Work details collected during mechanic onboarding */
+    onboarding: {
+      experienceYears: { type: Number, min: 0, max: 60 },
+      workshopName: { type: String, trim: true, maxlength: 120 },
+      serviceCity: { type: String, trim: true, maxlength: 80 },
+      servicePincode: { type: String, trim: true, maxlength: 6 },
+      serviceAddress: { type: String, trim: true, maxlength: 300 },
+      emergencyContactName: { type: String, trim: true, maxlength: 80 },
+      emergencyContactPhone: { type: String, trim: true, maxlength: 10 },
+      ownVehicleType: { type: String, enum: ['none', 'bike', 'car'] },
+      ownVehicleRegNo: { type: String, trim: true, maxlength: 16 },
+      submittedAt: Date,
+    },
     /** @deprecated prefer categoryIds — kept for backward compatibility */
     skills: [{ type: String, trim: true }],
     categoryIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'LabourCategory' }],
@@ -176,6 +201,10 @@ userSchema.methods.toSafeObject = function toSafeObject(options = {}) {
   delete o.passwordHash
   if (!options.includeLabourKycImages && o.labourProfile) {
     const lp = { ...o.labourProfile }
+    // Tell the mechanic which documents are already uploaded without exposing the image URLs.
+    const docs = lp.kycDocs || {}
+    lp.kycDocsUploaded = Object.fromEntries(Object.entries(docs).map(([k, v]) => [k, Boolean(v)]))
+    delete lp.kycDocs
     delete lp.kycFrontImageDataUrl
     delete lp.kycBackImageDataUrl
     delete lp.kycFrontImageUrl

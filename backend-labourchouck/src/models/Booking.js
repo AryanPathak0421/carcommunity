@@ -76,6 +76,24 @@ const bookingSchema = new mongoose.Schema(
     walletDiscount: { type: Number, default: 0, min: 0 },
     /** What the customer actually pays: totalAmount - walletDiscount */
     payableAmount: { type: Number, default: 0 },
+    /**
+     * Car parts the customer added. Snapshot of name/price at booking time; `partsTotal` is part of
+     * `totalAmount` and goes entirely to the mechanic (no commission, no GST on top).
+     */
+    parts: [
+      {
+        _id: false,
+        partId: { type: mongoose.Schema.Types.ObjectId, ref: 'CarPart' },
+        name: { type: String, required: true },
+        brand: String,
+        unitPrice: { type: Number, required: true, min: 0 },
+        quantity: { type: Number, required: true, min: 1 },
+        lineTotal: { type: Number, required: true, min: 0 },
+      },
+    ],
+    partsTotal: { type: Number, default: 0, min: 0 },
+    /** Set once reserved parts were put back on the shelf after a cancellation/failure */
+    partsReleasedAt: Date,
     /** Set once the discount has been returned to the wallet after a cancellation */
     walletRefundedAt: Date,
     /** Set once a CASH worker has been topped up for a discount the customer did not hand over */

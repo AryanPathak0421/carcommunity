@@ -4,8 +4,11 @@ import { ProtectedRoute } from './components/auth/ProtectedRoute.jsx'
 import { AppShell } from './layouts/AppShell.jsx'
 import { AdminLayout } from './layouts/AdminLayout.jsx'
 import { LandingPage } from './pages/LandingPage'
-import { AuthEntryPage } from './pages/auth/AuthEntryPage.jsx'
+import { UserAuthPage } from './pages/auth/UserAuthPage.jsx'
+import { MechanicAuthPage } from './pages/auth/MechanicAuthPage.jsx'
+import { AuthRedirect } from './pages/auth/AuthRedirect.jsx'
 import { LabourCategoriesPage } from './pages/app/LabourCategoriesPage.jsx'
+import { MechanicOnboardingPage } from './pages/app/MechanicOnboardingPage.jsx'
 import { appShellChildRoutes } from './routes/appRoutes.jsx'
 import { bootRoutes } from './routes/bootRoutes.jsx'
 import { AdminCategoriesPage } from './pages/admin/AdminCategoriesPage.jsx'
@@ -22,6 +25,7 @@ import { AdminUserSubscriptionsPage } from './pages/admin/AdminUserSubscriptions
 import { AdminBannersPage } from './pages/admin/AdminBannersPage.jsx'
 import { AdminCarListingsPage } from './pages/admin/AdminCarListingsPage.jsx'
 import { AdminAccessoriesPage } from './pages/admin/AdminAccessoriesPage.jsx'
+import { AdminCarPartsPage } from './pages/admin/AdminCarPartsPage.jsx'
 import { AdminServiceSettingsPage } from './pages/admin/AdminServiceSettingsPage.jsx'
 import { AdminComplaintsPage } from './pages/admin/AdminComplaintsPage.jsx'
 import { AdminProfilePage } from './pages/admin/AdminProfilePage.jsx'
@@ -51,8 +55,10 @@ function App() {
         <Routes>
           <Route path="/" element={<LandingPage />} />
           {bootRoutes}
-          <Route path="/b2c/auth" element={<AuthEntryPage />} />
-          <Route path="/auth" element={<Navigate to="/b2c/auth" replace />} />
+          <Route path="/user/auth" element={<UserAuthPage />} />
+          <Route path="/mechanic/auth" element={<MechanicAuthPage />} />
+          <Route path="/b2c/auth" element={<AuthRedirect />} />
+          <Route path="/auth" element={<AuthRedirect />} />
           <Route path="/terms" element={<PublicLegalPage kind="terms" />} />
           <Route path="/privacy" element={<PublicLegalPage kind="privacy" />} />
           <Route path="/privacy-policy" element={<Navigate to="/privacy" replace />} />
@@ -75,6 +81,17 @@ function App() {
               <ProtectedRoute roles={[USER_ROLES.MECHANIC]}>
                 <ErrorBoundary>
                   <LabourCategoriesPage />
+                </ErrorBoundary>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/mechanic/onboarding"
+            element={
+              <ProtectedRoute roles={[USER_ROLES.MECHANIC]}>
+                <ErrorBoundary>
+                  <MechanicOnboardingPage />
                 </ErrorBoundary>
               </ProtectedRoute>
             }
@@ -103,6 +120,7 @@ function App() {
             <Route path="banners" element={<AdminBannersPage />} />
             <Route path="cars" element={<AdminCarListingsPage />} />
             <Route path="accessories" element={<AdminAccessoriesPage />} />
+            <Route path="car-parts" element={<AdminCarPartsPage />} />
             <Route path="service-settings" element={<AdminServiceSettingsPage />} />
             <Route path="complaints" element={<AdminComplaintsPage />} />
             <Route path="profile" element={<AdminProfilePage />} />

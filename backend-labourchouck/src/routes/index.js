@@ -37,6 +37,8 @@ import carListingRoutes from './carListingRoutes.js'
 import adminCarListingRoutes from './adminCarListingRoutes.js'
 import accessoryRoutes from './accessoryRoutes.js'
 import adminAccessoryRoutes from './adminAccessoryRoutes.js'
+import carPartRoutes from './carPartRoutes.js'
+import adminCarPartRoutes from './adminCarPartRoutes.js'
 import { publicServiceUiRoutes, adminServiceUiRoutes } from './serviceUiConfigRoutes.js'
 
 const router = Router()
@@ -60,6 +62,7 @@ router.use('/notifications', notificationRoutes)
 router.use('/referrals', referralRoutes)
 router.use('/cars', carListingRoutes)
 router.use('/accessories', accessoryRoutes)
+router.use('/car-parts', carPartRoutes)
 router.use('/app-config', publicServiceUiRoutes)
 
 router.use('/admin/settings', systemSettingRoutes)
@@ -79,6 +82,7 @@ router.use('/admin/faqs', adminFaqRoutes)
 router.use('/admin/profile', adminProfileRoutes)
 router.use('/admin/cars', adminCarListingRoutes)
 router.use('/admin/accessories', adminAccessoryRoutes)
+router.use('/admin/car-parts', adminCarPartRoutes)
 router.use('/admin/service-config', adminServiceUiRoutes)
 router.use('/labour/location', locationRoutes)
 

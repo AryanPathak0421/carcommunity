@@ -107,6 +107,10 @@ router.post(
   [
     body('aadhaar').optional({ values: 'falsy' }).isString().trim(),
     body('pan').optional({ values: 'falsy' }).isString().trim(),
+    body('drivingLicence').optional({ values: 'falsy' }).isString().trim().isLength({ max: 30 }),
+    body('drivingLicenceExpiry').optional({ values: 'falsy' }).isString().trim().isLength({ max: 10 }),
+    body('docs').optional().isObject().withMessage('docs must be an object'),
+    body('onboarding').optional().isObject().withMessage('onboarding must be an object'),
     body('videoUrl')
       .isString()
       .trim()

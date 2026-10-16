@@ -70,7 +70,8 @@ export const acceptBroadcast = asyncHandler(async (req, res) => {
   }
 
   // 3. Notify the customer, and dismiss the offer for the other mechanics who received it
-  import('../socket.js').then(({ emitToUser }) => {
+  import('../socket.js').then(({ emitToUser, emitToAdmins }) => {
+    emitToAdmins('BOOKING_STATUS_UPDATE', { bookingId: booking._id, status: 'ACCEPTED', laborId })
     emitToUser(booking.userId, 'BOOKING_ACCEPTED', { bookingId: booking._id, laborId })
     ;(booking.eligibleLabourIds || []).forEach((mid) => {
       if (String(mid) !== String(laborId)) emitToUser(mid, 'BOOKING_EXPIRED', { bookingId: booking._id })

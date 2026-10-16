@@ -13,6 +13,7 @@ import { parseISTDateTime } from '../utils/dateHelper.js'
 import { sendToUser } from '../services/notificationService.js'
 import { qualifyReferralForBooking } from '../services/referralService.js'
 import { creditSelfBalance, debitSelfBalance, getSelfBalance } from '../services/walletService.js'
+import { priceParts, releaseParts, reserveParts } from '../services/partsService.js'
 import {
   refundBookingWalletDiscount,
   settleBookingIfReady,
@@ -33,9 +34,17 @@ export const calculateBill = asyncHandler(async (req, res) => {
   }
   const service = await LabourService.findById(serviceId)
   let basePrice = 0
-  
+  let partLines = []
+  let partsTotal = 0
+
   if (service) {
     basePrice = service.basePrice * durationDays
+    const priced = await priceParts(req.body.parts, service.subcategoryId)
+    if (!priced.ok) {
+      return sendError(res, { message: priced.message, statusCode: HTTP_STATUS.CONFLICT, code: priced.code })
+    }
+    partLines = priced.lines
+    partsTotal = priced.partsTotal
   } else {
     const { LabourCategory } = await import('../models/LabourCategory.js')
     const category = await LabourCategory.findById(serviceId)
@@ -69,7 +78,8 @@ export const calculateBill = asyncHandler(async (req, res) => {
     taxes = (baseAmount * settings.gstPercentage) / 100
   }
 
-  const totalAmount = baseAmount + taxes
+  // Parts are priced inclusive: no platform fee, GST or commission on top, and all of it is the mechanic's.
+  const totalAmount = baseAmount + taxes + partsTotal
 
   // Also pre-calculate commission to show to admin internally, but user doesn't necessarily need to see it
   let commissionAmount = 0
@@ -86,6 +96,8 @@ export const calculateBill = asyncHandler(async (req, res) => {
       basePrice,
       platformFee,
       taxes,
+      parts: partLines,
+      partsTotal,
       totalAmount,
       commissionAmount, // Internal calculation preview
       laborShare: basePrice - commissionAmount,
@@ -182,7 +194,13 @@ export const createBooking = asyncHandler(async (req, res) => {
     taxes = (baseAmount * settings.gstPercentage) / 100
   }
   
-  const totalAmount = baseAmount + taxes
+  const priced = await priceParts(req.body.parts, service.subcategoryId)
+  if (!priced.ok) {
+    return sendError(res, { message: priced.message, statusCode: HTTP_STATUS.CONFLICT, code: priced.code })
+  }
+  const partLines = priced.lines
+  const partsTotal = priced.partsTotal
+  const totalAmount = baseAmount + taxes + partsTotal
 
   let commissionAmount = 0
   if (settings?.commission?.isActive && settings.commission.type === 'global') {
@@ -218,6 +236,21 @@ export const createBooking = asyncHandler(async (req, res) => {
     }
   }
   const payableAmount = totalAmount - walletDiscount
+
+  // Take the parts off the shelf now (atomic, so the last unit cannot be sold twice).
+  // If someone else got there first, give the wallet credit back and ask the customer to review.
+  const reserved = await reserveParts(partLines)
+  if (!reserved.ok) {
+    if (walletDiscount > 0) {
+      await creditSelfBalance({
+        userId: req.user._id,
+        amount: walletDiscount,
+        context: 'BOOKING',
+        description: 'Wallet refund — parts no longer available',
+      }).catch((e) => console.error('[wallet] refund after parts failure:', e?.message || e))
+    }
+    return sendError(res, { message: reserved.message, statusCode: HTTP_STATUS.CONFLICT, code: reserved.code })
+  }
 
   const startOtp = newOtp()
   const completionOtp = newOtp()
@@ -261,6 +294,8 @@ export const createBooking = asyncHandler(async (req, res) => {
     basePrice,
     platformFee,
     taxes,
+    parts: partLines,
+    partsTotal,
     totalAmount,
     commissionAmount,
     laborShare,
@@ -273,6 +308,7 @@ export const createBooking = asyncHandler(async (req, res) => {
     attendanceLog
     })
   } catch (err) {
+    await releaseParts(partLines)
     // Give the wallet credit back rather than swallowing it with the booking.
     if (walletDiscount > 0) {
       await creditSelfBalance({
@@ -289,6 +325,10 @@ export const createBooking = asyncHandler(async (req, res) => {
     const { UserSubscription } = await import('../models/UserSubscription.js')
     await UserSubscription.findByIdAndUpdate(activeSub._id, { $inc: { bookingsUsed: 1 } })
   }
+
+  import('../socket.js')
+    .then(({ emitToAdmins }) => emitToAdmins('BOOKING_STATUS_UPDATE', { bookingId: booking._id, status: booking.status }))
+    .catch(err => console.error(err))
 
   // Phase 3: Trigger the Broadcast Engine asynchronously
   // Only trigger immediately for INSTANT bookings.
@@ -645,7 +685,8 @@ export const updateBookingStatus = asyncHandler(async (req, res) => {
   }
 
   // Notify the other party
-  import('../socket.js').then(({ emitToUser }) => {
+  import('../socket.js').then(({ emitToUser, emitToAdmins }) => {
+    emitToAdmins('BOOKING_STATUS_UPDATE', { bookingId: updated._id, status })
     emitToUser(updated.userId, 'BOOKING_STATUS_UPDATE', { bookingId: updated._id, status })
     if (status === 'CANCELLED' && updated.laborId && !isMechanic) {
       emitToUser(updated.laborId, 'BOOKING_STATUS_UPDATE', { bookingId: updated._id, status })
@@ -786,7 +827,8 @@ export const verifyDailyOtp = asyncHandler(async (req, res) => {
     await runCompletionEffects(updated)
   }
 
-  import('../socket.js').then(({ emitToUser }) => {
+  import('../socket.js').then(({ emitToUser, emitToAdmins }) => {
+    emitToAdmins('BOOKING_STATUS_UPDATE', { bookingId: updated._id, status: updated.status })
     emitToUser(updated.userId, 'BOOKING_STATUS_UPDATE', { bookingId: updated._id, status: updated.status })
   }).catch(err => console.error(err))
 

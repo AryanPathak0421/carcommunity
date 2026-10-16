@@ -49,7 +49,7 @@ export function LabourKycHero({ title, subtitle, phaseLabel, tone = 'violet', ma
             </span>
             <div className="min-w-0 flex-1 pt-0.5">
               <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/55">Identity</p>
-              <h1 className="text-xl font-extrabold tracking-tight">Video KYC</h1>
+              <h1 className="text-xl font-extrabold tracking-tight">Mechanic verification</h1>
             </div>
             <span className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide ring-1 ${badgeClass}`}>
               {phaseLabel}
@@ -69,7 +69,7 @@ export function LabourKycHero({ title, subtitle, phaseLabel, tone = 'violet', ma
           <div className="mt-4 flex items-center gap-2 rounded-2xl border border-white/15 bg-white/8 px-3 py-2.5">
             <ShieldCheck className="h-4 w-4 shrink-0 text-emerald-300" aria-hidden />
             <p className="text-[11px] leading-relaxed text-white/75">
-              Video KYC is reviewed by admin only. Your Aadhaar and PAN stay masked outside review.
+              Your documents are reviewed by our team only. ID numbers stay masked everywhere else.
             </p>
           </div>
         </div>

@@ -183,6 +183,9 @@ export async function startBroadcastCycle(bookingId) {
         bookingId: booking._id,
         basePrice: booking.basePrice,
         laborShare: booking.laborShare,
+        // The mechanic supplies the parts and keeps their price on top of their share.
+        partsTotal: booking.partsTotal || 0,
+        parts: (booking.parts || []).map((p) => ({ name: p.name, brand: p.brand, quantity: p.quantity })),
         address: booking.address,
         scheduledAt: booking.scheduledAt,
         type: booking.type,
@@ -196,7 +199,7 @@ export async function startBroadcastCycle(bookingId) {
   // Push notification to eligible laborers (reaches devices even when the app is closed)
   sendToUsers(eligibleLaborers.map(l => l._id), {
     title: 'New job offer nearby',
-    body: `₹${booking.laborShare || booking.basePrice || ''} · ${booking.address?.text || 'Near you'}. Open the app to accept — offer expires soon!`,
+    body: `₹${(booking.laborShare || booking.basePrice || 0) + (booking.partsTotal || 0)}${booking.parts?.length ? ' incl. parts' : ''} · ${booking.address?.locationText || 'Near you'}. Open the app to accept — offer expires soon!`,
     type: 'BOOKING_RECEIVED',
     data: { bookingId: String(booking._id), link: '/app' },
   }).catch(err => console.error('Push notify (offer) failed:', err))

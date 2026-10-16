@@ -9,6 +9,16 @@ import { populateLabourCategories } from '../utils/populateLabourCategories.js'
 import { sendToUser, notifyAdmins } from '../services/notificationService.js'
 import { isValidAadhaarLength, maskAadhaarLast4, normalizeAadhaar } from '../utils/aadhaar.js'
 import { normalizeStoredMediaUrl } from '../utils/mediaUrl.js'
+import {
+  isValidAadhaarChecksum,
+  isValidDrivingLicence,
+  isValidPincode,
+  isValidVehicleRegNo,
+  maskDrivingLicence,
+  normalizeAlnum,
+  normalizeDrivingLicence,
+  parseDateOnly,
+} from '../utils/kycValidators.js'
 
 const MAX_KYC_IMAGE_CHARS = 750_000
 
@@ -217,7 +227,39 @@ export const getProfile = asyncHandler(async (req, res) => {
   return sendSuccess(res, { data: { user: req.user.toSafeObject() } })
 })
 
-/** POST /users/me/labour/kyc/submit — mechanic: Aadhaar/PAN numbers + recorded video → pending admin review */
+const KYC_DOC_FIELDS = ['aadhaarFrontUrl', 'aadhaarBackUrl', 'panImageUrl', 'dlFrontUrl', 'dlBackUrl', 'selfieUrl']
+const KYC_DOC_REQUIRED = [
+  ['aadhaarFrontUrl', 'Aadhaar front photo'],
+  ['aadhaarBackUrl', 'Aadhaar back photo'],
+  ['panImageUrl', 'PAN card photo'],
+  ['dlFrontUrl', 'Driving licence photo'],
+  ['selfieUrl', 'Selfie'],
+]
+
+/** KYC photos and video must come from our own Cloudinary account (the admin opens these links). */
+function normalizeKycMediaUrl(value) {
+  const url = normalizeStoredMediaUrl(value)
+  if (!url) return url
+  try {
+    const parsed = new URL(url)
+    const cloud = process.env.CLOUDINARY_CLOUD_NAME
+    if (parsed.hostname !== 'res.cloudinary.com') return null
+    if (cloud && !parsed.pathname.startsWith(`/${cloud}/`)) return null
+    return url
+  } catch {
+    return null
+  }
+}
+
+function kycError(res, message, code) {
+  return sendError(res, { message, statusCode: HTTP_STATUS.BAD_REQUEST, code })
+}
+
+/**
+ * POST /users/me/labour/kyc/submit — mechanic onboarding: Aadhaar, PAN, driving licence (numbers +
+ * photos), selfie, work details and a recorded video → pending admin review.
+ * Anything already on file is kept, so a rejected mechanic only has to resend what changed.
+ */
 export const submitLabourKycDocuments = asyncHandler(async (req, res) => {
   if (req.user.role !== USER_ROLES.MECHANIC) {
     return sendError(res, {
@@ -228,88 +270,158 @@ export const submitLabourKycDocuments = asyncHandler(async (req, res) => {
   }
 
   if (req.user.labourProfile?.kycStatus === KYC_STATUS.VERIFIED) {
-    return sendError(res, {
-      message: 'KYC is already approved',
-      statusCode: HTTP_STATUS.BAD_REQUEST,
-      code: 'KYC_ALREADY_VERIFIED',
-    })
+    return kycError(res, 'KYC is already approved', 'KYC_ALREADY_VERIFIED')
   }
 
   const lp = req.user.labourProfile || {}
-  const isVideoOnlyResubmit =
-    lp.kycStatus === KYC_STATUS.FAILED && Boolean(lp.aadhaarMasked?.trim()) && Boolean(lp.panMasked?.trim())
+  const onFile = lp.onboarding || {}
+  const docsOnFile = lp.kycDocs || {}
+  const body = req.body
+  const set = {}
 
-  const normalizedAadhaar = normalizeAadhaar(req.body.aadhaar)
-  const normalizedPan = normalizePan(req.body.pan)
-  const hasAadhaarInput = normalizedAadhaar.length > 0
-  const hasPanInput = normalizedPan.length > 0
-
-  if (isVideoOnlyResubmit) {
-    if (hasAadhaarInput && !isValidAadhaarLength(normalizedAadhaar)) {
-      return sendError(res, {
-        message: 'Enter a valid 12-digit Aadhaar number',
-        statusCode: HTTP_STATUS.BAD_REQUEST,
-        code: 'INVALID_AADHAAR',
-      })
+  // --- identity numbers (stored masked) ---
+  const aadhaar = normalizeAadhaar(body.aadhaar)
+  if (aadhaar) {
+    if (!isValidAadhaarLength(aadhaar) || !isValidAadhaarChecksum(aadhaar)) {
+      return kycError(res, 'Enter a valid 12-digit Aadhaar number', 'INVALID_AADHAAR')
     }
-    if (hasPanInput && !isValidPan(normalizedPan)) {
-      return sendError(res, {
-        message: 'Enter a valid PAN number',
-        statusCode: HTTP_STATUS.BAD_REQUEST,
-        code: 'INVALID_PAN',
-      })
+    set['labourProfile.aadhaarMasked'] = maskAadhaarLast4(aadhaar)
+  }
+  const pan = normalizePan(body.pan)
+  if (pan) {
+    if (!isValidPan(pan)) return kycError(res, 'Enter a valid PAN number', 'INVALID_PAN')
+    set['labourProfile.panMasked'] = maskPan(pan)
+  }
+  const dl = normalizeDrivingLicence(body.drivingLicence)
+  if (dl) {
+    if (!isValidDrivingLicence(dl)) {
+      return kycError(res, 'Enter a valid driving licence number (e.g. MH1420110062821)', 'INVALID_DRIVING_LICENCE')
     }
-  } else {
-    if (!isValidAadhaarLength(normalizedAadhaar)) {
-      return sendError(res, {
-        message: 'Enter a valid 12-digit Aadhaar number',
-        statusCode: HTTP_STATUS.BAD_REQUEST,
-        code: 'INVALID_AADHAAR',
-      })
-    }
-    if (!isValidPan(normalizedPan)) {
-      return sendError(res, {
-        message: 'Enter a valid PAN number',
-        statusCode: HTTP_STATUS.BAD_REQUEST,
-        code: 'INVALID_PAN',
-      })
-    }
+    set['labourProfile.dlNumberMasked'] = maskDrivingLicence(dl)
+  }
+  let dlExpiry = lp.dlExpiry ? new Date(lp.dlExpiry) : null
+  if (body.drivingLicenceExpiry) {
+    dlExpiry = parseDateOnly(body.drivingLicenceExpiry)
+    if (!dlExpiry) return kycError(res, 'Enter the licence expiry as YYYY-MM-DD', 'INVALID_DL_EXPIRY')
+    set['labourProfile.dlExpiry'] = dlExpiry
+  }
+  if (dlExpiry && dlExpiry.getTime() < Date.now()) {
+    return kycError(res, 'Your driving licence has expired', 'DL_EXPIRED')
   }
 
-  const videoUrl = normalizeStoredMediaUrl(req.body.videoUrl)
-  if (!videoUrl) {
-    return sendError(res, {
-      message: 'Record and upload a KYC video before submitting',
-      statusCode: HTTP_STATUS.BAD_REQUEST,
-      code: 'INVALID_KYC_VIDEO',
-    })
+  // --- document photos ---
+  const docs = { ...docsOnFile }
+  for (const field of KYC_DOC_FIELDS) {
+    if (body.docs?.[field] == null || body.docs[field] === '') continue
+    const url = normalizeKycMediaUrl(body.docs[field])
+    if (!url) return kycError(res, `Invalid upload URL for ${field}`, 'INVALID_DOC_URL')
+    docs[field] = url
+    set[`labourProfile.kycDocs.${field}`] = url
   }
 
-  const updateData = {
-    'labourProfile.kycStatus': KYC_STATUS.PENDING,
-    'labourProfile.kycVideoUrl': videoUrl,
-    'labourProfile.kycVideoMeta': sanitizeKycVideoMeta(req.body.videoMeta),
-    'labourProfile.kycSubmittedAt': new Date(),
+  // --- work details ---
+  const details = { ...onFile }
+  const w = body.onboarding || {}
+  if (w.experienceYears != null) {
+    const years = Number(w.experienceYears)
+    if (!Number.isInteger(years) || years < 0 || years > 60) {
+      return kycError(res, 'Experience must be a whole number between 0 and 60 years', 'INVALID_EXPERIENCE')
+    }
+    details.experienceYears = years
   }
-  if (hasAadhaarInput) updateData['labourProfile.aadhaarMasked'] = maskAadhaarLast4(normalizedAadhaar)
-  if (hasPanInput) updateData['labourProfile.panMasked'] = maskPan(normalizedPan)
+  for (const [key, max] of [
+    ['workshopName', 120],
+    ['serviceCity', 80],
+    ['serviceAddress', 300],
+    ['emergencyContactName', 80],
+  ]) {
+    if (w[key] != null) details[key] = String(w[key]).trim().slice(0, max)
+  }
+  if (w.servicePincode != null) {
+    if (!isValidPincode(String(w.servicePincode).trim())) {
+      return kycError(res, 'Enter a valid 6-digit pincode', 'INVALID_PINCODE')
+    }
+    details.servicePincode = String(w.servicePincode).trim()
+  }
+  if (w.emergencyContactPhone != null) {
+    const phone = String(w.emergencyContactPhone).replace(/\D/g, '').slice(-10)
+    if (!/^[6-9]\d{9}$/.test(phone)) {
+      return kycError(res, 'Enter a valid 10-digit emergency contact number', 'INVALID_EMERGENCY_PHONE')
+    }
+    if (phone === req.user.phone) {
+      return kycError(res, 'Emergency contact must be a different number from your own', 'INVALID_EMERGENCY_PHONE')
+    }
+    details.emergencyContactPhone = phone
+  }
+  if (w.ownVehicleType != null) {
+    if (!['none', 'bike', 'car'].includes(w.ownVehicleType)) {
+      return kycError(res, 'Own vehicle must be none, bike or car', 'INVALID_VEHICLE')
+    }
+    details.ownVehicleType = w.ownVehicleType
+    if (w.ownVehicleType === 'none') details.ownVehicleRegNo = ''
+  }
+  if (w.ownVehicleRegNo != null && details.ownVehicleType !== 'none') {
+    const reg = normalizeAlnum(w.ownVehicleRegNo, 11)
+    if (reg && !isValidVehicleRegNo(reg)) {
+      return kycError(res, 'Enter a valid vehicle registration number', 'INVALID_VEHICLE_REG')
+    }
+    details.ownVehicleRegNo = reg
+  }
+  if (details.ownVehicleType && details.ownVehicleType !== 'none' && !details.ownVehicleRegNo) {
+    return kycError(res, 'Enter your vehicle registration number', 'INVALID_VEHICLE_REG')
+  }
+
+  // --- video ---
+  const videoUrl = normalizeKycMediaUrl(body.videoUrl)
+  if (!videoUrl) return kycError(res, 'Record and upload a KYC video before submitting', 'INVALID_KYC_VIDEO')
+
+  // --- everything required must now be on file (new or existing) ---
+  const missing = []
+  if (!(set['labourProfile.aadhaarMasked'] || lp.aadhaarMasked)) missing.push('Aadhaar number')
+  if (!(set['labourProfile.panMasked'] || lp.panMasked)) missing.push('PAN number')
+  if (!(set['labourProfile.dlNumberMasked'] || lp.dlNumberMasked)) missing.push('driving licence number')
+  if (!dlExpiry) missing.push('driving licence expiry')
+  for (const [field, label] of KYC_DOC_REQUIRED) if (!docs[field]) missing.push(label)
+  if (details.experienceYears == null) missing.push('experience')
+  for (const [field, label] of [
+    ['serviceCity', 'service city'],
+    ['servicePincode', 'pincode'],
+    ['serviceAddress', 'service address'],
+    ['emergencyContactName', 'emergency contact name'],
+    ['emergencyContactPhone', 'emergency contact number'],
+  ]) {
+    if (!details[field]) missing.push(label)
+  }
+  if (missing.length) {
+    return kycError(res, `Please complete: ${missing.join(', ')}`, 'ONBOARDING_INCOMPLETE')
+  }
+
+  const now = new Date()
+  for (const [key, value] of Object.entries(details)) {
+    if (key !== 'submittedAt') set[`labourProfile.onboarding.${key}`] = value
+  }
+  set['labourProfile.onboarding.submittedAt'] = now
+  set['labourProfile.kycStatus'] = KYC_STATUS.PENDING
+  set['labourProfile.kycVideoUrl'] = videoUrl
+  set['labourProfile.kycVideoMeta'] = sanitizeKycVideoMeta(body.videoMeta)
+  set['labourProfile.kycSubmittedAt'] = now
 
   req.user = await User.findByIdAndUpdate(
     req.user._id,
-    { $set: updateData, $unset: { 'labourProfile.kycReviewNote': 1 } },
-    { new: true, runValidators: false }
+    { $set: set, $unset: { 'labourProfile.kycReviewNote': 1 } },
+    { new: true, runValidators: false },
   )
   await populateLabourCategories(req.user)
 
   notifyAdmins({
     title: 'New KYC submission',
-    body: `${req.user.fullName || 'A mechanic'} submitted KYC documents for review.`,
+    body: `${req.user.fullName || 'A mechanic'} submitted onboarding documents for review.`,
     type: 'KYC_SUBMITTED',
     data: { userId: String(req.user._id), link: '/admin/labour' },
   }).catch(err => console.error('Push notify (KYC submitted) failed:', err))
 
   return sendSuccess(res, {
-    message: 'KYC video submitted — an admin will review your Aadhaar and PAN shortly.',
+    message: 'Onboarding submitted — an admin will verify your Aadhaar, PAN, driving licence and photos shortly.',
     data: { user: req.user.toSafeObject() },
   })
 })
@@ -502,6 +614,7 @@ export const listUsers = asyncHandler(async (req, res) => {
     const lp = { ...u.labourProfile }
     delete lp.kycFrontImageDataUrl
     delete lp.kycBackImageDataUrl
+    delete lp.kycDocs
     return { ...u, labourProfile: lp }
   })
 

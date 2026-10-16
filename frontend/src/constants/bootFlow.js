@@ -10,5 +10,11 @@ export const BOOT_ROUTES = {
   AUTH: '/auth',
 }
 
+/** Separate sign in / sign up pages per audience */
+export const AUTH_PATHS = {
+  USER: '/user/auth',
+  MECHANIC: '/mechanic/auth',
+}
+
 /** Minimum time splash stays visible (ms) */
 export const SPLASH_MIN_DURATION_MS = 2200

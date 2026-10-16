@@ -5,6 +5,7 @@ import { AdminWallet } from '../models/AdminWallet.js'
 import { PaymentTransaction } from '../models/PaymentTransaction.js'
 import { creditSelfBalance } from './walletService.js'
 import { refundPayment } from './paymentService.js'
+import { releaseBookingParts } from './partsService.js'
 
 /**
  * Money that has to move when a booking ends in a particular way.
@@ -21,6 +22,9 @@ import { refundPayment } from './paymentService.js'
  */
 export async function refundBookingWalletDiscount(booking, reason = 'cancelled') {
   let refunded = false
+  // Every path that ends a booking without a job comes through here, so this is also where the
+  // reserved car parts go back on the shelf.
+  await releaseBookingParts(booking)
   try {
     const amount = Number(booking?.walletDiscount) || 0
     if (amount > 0 && !booking.walletRefundedAt) {
@@ -191,7 +195,8 @@ export async function settleBookingIfReady(bookingId) {
         })
       }
     } else {
-      const share = Number(claimed.laborShare) || 0
+      // The mechanic supplied the parts, so the whole parts amount is theirs on top of their share.
+      const share = (Number(claimed.laborShare) || 0) + (Number(claimed.partsTotal) || 0)
       if (share > 0) {
         await creditSelfBalance({
           userId: claimed.laborId,

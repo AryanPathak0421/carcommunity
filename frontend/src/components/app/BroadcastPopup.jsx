@@ -195,8 +195,22 @@ export function BroadcastPopup() {
                     <IndianRupee className="h-3.5 w-3.5" aria-hidden />
                     Your Share
                   </span>
-                  <span className="text-lg font-extrabold text-emerald-700">₹{incoming.laborShare || incoming.basePrice}</span>
+                  <span className="text-lg font-extrabold text-emerald-700">
+                    ₹{(incoming.laborShare || incoming.basePrice || 0) + (incoming.partsTotal || 0)}
+                  </span>
                 </div>
+                {incoming.parts?.length > 0 && (
+                  <div className="rounded-xl bg-orange-50 px-3 py-2 text-xs text-slate-700 ring-1 ring-orange-100">
+                    <p className="font-bold text-orange-700">Includes ₹{incoming.partsTotal} for parts you bring:</p>
+                    <ul className="mt-1 space-y-0.5">
+                      {incoming.parts.map((p) => (
+                        <li key={p.name}>
+                          {p.name} × {p.quantity}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-slate-500">Base Price</span>
                   <span className="font-bold text-slate-800">₹{incoming.basePrice}</span>

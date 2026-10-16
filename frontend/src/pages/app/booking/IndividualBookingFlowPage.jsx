@@ -24,6 +24,7 @@ import { AppTextInput } from '../../../components/app-ui/inputs/AppTextInput.jsx
 import { GlassPanel } from '../../../components/ui/GlassPanel.jsx'
 import { fetchLabourCategoriesGrouped } from '../../../api/labourCategoriesApi.js'
 import { bookingsApi } from '../../../api/bookingsApi.js'
+import { BookingPartsPicker } from '../../../components/app/booking/BookingPartsPicker.jsx'
 import { LiveTrackingScreen } from '../../../components/app/tracking/LiveTrackingScreen.jsx'
 import { getPublicSettings } from '../../../api/adminSettingsApi.js'
 import { userSubscriptionApi } from '../../../api/userSubscriptionApi.js'
@@ -430,7 +431,8 @@ export function IndividualBookingFlowPage() {
       const days = durationKindToDays(draft.durationKind, draft.durationDays)
       bookingsApi.calculateBill({
         serviceId: draft.serviceId || draft.categoryId,
-        durationDays: days
+        durationDays: days,
+        parts: draft.parts || [],
       }).then(res => {
         if (!cancelled) {
           setCalculatedBill(res.data)
@@ -535,7 +537,8 @@ export function IndividualBookingFlowPage() {
       const days = durationKindToDays(draft.durationKind, draft.durationDays)
       const res = await bookingsApi.calculateBill({
         serviceId: draft.serviceId || draft.categoryId, // Fallback
-        durationDays: days
+        durationDays: days,
+        parts: draft.parts || [],
       })
       setCalculatedBill(res.data)
       syncDraft({ billAmount: res.data.totalAmount })
@@ -580,6 +583,7 @@ export function IndividualBookingFlowPage() {
         endTime: draft.endTime,
         scheduledAt: draft.serviceDate,
         imageNames: uploadedImageUrls,
+        parts: draft.parts || [],
       }
 
       const res = await bookingsApi.createBooking(payload)
@@ -590,7 +594,12 @@ export function IndividualBookingFlowPage() {
       goStep(draft.bookingType === 'scheduled' ? 'scheduled_success' : 'searching')
     } catch (err) {
       console.error(err)
-      if (err.message && err.message.includes('subscription plan')) {
+      if (String(err.code || '').startsWith('PART_')) {
+        // a part sold out (or changed) while the customer was reviewing — send them back to adjust
+        setCalculatedBill(null)
+        setFormError(err.message)
+        goStep('details')
+      } else if (err.message && err.message.includes('subscription plan')) {
         setSubscriptionModalMsg(err.message)
         setSubscriptionModalOpen(true)
       } else {
@@ -837,6 +846,12 @@ export function IndividualBookingFlowPage() {
                 <span>Subtotal</span>
                 <span>{formatInr(booking?.basePrice || 0)}</span>
               </div>
+              {booking?.partsTotal > 0 ? (
+                <div className="mt-1 flex justify-between font-semibold">
+                  <span>Car parts</span>
+                  <span>{formatInr(booking.partsTotal)}</span>
+                </div>
+              ) : null}
               <div className="mt-1 flex justify-between lc-booking-flow-muted">
                 <span>Platform fee</span>
                 <span>{formatInr(booking?.platformFee || 0)}</span>
@@ -1288,6 +1303,12 @@ export function IndividualBookingFlowPage() {
               </div>
             )}
 
+            <BookingPartsPicker
+              serviceId={draft.serviceId || draft.categoryId}
+              value={draft.parts || []}
+              onChange={(parts) => syncDraft({ parts })}
+            />
+
             {formError ? (
               <p className="flex items-start gap-2 rounded-xl bg-amber-50 px-3 py-2 text-xs text-amber-950">
                 <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
@@ -1349,6 +1370,14 @@ export function IndividualBookingFlowPage() {
                     <span>Service fee</span>
                     <span>{formatInr(calculatedBill.basePrice)}</span>
                   </div>
+                  {(calculatedBill.parts || []).map((p) => (
+                    <div key={p.partId} className="mt-1 flex justify-between gap-2 font-semibold text-black">
+                      <span className="min-w-0 truncate">
+                        {p.name} <span className="font-medium lc-booking-flow-muted">× {p.quantity}</span>
+                      </span>
+                      <span>{formatInr(p.lineTotal)}</span>
+                    </div>
+                  ))}
                   <div className="mt-1 flex justify-between lc-booking-flow-muted">
                     <span>Platform fee</span>
                     <span>{formatInr(calculatedBill.platformFee)}</span>

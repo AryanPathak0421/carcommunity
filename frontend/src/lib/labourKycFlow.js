@@ -1,24 +1,22 @@
 import { KYC_STATUS } from '../constants/userRoles.js'
 
 export const KYC_WORKFLOW = [
-  { id: 'aadhaar', label: 'Enter Aadhaar number', short: 'Aadhaar' },
-  { id: 'pan', label: 'Enter PAN number', short: 'PAN' },
-  { id: 'video', label: 'Record document video', short: 'Video' },
+  { id: 'work', label: 'Work details & emergency contact', short: 'Details' },
+  { id: 'documents', label: 'Aadhaar, PAN & driving licence', short: 'Documents' },
+  { id: 'video', label: 'Selfie & live document video', short: 'Selfie' },
   { id: 'review', label: 'Admin verification', short: 'Review' },
   { id: 'verified', label: 'Verified on platform', short: 'Done' },
 ]
 
-/** Timeline copy when Aadhaar/PAN were already submitted and only video needs redo. */
-export const KYC_WORKFLOW_RESUBMIT = [
-  { id: 'aadhaar', label: 'Aadhaar saved', short: 'Aadhaar' },
-  { id: 'pan', label: 'PAN saved', short: 'PAN' },
-  { id: 'video', label: 'Record new KYC video', short: 'Video' },
-  { id: 'review', label: 'Admin verification', short: 'Review' },
-  { id: 'verified', label: 'Verified on platform', short: 'Done' },
-]
+/** Same steps — shown when a rejected mechanic fixes and resubmits. */
+export const KYC_WORKFLOW_RESUBMIT = KYC_WORKFLOW
 
 export function hasKycDetailsOnFile(labourProfile) {
-  return Boolean(labourProfile?.aadhaarMasked?.trim()) && Boolean(labourProfile?.panMasked?.trim())
+  return (
+    Boolean(labourProfile?.aadhaarMasked?.trim()) &&
+    Boolean(labourProfile?.panMasked?.trim()) &&
+    Boolean(labourProfile?.dlNumberMasked?.trim())
+  )
 }
 
 export function getKycUiState(labourProfile) {
@@ -29,7 +27,7 @@ export function getKycUiState(labourProfile) {
   if (kyc === KYC_STATUS.VERIFIED) {
     return {
       phase: 'verified',
-      title: 'Video KYC verified',
+      title: 'Verified mechanic',
       subtitle: 'You can accept jobs and receive payouts as a verified mechanic.',
       tone: 'emerald',
     }
@@ -38,7 +36,7 @@ export function getKycUiState(labourProfile) {
     return {
       phase: 'review',
       title: 'Under admin review',
-      subtitle: 'Your KYC video was submitted and is waiting for manual approval.',
+      subtitle: 'Your documents were submitted and are waiting for manual approval.',
       tone: 'sky',
     }
   }
@@ -46,35 +44,23 @@ export function getKycUiState(labourProfile) {
     return {
       phase: 'failed',
       title: 'Verification needs correction',
-      subtitle: reviewNote || 'Record a clearer Aadhaar and PAN video, then submit again.',
+      subtitle: reviewNote || 'Fix the details your reviewer flagged and submit again.',
       tone: 'rose',
     }
   }
   return {
     phase: 'submit',
     title: 'Complete your KYC',
-    subtitle: 'Record Aadhaar and PAN documents in one live video to unlock jobs.',
+    subtitle: 'Add your ID documents, selfie and a short video to unlock jobs.',
     tone: 'violet',
   }
 }
 
 /** 0–4 workflow step for timeline highlight. */
-export function kycWorkflowStepIndex({
-  kycStatus,
-  submittedAt,
-  aadhaarDigits,
-  panValid,
-  detailsOnFile = false,
-}) {
+export function kycWorkflowStepIndex({ kycStatus, submittedAt, detailsOnFile = false }) {
   if (kycStatus === KYC_STATUS.VERIFIED) return 4
   if (kycStatus === KYC_STATUS.PENDING && submittedAt) return 3
-
-  const detailsComplete = detailsOnFile || (panValid && aadhaarDigits === 12)
-  if (detailsComplete) return 2
-
-  if (aadhaarDigits === 12) return 1
-  if (aadhaarDigits >= 4) return 0
-  return 0
+  return detailsOnFile ? 2 : 0
 }
 
 export const KYC_BENEFITS = [

@@ -6,6 +6,9 @@ import { corsOriginCheck } from './config/security.js'
 
 let io
 
+// Admins also join this shared room so the live operations view receives every mechanic position.
+const ADMIN_ROOM = 'admins'
+
 // Mechanic position is only accepted/forwarded while a job is live, and at most every 2s per booking.
 const LIVE_TRACKING_STATUSES = ['ACCEPTED', 'ASSIGNED', 'EN_ROUTE', 'STARTED']
 const MIN_LOCATION_INTERVAL_MS = 2000
@@ -42,6 +45,7 @@ export const initSocket = (httpServer) => {
     
     // Join a room specific to this user ID so we can emit directly to them
     socket.join(socket.user._id.toString())
+    if (socket.user.role === 'admin') socket.join(ADMIN_ROOM)
 
     socket.on('disconnect', () => {
       console.log(`Socket disconnected: ${socket.id}`)
@@ -78,18 +82,20 @@ export const initSocket = (httpServer) => {
         const booking = await Booking.findOneAndUpdate(
           { _id: key, laborId: socket.user._id, status: { $in: LIVE_TRACKING_STATUSES } },
           { $set: { liveLocation: point } },
-          { new: true, projection: { userId: 1 } },
+          { new: true, projection: { userId: 1, laborId: 1 } },
         )
         if (!booking) return
 
-        emitToUser(booking.userId, 'LABOUR_LOCATION_UPDATE', {
+        const payload = {
           bookingId: key,
           lat,
           lng,
           heading: point.heading,
           speed: point.speed,
           at: point.at,
-        })
+        }
+        emitToUser(booking.userId, 'LABOUR_LOCATION_UPDATE', payload)
+        emitToAdmins('LABOUR_LOCATION_UPDATE', { ...payload, laborId: String(booking.laborId) })
       } catch (err) {
         console.error('[socket] location update failed:', err?.message || err)
       }
@@ -109,5 +115,11 @@ export const getIo = () => {
 export const emitToUser = (userId, eventName, payload) => {
   if (io) {
     io.to(userId.toString()).emit(eventName, payload)
+  }
+}
+
+export const emitToAdmins = (eventName, payload) => {
+  if (io) {
+    io.to(ADMIN_ROOM).emit(eventName, payload)
   }
 }
