@@ -29,6 +29,9 @@ export function assertProductionConfig() {
     problems.push('RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET must be set (payments fail closed without them)')
   }
   if (!process.env.MONGODB_URI) problems.push('MONGODB_URI must be set')
+  if (process.env.ALLOW_DEMO_ACCOUNTS === 'true') {
+    console.warn('[security] ALLOW_DEMO_ACCOUNTS is on: demo numbers 1111111111 (customer) and 2222222222 (mechanic) accept OTP 123456. Remove it once SMS login is live.')
+  }
   if (process.env.OTP_FIXED_CODE) {
     console.warn('[security] OTP_FIXED_CODE is set: every account accepts that OTP. Remove it once SMS login is live.')
   }

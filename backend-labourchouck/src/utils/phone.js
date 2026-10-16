@@ -8,6 +8,9 @@ const TEST_ACCOUNTS = {
 }
 
 export function isTestAccountsEnabled() {
+  // Explicit, separate opt-in for hosted demos: ONLY the two fixed demo numbers below get the fixed
+  // OTP. It never affects any other account. Turn it off (remove the variable) once SMS is live.
+  if (process.env.ALLOW_DEMO_ACCOUNTS === 'true') return true
   return process.env.NODE_ENV !== 'production' && process.env.ENABLE_TEST_ACCOUNTS === 'true'
 }
 
