@@ -54,3 +54,62 @@ self.addEventListener('notificationclick', (event) => {
     }),
   )
 })
+
+// ---- PWA: installable + offline shell ---------------------------------------
+// Same worker as push so only one registration owns the "/" scope.
+const SHELL_CACHE = 'cc-shell-v1'
+const ASSET_CACHE = 'cc-assets-v1'
+
+self.addEventListener('install', (event) => {
+  event.waitUntil(caches.open(SHELL_CACHE).then((c) => c.add('/')).catch(() => {}))
+  self.skipWaiting()
+})
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches
+      .keys()
+      .then((keys) => Promise.all(keys.filter((k) => k !== SHELL_CACHE && k !== ASSET_CACHE).map((k) => caches.delete(k))))
+      .then(() => self.clients.claim()),
+  )
+})
+
+self.addEventListener('fetch', (event) => {
+  const req = event.request
+  if (req.method !== 'GET') return
+  const url = new URL(req.url)
+  if (url.origin !== self.location.origin) return
+  // Never cache live data.
+  if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/socket.io/')) return
+
+  // Page loads: network first (always fresh), fall back to the cached shell offline.
+  if (req.mode === 'navigate') {
+    event.respondWith(
+      fetch(req)
+        .then((res) => {
+          const copy = res.clone()
+          caches.open(SHELL_CACHE).then((c) => c.put('/', copy))
+          return res
+        })
+        .catch(() => caches.match('/')),
+    )
+    return
+  }
+
+  // Hashed build files and images never change under the same URL: cache first.
+  if (url.pathname.startsWith('/assets/') || /\.(png|webp|jpg|svg|woff2?)$/.test(url.pathname)) {
+    event.respondWith(
+      caches.match(req).then(
+        (hit) =>
+          hit ||
+          fetch(req).then((res) => {
+            if (res.ok) {
+              const copy = res.clone()
+              caches.open(ASSET_CACHE).then((c) => c.put(req, copy))
+            }
+            return res
+          }),
+      ),
+    )
+  }
+})

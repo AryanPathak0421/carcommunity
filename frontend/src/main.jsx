@@ -19,3 +19,10 @@ createRoot(document.getElementById('root')).render(
   </StrictMode>,
 )
 
+
+// PWA: register the worker (offline shell + push) once the page has loaded.
+if ('serviceWorker' in navigator && import.meta.env.PROD) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/firebase-messaging-sw.js').catch(() => {})
+  })
+}

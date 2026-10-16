@@ -16,6 +16,7 @@ import { adminInitials } from '../lib/formatAdminLastLogin.js'
 import { readAppUserLocation } from '../lib/appUserLocationStorage.js'
 import { AppUserLocationModal } from '../components/app/AppUserLocationModal.jsx'
 import { CarCommunityLogo } from '../components/brand/CarCommunityLogo.jsx'
+import { InstallAppBanner } from '../components/app/InstallAppBanner.jsx'
 import { APP_HOME_LOCATION, APP_HOME_PATH, hasBookingFlowQuery } from '../lib/bookingFlowNavigation.js'
 
 /** "Indore, Madhya Pradesh" from a full street address: last two meaningful parts, no pincode/country. */
@@ -230,6 +231,7 @@ export function AppShell() {
 
   return (
     <div className="relative min-h-dvh w-full overflow-x-clip text-slate-900">
+      <InstallAppBanner />
       <AppAmbientBackground />
 
       <AnimatePresence>
