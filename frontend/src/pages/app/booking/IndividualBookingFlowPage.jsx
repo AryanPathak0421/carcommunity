@@ -510,19 +510,11 @@ export function IndividualBookingFlowPage() {
         return false
       }
       if (!draft.timeSlot) {
-        setFormError('Pick a start time.')
-        return false
-      }
-      if (draft.durationKind !== 'multi_day' && !draft.endTime) {
-        setFormError('Pick an end time.')
+        setFormError('Pick a time for the visit.')
         return false
       }
       if (draft.serviceDate === todayISODate() && draft.timeSlot < currentIstStr) {
-        setFormError('Start time cannot be in the past.')
-        return false
-      }
-      if (draft.durationKind !== 'multi_day' && draft.timeSlot >= draft.endTime) {
-        setFormError('End time must be after start time.')
+        setFormError('The time cannot be in the past.')
         return false
       }
     }
@@ -580,7 +572,6 @@ export function IndividualBookingFlowPage() {
         durationKind: draft.durationKind,
         durationDays: days,
         timeSlot: draft.timeSlot,
-        endTime: draft.endTime,
         scheduledAt: draft.serviceDate,
         imageNames: uploadedImageUrls,
         parts: draft.parts || [],
@@ -628,8 +619,8 @@ export function IndividualBookingFlowPage() {
               <span className="text-slate-900 font-bold">{new Date(draft.serviceDate).toLocaleDateString()}</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-slate-500 font-semibold">Time slot</span>
-              <span className="text-slate-900 font-bold">{draft.timeSlot} - {draft.endTime}</span>
+              <span className="text-slate-500 font-semibold">Time</span>
+              <span className="text-slate-900 font-bold">{draft.timeSlot}</span>
             </div>
           </div>
           <motion.div className="mt-6 flex flex-col gap-2">
@@ -1274,32 +1265,17 @@ export function IndividualBookingFlowPage() {
                     className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-black"
                   />
                 </motion.div>
-                <div className={draft.durationKind === 'multi_day' ? "grid grid-cols-1 gap-3" : "grid grid-cols-2 gap-3"}>
-                  <motion.div>
-                    <FieldLabel htmlFor="scheduled-time">Start Time</FieldLabel>
-                    <input
-                      id="scheduled-time"
-                      name="timeSlot"
-                      type="time"
-                      value={draft.timeSlot || ''}
-                      onChange={(e) => syncDraft({ timeSlot: e.target.value })}
-                      className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-black outline-none focus:border-brand focus:ring-1"
-                    />
-                  </motion.div>
-                  {draft.durationKind !== 'multi_day' && (
-                    <motion.div>
-                      <FieldLabel htmlFor="scheduled-end-time">End Time</FieldLabel>
-                      <input
-                        id="scheduled-end-time"
-                        name="endTime"
-                        type="time"
-                        value={draft.endTime || ''}
-                        onChange={(e) => syncDraft({ endTime: e.target.value })}
-                        className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-black outline-none focus:border-brand focus:ring-1"
-                      />
-                    </motion.div>
-                  )}
-                </div>
+                <motion.div>
+                  <FieldLabel htmlFor="scheduled-time">Time</FieldLabel>
+                  <input
+                    id="scheduled-time"
+                    name="timeSlot"
+                    type="time"
+                    value={draft.timeSlot || ''}
+                    onChange={(e) => syncDraft({ timeSlot: e.target.value })}
+                    className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-black outline-none focus:border-brand focus:ring-1"
+                  />
+                </motion.div>
               </div>
             )}
 
