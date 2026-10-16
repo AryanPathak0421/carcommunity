@@ -20,7 +20,7 @@ export function CarCommunityLogo({ variant = 'color', size = 'md', tagline = tru
         }`}
         aria-hidden
       >
-        <img src="/logo-icon.png" alt="" className="h-full w-full object-contain" draggable={false} />
+        <img src="/logo-icon.png?v=2" alt="" className="h-full w-full object-contain" draggable={false} />
       </span>
       <span className="flex min-w-0 flex-col leading-none">
         <span className={`${dims.text} font-black tracking-tight`}>
