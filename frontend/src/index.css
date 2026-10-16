@@ -22,7 +22,6 @@
 
 html {
   scroll-behavior: smooth;
-  overscroll-behavior-y: none;
   /* The app is a fixed-size mobile UI: no pinch or double-tap zoom (scrolling still works). */
   touch-action: pan-x pan-y;
   -webkit-text-size-adjust: 100%;
@@ -36,7 +35,6 @@ body {
   background: var(--color-page);
   color: #0f172a;
   -webkit-font-smoothing: antialiased;
-  overscroll-behavior-y: none;
 }
 
 ::selection {
