@@ -27,8 +27,8 @@ messaging.onBackgroundMessage((payload) => {
   const body = payload.data?.body || 'You have a new notification'
   self.registration.showNotification(title, {
     body,
-    icon: '/logo.svg',
-    badge: '/favicon.svg',
+    icon: '/icon-192.png',
+    badge: '/favicon-32.png',
     data: payload.data || {},
     tag: payload.data?.type || 'carcommunity',
   })

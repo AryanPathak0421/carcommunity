@@ -44,13 +44,13 @@ export function BroadcastPopup() {
           if (registration) {
             registration.showNotification(title, {
               body,
-              icon: '/logo.svg',
-              badge: '/favicon.svg',
+              icon: '/icon-192.png',
+              badge: '/favicon-32.png',
               tag: 'BOOKING_RECEIVED',
               data: { link: '/app' },
             })
           } else {
-            new Notification(title, { body, icon: '/logo.svg', badge: '/favicon.svg' })
+            new Notification(title, { body, icon: '/icon-192.png', badge: '/favicon-32.png' })
           }
         } catch (err) {
           console.warn('[BroadcastPopup] Failed to show local notification:', err)

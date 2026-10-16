@@ -10,7 +10,7 @@ const schema = {
   name: SITE.name,
   url: SITE.url,
   description,
-  logo: `${SITE.url}/favicon.svg`,
+  logo: `${SITE.url}/icon-512.png`,
   sameAs: [
     'https://www.linkedin.com/company/carcommunity',
     'https://twitter.com/carcommunity',

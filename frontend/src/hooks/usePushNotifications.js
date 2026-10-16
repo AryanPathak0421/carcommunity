@@ -47,8 +47,8 @@ export function usePushNotifications() {
           const body = payload.notification?.body || payload.data?.body || ''
           const options = {
             body,
-            icon: '/logo.svg',
-            badge: '/favicon.svg',
+            icon: '/icon-192.png',
+            badge: '/favicon-32.png',
             data: payload.data || {},
             tag: payload.data?.type || 'carcommunity',
           }
