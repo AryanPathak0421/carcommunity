@@ -111,7 +111,7 @@ export function LabourNotificationsPage() {
 
   return (
     <div className="-mx-4 min-h-[70vh] pb-6">
-      <section className="relative overflow-hidden rounded-b-[2rem] bg-linear-to-br from-slate-900 via-slate-800 to-slate-950 px-4 pb-6 pt-[max(0.5rem,env(safe-area-inset-top))] text-white">
+      <section className="relative overflow-hidden rounded-b-[2rem] bg-linear-to-br from-slate-900 via-slate-800 to-slate-950 px-4 pb-6 pt-[max(0.5rem,0px)] text-white">
         <motion.div
           className="pointer-events-none absolute -right-8 top-0 h-40 w-40 rounded-full bg-brand/30 blur-3xl"
           animate={reduce ? undefined : { opacity: [0.3, 0.55, 0.3] }}

@@ -382,7 +382,7 @@ export function MechanicOnboardingPage() {
   return (
     <div className="min-h-dvh bg-slate-50">
       <div className="mx-auto flex min-h-dvh w-full max-w-lg flex-col bg-white shadow-[0_0_60px_-30px_rgba(15,23,42,0.35)]">
-        <header className="bg-linear-to-br from-navy via-slate-800 to-slate-900 px-6 pb-6 pt-[max(1.25rem,env(safe-area-inset-top))] text-white">
+        <header className="bg-linear-to-br from-navy via-slate-800 to-slate-900 px-6 pb-6 pt-[max(1.25rem,0px)] text-white">
           <div className="flex items-center justify-between">
             <CarCommunityLogo variant="light" size="md" tagline={false} />
             <span className="flex items-center gap-1 rounded-full bg-white/15 px-3 py-1 text-[11px] font-bold">

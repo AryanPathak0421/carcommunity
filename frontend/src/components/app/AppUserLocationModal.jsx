@@ -116,7 +116,7 @@ export function AppUserLocationModal({
       >
         <div className="pointer-events-none absolute inset-x-0 top-0 h-36 bg-linear-to-b from-brand/10 via-emerald-50/30 to-transparent" aria-hidden />
 
-        <header className="relative flex shrink-0 items-center gap-2 border-b border-slate-100/90 px-3 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
+        <header className="relative flex shrink-0 items-center gap-2 border-b border-slate-100/90 px-3 pb-3 pt-[max(0.75rem,0px)]">
           <button
             type="button"
             onClick={onClose}

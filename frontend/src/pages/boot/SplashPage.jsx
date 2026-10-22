@@ -68,7 +68,7 @@ export function SplashPage() {
 
   return (
     <div className="lc-splash-page relative min-h-dvh w-full overflow-hidden">
-      <div className="relative z-10 mx-auto flex min-h-dvh w-full max-w-lg flex-col items-center justify-center px-6 pb-[max(6rem,env(safe-area-inset-bottom))] pt-[max(1.5rem,env(safe-area-inset-top))]">
+      <div className="relative z-10 mx-auto flex min-h-dvh w-full max-w-lg flex-col items-center justify-center px-6 pb-[max(6rem,env(safe-area-inset-bottom))] pt-[max(1.5rem,0px)]">
         <span className="mb-5 flex h-20 w-20 items-center justify-center rounded-3xl bg-white p-2 shadow-lg">
           <img src="/logo-icon.png?v=3" alt="CarCommunity" className="h-full w-full object-contain" />
         </span>

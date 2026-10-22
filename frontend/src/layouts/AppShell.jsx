@@ -76,6 +76,14 @@ export function AppShell() {
   const drawerInitials = adminInitials(user)
   const profileImageUrl = user?.profileImageUrl?.trim()
 
+  // Phone status bar follows the colour at the top of the screen (full-bleed orange header on Profile).
+  useEffect(() => {
+    const meta = document.querySelector('meta[name="theme-color"]')
+    if (!meta) return undefined
+    meta.setAttribute('content', pathname === '/app/profile' ? '#F97316' : '#FFFFFF')
+    return () => meta.setAttribute('content', '#F97316')
+  }, [pathname])
+
   useEffect(() => {
     queueMicrotask(() => setDrawerOpen(false))
   }, [pathname])
@@ -439,7 +447,7 @@ export function AppShell() {
 
         <main
           className={`relative z-10 flex-1 px-4 pb-32 ${hideShellHeader
-            ? 'pt-[max(0.5rem,env(safe-area-inset-top,0px))]'
+            ? 'pt-[max(0.5rem,0px)]'
             : isIndividualAppHome
               ? 'pt-0'
               : 'pt-4'

@@ -227,19 +227,19 @@ export function MechanicNavigationScreen({
         <button
           type="button"
           onClick={onBack}
-          className="absolute left-4 top-[max(1rem,env(safe-area-inset-top))] flex h-11 w-11 items-center justify-center rounded-full bg-white text-navy shadow-lg ring-1 ring-slate-200 transition active:scale-95"
+          className="absolute left-4 top-[max(1rem,0px)] flex h-11 w-11 items-center justify-center rounded-full bg-white text-navy shadow-lg ring-1 ring-slate-200 transition active:scale-95"
           aria-label="Back"
         >
           <ArrowLeft className="h-5 w-5" aria-hidden />
         </button>
 
-        <span className="absolute right-4 top-[max(1.25rem,env(safe-area-inset-top))] flex items-center gap-1 rounded-full bg-navy px-3 py-1.5 text-[11px] font-extrabold text-white shadow-lg">
+        <span className="absolute right-4 top-[max(1.25rem,0px)] flex items-center gap-1 rounded-full bg-navy px-3 py-1.5 text-[11px] font-extrabold text-white shadow-lg">
           <IndianRupee className="h-3.5 w-3.5" aria-hidden />
           You earn ₹{(Number(booking.laborShare || 0) + Number(booking.partsTotal || 0)).toLocaleString('en-IN', { maximumFractionDigits: 2 })}
         </span>
 
         {gpsNote ? (
-          <p className="absolute inset-x-4 top-[max(4.5rem,calc(env(safe-area-inset-top)+3.5rem))] rounded-xl bg-amber-50 px-3 py-2 text-[11px] font-semibold leading-snug text-amber-900 shadow ring-1 ring-amber-200">
+          <p className="absolute inset-x-4 top-[4.5rem] rounded-xl bg-amber-50 px-3 py-2 text-[11px] font-semibold leading-snug text-amber-900 shadow ring-1 ring-amber-200">
             {gpsNote}
           </p>
         ) : null}

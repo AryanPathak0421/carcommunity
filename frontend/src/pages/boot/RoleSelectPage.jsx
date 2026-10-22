@@ -67,7 +67,7 @@ export function RoleSelectPage() {
         aria-hidden
       />
 
-      <div className="relative z-10 mx-auto flex min-h-dvh w-full max-w-lg flex-col px-5 pb-[max(1.75rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))]">
+      <div className="relative z-10 mx-auto flex min-h-dvh w-full max-w-lg flex-col px-5 pb-[max(1.75rem,env(safe-area-inset-bottom))] pt-[max(1rem,0px)]">
         <header className="flex items-center justify-between">
           <button
             type="button"

@@ -14,7 +14,7 @@ function openAppDrawer() {
 export function AppStackScreenHeader({ title, backTo = '/app', onBack, variant, subtitle, children }) {
   if (variant === 'brand') {
     return (
-      <header className="sticky top-0 z-30 -mx-4 -mt-2 bg-brand px-4 pb-3.5 pt-[max(0.75rem,env(safe-area-inset-top,0px))] shadow-[0_8px_20px_-14px_rgba(15,23,42,0.6)]">
+      <header className="sticky top-0 z-30 -mx-4 -mt-2 bg-brand px-4 pb-3.5 pt-[max(0.75rem,0px)] shadow-[0_8px_20px_-14px_rgba(15,23,42,0.6)]">
         <div className="flex items-center gap-2">
           <button
             type="button"
@@ -35,7 +35,7 @@ export function AppStackScreenHeader({ title, backTo = '/app', onBack, variant, 
   }
 
   return (
-    <header className="sticky top-0 z-30 pb-3 pt-[max(0.25rem,env(safe-area-inset-top))]">
+    <header className="sticky top-0 z-30 pb-3 pt-[max(0.25rem,0px)]">
       <GlassPanel className="flex items-center gap-3 px-3 py-2.5">
         {onBack ? (
           <button

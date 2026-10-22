@@ -298,11 +298,11 @@ export function AppProfilePage() {
       initial={reduce ? false : { opacity: 0 }}
       animate={{ opacity: 1 }}
     >
-      <header className="relative bg-linear-to-br from-brand to-emerald-800 px-5 pb-8 pt-[max(1rem,env(safe-area-inset-top))] text-white">
+      <header className="relative bg-linear-to-br from-brand to-emerald-800 px-5 pb-8 pt-[max(1rem,0px)] text-white">
         <button
           type="button"
           onClick={openAppDrawer}
-          className="absolute right-4 top-[max(0.75rem,env(safe-area-inset-top))] flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 text-white transition hover:bg-white/15"
+          className="absolute right-4 top-[max(0.75rem,0px)] flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 text-white transition hover:bg-white/15"
           aria-label="Open menu"
         >
           <Menu className="h-5 w-5" aria-hidden />

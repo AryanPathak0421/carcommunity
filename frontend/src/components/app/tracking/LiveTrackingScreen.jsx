@@ -171,14 +171,14 @@ export function LiveTrackingScreen({ bookingId, onBack, onCancelled }) {
         <button
           type="button"
           onClick={onBack}
-          className="absolute left-4 top-[max(1rem,env(safe-area-inset-top))] flex h-11 w-11 items-center justify-center rounded-full bg-white text-navy shadow-lg ring-1 ring-slate-200 transition active:scale-95"
+          className="absolute left-4 top-[max(1rem,0px)] flex h-11 w-11 items-center justify-center rounded-full bg-white text-navy shadow-lg ring-1 ring-slate-200 transition active:scale-95"
           aria-label="Back"
         >
           <ArrowLeft className="h-5 w-5" aria-hidden />
         </button>
 
         {mechanic && status === 'EN_ROUTE' ? (
-          <span className="absolute left-1/2 top-[max(1.25rem,env(safe-area-inset-top))] flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-[11px] font-extrabold text-navy shadow-lg ring-1 ring-slate-200">
+          <span className="absolute left-1/2 top-[max(1.25rem,0px)] flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-[11px] font-extrabold text-navy shadow-lg ring-1 ring-slate-200">
             <span className="relative flex h-2 w-2">
               <span className={`absolute inline-flex h-full w-full rounded-full ${isFresh ? 'animate-ping bg-emerald-400' : 'bg-amber-400'} opacity-75`} />
               <span className={`relative inline-flex h-2 w-2 rounded-full ${isFresh ? 'bg-emerald-500' : 'bg-amber-500'}`} />

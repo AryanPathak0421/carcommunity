@@ -116,7 +116,7 @@ export function AccessoriesPage() {
 
   return (
     <div className="-mx-4">
-      <div className="sticky top-0 z-40 border-b border-slate-200 bg-white px-4 pb-2.5 pt-[max(0.625rem,env(safe-area-inset-top,0px))] shadow-sm">
+      <div className="sticky top-0 z-40 border-b border-slate-200 bg-white px-4 pb-2.5 pt-[max(0.625rem,0px)] shadow-sm">
         <div className="flex items-center gap-2">
           <button
             type="button"

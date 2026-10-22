@@ -110,7 +110,7 @@ export function CarWashPage() {
 
   return (
     <div className="-mx-4 pb-28">
-      <div className="bg-linear-to-br from-sky-600 via-sky-500 to-cyan-400 px-4 pb-6 pt-[max(0.75rem,env(safe-area-inset-top,0px))] text-white">
+      <div className="bg-linear-to-br from-sky-600 via-sky-500 to-cyan-400 px-4 pb-6 pt-[max(0.75rem,0px)] text-white">
         <button
           type="button"
           onClick={() => navigate('/app')}

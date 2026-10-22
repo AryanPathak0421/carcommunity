@@ -219,7 +219,7 @@ export function IndividualCategorySearchPanel({ tradeGroups, groupsLoading }) {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="shrink-0 bg-brand px-4 pb-3.5 pt-[max(0.75rem,env(safe-area-inset-top,0px))] shadow-[0_8px_20px_-14px_rgba(15,23,42,0.6)]">
+      <div className="shrink-0 bg-brand px-4 pb-3.5 pt-[max(0.75rem,0px)] shadow-[0_8px_20px_-14px_rgba(15,23,42,0.6)]">
         <div className="mb-3 flex items-center gap-2">
           <button
             type="button"

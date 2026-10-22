@@ -330,7 +330,7 @@ export function AuthEntryPage({ audience = USER_ROLES.INDIVIDUAL }) {
     <div className="min-h-dvh bg-slate-50">
       <div className="mx-auto flex min-h-dvh w-full max-w-lg flex-col bg-white shadow-[0_0_60px_-30px_rgba(15,23,42,0.35)]">
         {/* hero */}
-        <header className={`relative min-h-[17rem] overflow-hidden ${copy.heroClass} px-6 pb-16 pt-[max(1.25rem,env(safe-area-inset-top))] text-white`}>
+        <header className={`relative min-h-[17rem] overflow-hidden ${copy.heroClass} px-6 pb-16 pt-[max(1.25rem,0px)] text-white`}>
           <span className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full bg-white/10" aria-hidden />
           <span className="pointer-events-none absolute -left-8 bottom-2 h-28 w-28 rounded-full bg-white/10" aria-hidden />
           <div className="relative z-20 flex items-center justify-between">
