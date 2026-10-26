@@ -710,18 +710,6 @@ export function AuthEntryPage({ audience = USER_ROLES.INDIVIDUAL }) {
             )}
           </AnimatePresence>
 
-          <p className="mt-8 text-center text-[12px] text-slate-500">
-            {copy.otherPrompt}{' '}
-            <Link to={copy.otherPath} state={location.state} replace className="font-bold text-brand hover:underline">
-              {copy.otherLink}
-            </Link>
-          </p>
-          <p className="mt-2 text-center text-[12px] text-slate-400">
-            Admin?{' '}
-            <Link to="/admin/login" className="font-bold text-brand hover:underline">
-              Web login
-            </Link>
-          </p>
         </main>
       </div>
     </div>
