@@ -41,7 +41,9 @@ function RotatingHint({ words }) {
 export function HomeStickyBar({ tradeGroups, activeId, onSelect, searchHints, onSearch, onVoiceSearch }) {
   const tabsRef = useRef(null)
   const voice = useVoiceSearch(onVoiceSearch)
-  const showMic = voice.supported && Boolean(onVoiceSearch)
+  // Voice search is switched off for now (mic not accurate). To bring it back:
+  // const showMic = voice.supported && Boolean(onVoiceSearch)
+  const showMic = false
 
   useEffect(() => {
     const el = tabsRef.current?.querySelector('[aria-selected="true"]')

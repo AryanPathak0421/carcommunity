@@ -122,6 +122,9 @@ function ServiceResult({ item, query, onBook }) {
 /**
  * Full Search tab — find a service (book directly) or a skill (opens its page).
  */
+/** Voice search (mic) is switched off for now: it is not accurate enough. Set true to bring it back. */
+const VOICE_SEARCH_ENABLED = false
+
 export function IndividualCategorySearchPanel({ tradeGroups, groupsLoading }) {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
@@ -266,7 +269,7 @@ export function IndividualCategorySearchPanel({ tradeGroups, groupsLoading }) {
               <X className="h-4 w-4" aria-hidden />
             </button>
           ) : null}
-          {voice.supported ? (
+          {VOICE_SEARCH_ENABLED && voice.supported ? (
             <button
               type="button"
               onClick={voice.start}

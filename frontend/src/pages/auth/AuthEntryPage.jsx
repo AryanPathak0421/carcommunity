@@ -210,15 +210,15 @@ export function AuthEntryPage({ audience = USER_ROLES.INDIVIDUAL }) {
       setOtpCells(Array(6).fill(''))
       setResendIn(30)
       setStep('otp')
-      // Test-account hint is dev-only: never shown (and tree-shaken) in production builds.
-      const testAcc = import.meta.env.DEV && p ? HARDCODED_TEST_ACCOUNTS[p] : null
+      // Test-account hint ("Hardcoded Test Account ...: Enter OTP 123456") is switched off.
+      // const testAcc = import.meta.env.DEV && p ? HARDCODED_TEST_ACCOUNTS[p] : null
+      // message: `Hardcoded Test Account (${testAcc.label}): Enter OTP ${testAcc.otp}`
       setBanner({
         variant: 'success',
-        message: testAcc
-          ? `Hardcoded Test Account (${testAcc.label}): Enter OTP ${testAcc.otp}`
-          : OTP_BYPASS_HINT && p
-          ? `Demo OTP: enter the last 6 digits of ${p} (${demoOtpFromPhone(p)}).`
-          : 'OTP sent. Check SMS — in development it may appear in the server terminal.',
+        message:
+          OTP_BYPASS_HINT && p
+            ? `Demo OTP: enter the last 6 digits of ${p} (${demoOtpFromPhone(p)}).`
+            : 'OTP sent. Enter the 6-digit code to continue.',
       })
     } catch (e) {
       setBanner({
