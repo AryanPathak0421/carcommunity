@@ -9,6 +9,7 @@ import { MechanicAuthPage } from './pages/auth/MechanicAuthPage.jsx'
 import { MechanicEntryPage } from './pages/auth/MechanicEntryPage.jsx'
 import { PwaManifestSwitcher } from './components/app/PwaManifestSwitcher.jsx'
 import { ContactPage } from './pages/ContactPage.jsx'
+import { SupportPage } from './pages/SupportPage.jsx'
 import { AdminContactSettingsPage } from './pages/admin/AdminContactSettingsPage.jsx'
 import { AuthRedirect } from './pages/auth/AuthRedirect.jsx'
 import { LabourCategoriesPage } from './pages/app/LabourCategoriesPage.jsx'
@@ -63,6 +64,8 @@ function App() {
           <Route path="/user/auth" element={<UserAuthPage />} />
           <Route path="/mechanic" element={<MechanicEntryPage />} />
           <Route path="/contact" element={<ContactPage />} />
+          <Route path="/support" element={<SupportPage />} />
+          <Route path="/mechanic/support" element={<SupportPage audience="mechanic" />} />
           <Route path="/mechanic/contact" element={<ContactPage audience="mechanic" />} />
           <Route path="/mechanic/auth" element={<MechanicAuthPage />} />
           <Route path="/b2c/auth" element={<AuthRedirect />} />

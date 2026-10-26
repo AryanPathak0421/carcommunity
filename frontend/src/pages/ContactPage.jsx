@@ -72,6 +72,9 @@ export function ContactPage({ audience = 'customer' }) {
             <CarCommunityLogo size="sm" tagline={false} />
           </Link>
           <nav className="ml-auto flex items-center gap-4 text-[13px] font-bold">
+            <Link to={audience === 'mechanic' ? '/mechanic/support' : '/support'} className="text-slate-500 hover:text-slate-800">
+              Support
+            </Link>
             <Link to="/terms" className="text-slate-500 hover:text-slate-800">
               Terms
             </Link>
