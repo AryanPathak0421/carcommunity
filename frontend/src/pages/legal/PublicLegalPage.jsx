@@ -5,18 +5,22 @@ import { ArrowLeft } from 'lucide-react'
 import { DynamicLegalDocument } from '../../components/legal/DynamicLegalDocument.jsx'
 import { COMPANY, LEGAL_DOCS } from '../../data/legalContent.js'
 
-/** Public website page for the Terms (kind="terms") or Privacy Policy (kind="privacy"). */
-export function PublicLegalPage({ kind }) {
+/**
+ * Public website page for the Terms (kind="terms") or Privacy Policy (kind="privacy").
+ * `role="mechanic"` shows the policy written for the mechanic app (`/mechanic/privacy`).
+ */
+export function PublicLegalPage({ kind, role = 'individual' }) {
   const doc = LEGAL_DOCS[kind]
+  const isMechanic = role === 'mechanic'
 
   useEffect(() => {
     const previous = document.title
-    document.title = `${doc.title} — ${COMPANY.brand}`
+    document.title = `${doc.title} — ${COMPANY.brand}${isMechanic ? ' Partner (Mechanic app)' : ''}`
     window.scrollTo(0, 0)
     return () => {
       document.title = previous
     }
-  }, [doc.title])
+  }, [doc.title, isMechanic])
 
   return (
     <div className="min-h-screen bg-white">
@@ -36,7 +40,10 @@ export function PublicLegalPage({ kind }) {
             <Link to="/terms" className={kind === 'terms' ? 'text-brand' : 'text-slate-500 hover:text-slate-800'}>
               Terms
             </Link>
-            <Link to="/privacy" className={kind === 'privacy' ? 'text-brand' : 'text-slate-500 hover:text-slate-800'}>
+            <Link
+              to={isMechanic ? '/mechanic/privacy' : '/privacy'}
+              className={kind === 'privacy' ? 'text-brand' : 'text-slate-500 hover:text-slate-800'}
+            >
               Privacy
             </Link>
           </nav>
@@ -44,7 +51,7 @@ export function PublicLegalPage({ kind }) {
       </header>
 
       <main className="mx-auto max-w-3xl px-4 pb-16 pt-8">
-        <DynamicLegalDocument kind={kind} role="individual" variant="public" />
+        <DynamicLegalDocument kind={kind} role={role} variant="public" />
       </main>
 
       <footer className="border-t border-slate-200 bg-slate-50 py-6 text-center text-[12px] text-slate-500">

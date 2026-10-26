@@ -69,6 +69,7 @@ function App() {
           <Route path="/auth" element={<AuthRedirect />} />
           <Route path="/terms" element={<PublicLegalPage kind="terms" />} />
           <Route path="/privacy" element={<PublicLegalPage kind="privacy" />} />
+          <Route path="/mechanic/privacy" element={<PublicLegalPage kind="privacy" role="mechanic" />} />
           <Route path="/privacy-policy" element={<Navigate to="/privacy" replace />} />
 
           <Route
