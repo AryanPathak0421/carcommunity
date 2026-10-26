@@ -257,6 +257,7 @@ export const footerLinks = {
   ],
   legal: [
     { label: 'Terms', href: '/terms' },
+    { label: 'Contact us', href: '/contact' },
     { label: 'Privacy', href: '/privacy' },
     { label: 'Grievance', href: '/privacy#grievance' },
   ],

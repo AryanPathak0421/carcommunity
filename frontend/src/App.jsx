@@ -6,6 +6,10 @@ import { AdminLayout } from './layouts/AdminLayout.jsx'
 import { LandingPage } from './pages/LandingPage'
 import { UserAuthPage } from './pages/auth/UserAuthPage.jsx'
 import { MechanicAuthPage } from './pages/auth/MechanicAuthPage.jsx'
+import { MechanicEntryPage } from './pages/auth/MechanicEntryPage.jsx'
+import { PwaManifestSwitcher } from './components/app/PwaManifestSwitcher.jsx'
+import { ContactPage } from './pages/ContactPage.jsx'
+import { AdminContactSettingsPage } from './pages/admin/AdminContactSettingsPage.jsx'
 import { AuthRedirect } from './pages/auth/AuthRedirect.jsx'
 import { LabourCategoriesPage } from './pages/app/LabourCategoriesPage.jsx'
 import { MechanicOnboardingPage } from './pages/app/MechanicOnboardingPage.jsx'
@@ -52,10 +56,14 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <PwaManifestSwitcher />
         <Routes>
           <Route path="/" element={<LandingPage />} />
           {bootRoutes}
           <Route path="/user/auth" element={<UserAuthPage />} />
+          <Route path="/mechanic" element={<MechanicEntryPage />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/mechanic/contact" element={<ContactPage audience="mechanic" />} />
           <Route path="/mechanic/auth" element={<MechanicAuthPage />} />
           <Route path="/b2c/auth" element={<AuthRedirect />} />
           <Route path="/auth" element={<AuthRedirect />} />
@@ -122,6 +130,7 @@ function App() {
             <Route path="accessories" element={<AdminAccessoriesPage />} />
             <Route path="car-parts" element={<AdminCarPartsPage />} />
             <Route path="service-settings" element={<AdminServiceSettingsPage />} />
+            <Route path="contact" element={<AdminContactSettingsPage />} />
             <Route path="complaints" element={<AdminComplaintsPage />} />
             <Route path="profile" element={<AdminProfilePage />} />
             <Route path="reports" element={<AdminReportsPage />} />

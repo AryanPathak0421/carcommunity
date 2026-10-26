@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Download, X } from 'lucide-react'
+import { USER_ROLES } from '../../constants/userRoles.js'
+import { useAuth } from '../../hooks/useAuth.js'
 
 const DISMISS_KEY = 'cc_install_dismissed'
 
@@ -17,6 +19,8 @@ function isStandalone() {
 
 /** "Install app" prompt: Chrome/Android one-tap install, plus a hint for iPhone Safari. */
 export function InstallAppBanner() {
+  const { realUser } = useAuth()
+  const isMechanic = realUser?.role === USER_ROLES.MECHANIC
   const [deferred, setDeferred] = useState(null)
   const [dismissed, setDismissed] = useState(readDismissed)
   const [installed, setInstalled] = useState(() => isStandalone())
@@ -61,9 +65,13 @@ export function InstallAppBanner() {
     <div className="fixed inset-x-0 bottom-3 z-50 mx-auto flex w-[calc(100%-1.5rem)] max-w-lg items-center gap-3 rounded-2xl bg-white p-3 shadow-[0_12px_36px_-10px_rgba(15,23,42,0.45)] ring-1 ring-slate-200">
       <img src="/icon-192.png" alt="" className="h-11 w-11 shrink-0 rounded-xl" />
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-extrabold text-slate-900">Install CarCommunity</p>
+        <p className="text-sm font-extrabold text-slate-900">{isMechanic ? 'Install CarCommunity Partner' : 'Install CarCommunity'}</p>
         <p className="truncate text-[11px] font-medium text-slate-500">
-          {deferred ? 'Add to your home screen for quick access' : 'Tap Share, then "Add to Home Screen"'}
+          {deferred
+            ? isMechanic
+              ? 'Get job alerts and open your work dashboard in one tap'
+              : 'Add to your home screen for quick access'
+            : 'Tap Share, then "Add to Home Screen"'}
         </p>
       </div>
       {deferred ? (

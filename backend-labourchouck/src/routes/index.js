@@ -12,6 +12,7 @@ import paymentRoutes from './paymentRoutes.js'
 import reviewRoutes from './reviewRoutes.js'
 import userSubscriptionRoutes from './userSubscriptionRoutes.js'
 import termsRoutes from './termsRoutes.js'
+import { publicContactRoutes, adminContactRoutes } from './contactSettingsRoutes.js'
 import privacyPolicyRoutes from './privacyPolicyRoutes.js'
 import faqRoutes from './faqRoutes.js'
 import notificationRoutes from './notificationRoutes.js'
@@ -64,6 +65,7 @@ router.use('/cars', carListingRoutes)
 router.use('/accessories', accessoryRoutes)
 router.use('/car-parts', carPartRoutes)
 router.use('/app-config', publicServiceUiRoutes)
+router.use('/contact-info', publicContactRoutes)
 
 router.use('/admin/settings', systemSettingRoutes)
 router.use('/admin/zones', adminZoneRoutes)
@@ -84,6 +86,7 @@ router.use('/admin/cars', adminCarListingRoutes)
 router.use('/admin/accessories', adminAccessoryRoutes)
 router.use('/admin/car-parts', adminCarPartRoutes)
 router.use('/admin/service-config', adminServiceUiRoutes)
+router.use('/admin/contact-settings', adminContactRoutes)
 router.use('/labour/location', locationRoutes)
 
 import { getCollectedCommissionAmount } from '../controllers/adminWalletController.js'

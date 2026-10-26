@@ -23,6 +23,7 @@ import {
   HandCoins,
   Star,
   FileText,
+  Phone,
 } from 'lucide-react'
 
 /**
@@ -113,6 +114,7 @@ export const ADMIN_NAV_SECTIONS = [
       { to: '/admin/profile', label: 'Profile', icon: UserCog },
       { to: '/admin/settings', label: 'Settings', icon: Settings },
       { to: '/admin/service-settings', label: 'Service app settings', icon: Settings },
+      { to: '/admin/contact', label: 'Contact us', icon: Phone },
       { to: '/admin/reviews', label: 'Reviews & Ratings', icon: Star },
     ],
   },
@@ -124,6 +126,7 @@ const ROUTE_TITLES = [
   { prefix: '/admin/profile', title: 'Profile' },
   { prefix: '/admin/complaints', title: 'Complaints' },
   { prefix: '/admin/service-settings', title: 'Service app settings' },
+  { prefix: '/admin/contact', title: 'Contact us' },
   { prefix: '/admin/settings', title: 'Settings' },
   { prefix: '/admin/banners', title: 'Banners' },
   { prefix: '/admin/terms', title: 'Terms & Conditions' },

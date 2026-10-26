@@ -1,0 +1,24 @@
+{
+  "name": "CarCommunity Partner",
+  "short_name": "CC Partner",
+  "description": "For mechanics: get nearby job requests, navigate to customers, track earnings and withdraw.",
+  "id": "/mechanic",
+  "start_url": "/mechanic?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f172a",
+  "theme_color": "#F97316",
+  "categories": ["business", "productivity", "utilities"],
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "My jobs", "short_name": "Jobs", "url": "/app/jobs", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Earnings", "short_name": "Earnings", "url": "/app/earnings", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Wallet", "short_name": "Wallet", "url": "/app/wallet", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

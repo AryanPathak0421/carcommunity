@@ -14,6 +14,7 @@ import {
   HardHat,
   HelpCircle,
   Headset,
+  Phone,
   Info,
   Car,
   Loader2,
@@ -424,6 +425,7 @@ export function AppProfilePage() {
           <MenuRow icon={ShieldCheck} label="Privacy policy" to="/app/privacy-policy" />
           <MenuRow icon={HelpCircle} label="FAQs" to="/app/faq" />
           <MenuRow icon={Headset} label="Help & support" to="/app/support" />
+          <MenuRow icon={Phone} label="Contact us" to={isLabour ? '/mechanic/contact' : '/contact'} />
           <MenuRow icon={ClipboardX} label="Request account deletion" onClick={() => setDeleteOpen(true)} />
           <MenuRow icon={LogOut} label="Log out" onClick={handleSignOut} />
         </MenuGroup>
