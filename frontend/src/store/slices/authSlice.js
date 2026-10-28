@@ -22,6 +22,12 @@ const authSlice = createSlice({
       state.token = accessToken ?? null
       state.user = user ?? null
     },
+    /** Swap in a renewed token (sliding session) without touching the user. */
+    renewToken(state, action) {
+      if (!action.payload) return
+      localStorage.setItem(AUTH_STORAGE_KEY, action.payload)
+      state.token = action.payload
+    },
     setUser(state, action) {
       state.user = action.payload
     },
@@ -37,5 +43,5 @@ const authSlice = createSlice({
   },
 })
 
-export const { setCredentials, setUser, setLoading, clearSession } = authSlice.actions
+export const { setCredentials, renewToken, setUser, setLoading, clearSession } = authSlice.actions
 export const authReducer = authSlice.reducer
