@@ -242,7 +242,16 @@ export const adminLogin = asyncHandler(async (req, res) => {
 /** GET /auth/me */
 export const getMe = asyncHandler(async (req, res) => {
   await populateLabourCategories(req.user)
-  return sendSuccess(res, { data: { user: req.user.toSafeObject() } })
+  const data = { user: req.user.toSafeObject() }
+
+  // Sliding session: once less than half of the token's life is left, hand out a fresh one so
+  // anyone who opens the app at least every ~2 weeks never has to sign in again.
+  const { iat, exp } = req.tokenPayload || {}
+  if (req.user.role !== USER_ROLES.ADMIN && iat && exp) {
+    const now = Math.floor(Date.now() / 1000)
+    if (exp - now < (exp - iat) / 2) data.token = signAccessToken(req.user)
+  }
+  return sendSuccess(res, { data })
 })
 
 /** POST /auth/logout */
