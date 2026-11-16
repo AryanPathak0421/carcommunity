@@ -128,6 +128,11 @@ export const assignLabourerManually = asyncHandler(async (req, res) => {
   booking.status = 'ASSIGNED'
   await booking.save()
 
+  import('../socket.js').then(({ emitToUser, emitToAdmins }) => {
+    emitToAdmins('BOOKING_STATUS_UPDATE', { bookingId: booking._id, status: 'ASSIGNED', laborId })
+    emitToUser(booking.userId, 'BOOKING_ACCEPTED', { bookingId: booking._id, laborId })
+  }).catch((err) => console.error('[socket] assignLabourerManually error:', err))
+
   const updatedBooking = await Booking.findById(id)
     .populate('userId', 'fullName phone email profileImageUrl')
     .populate('laborId', 'fullName phone email profileImageUrl')

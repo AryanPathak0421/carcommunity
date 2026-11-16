@@ -13,6 +13,7 @@ import { requestLoginOtp, requestRegisterOtp, verifyLogin, verifyRegister } from
 import { useAuth } from '../../hooks/useAuth.js'
 import { ApiError } from '../../api/http.js'
 import { referralsApi } from '../../api/referralsApi.js'
+import { writeBootRole } from '../../lib/bootPersona.js'
 import {
   captureReferralCodeFromUrl,
   clearStoredReferralCode,
@@ -101,9 +102,21 @@ export function AuthEntryPage({ audience = USER_ROLES.INDIVIDUAL }) {
   const role = AUDIENCES[audience] ? audience : USER_ROLES.INDIVIDUAL
   const navigate = useNavigate()
   const location = useLocation()
-  const { applySession } = useAuth()
+  const { applySession, realUser, logout } = useAuth()
   const reduce = useReducedMotion()
   const otpInputRefs = useRef([])
+
+  useEffect(() => {
+    if (realUser) {
+      if (realUser.role === role) {
+        navigate('/app', { replace: true })
+      } else {
+        logout().then(() => {
+          writeBootRole(role)
+        })
+      }
+    }
+  }, [realUser, role, navigate, logout])
 
   const [mode, setMode] = useState('login')
   const [step, setStep] = useState('form')

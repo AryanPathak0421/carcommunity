@@ -58,7 +58,7 @@ export async function startBroadcastCycle(bookingId) {
   }).select('acceptedLabourId').lean()
   const busyLabourIds = busyBookings.map(b => b.acceptedLabourId)
 
-  const potentialLaborersRaw = await User.find({
+  let potentialLaborersRaw = await User.find({
     _id: { $nin: busyLabourIds },
     role: 'mechanic',
     'labourProfile.availabilityStatus': 'available',
@@ -66,6 +66,29 @@ export async function startBroadcastCycle(bookingId) {
     'labourProfile.currentLongitude': { $gte: bookingLng - bufferLngDiff, $lte: bookingLng + bufferLngDiff },
     'labourProfile.subcategoryIds': booking.subcategoryId
   }).lean()
+
+  if (potentialLaborersRaw.length === 0 && process.env.NODE_ENV !== 'production') {
+    const testMech = await User.findOne({ phone: '2222222222', role: 'mechanic' }).lean()
+    if (testMech && !busyLabourIds.some((id) => String(id) === String(testMech._id))) {
+      testMech.labourProfile = {
+        ...testMech.labourProfile,
+        currentLatitude: bookingLat + 0.005,
+        currentLongitude: bookingLng + 0.005,
+        availabilityStatus: 'available',
+      }
+      potentialLaborersRaw = [testMech]
+      await User.updateOne(
+        { _id: testMech._id },
+        {
+          $set: {
+            'labourProfile.currentLatitude': bookingLat + 0.005,
+            'labourProfile.currentLongitude': bookingLng + 0.005,
+            'labourProfile.availabilityStatus': 'available',
+          },
+        },
+      )
+    }
+  }
 
   const to24Hour = (timeStr) => {
     if (!timeStr) return ''

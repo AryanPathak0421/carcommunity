@@ -22,7 +22,10 @@ function setHead(selector, create, apply) {
 export function PwaManifestSwitcher() {
   const { pathname } = useLocation()
   const { realUser } = useAuth()
-  const isMechanic = pathname.startsWith('/mechanic') || realUser?.role === USER_ROLES.MECHANIC
+  const isMechanic =
+    pathname.startsWith('/mechanic') ||
+    pathname.startsWith('/partner') ||
+    realUser?.role === USER_ROLES.MECHANIC
 
   useEffect(() => {
     const cfg = isMechanic ? MECHANIC : CUSTOMER

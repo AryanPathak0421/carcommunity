@@ -63,16 +63,21 @@ function App() {
           {bootRoutes}
           <Route path="/user/auth" element={<UserAuthPage />} />
           <Route path="/mechanic" element={<MechanicEntryPage />} />
+          <Route path="/partner" element={<MechanicEntryPage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/support" element={<SupportPage />} />
           <Route path="/mechanic/support" element={<SupportPage audience="mechanic" />} />
+          <Route path="/partner/support" element={<SupportPage audience="mechanic" />} />
           <Route path="/mechanic/contact" element={<ContactPage audience="mechanic" />} />
+          <Route path="/partner/contact" element={<ContactPage audience="mechanic" />} />
           <Route path="/mechanic/auth" element={<MechanicAuthPage />} />
+          <Route path="/partner/auth" element={<MechanicAuthPage />} />
           <Route path="/b2c/auth" element={<AuthRedirect />} />
           <Route path="/auth" element={<AuthRedirect />} />
           <Route path="/terms" element={<PublicLegalPage kind="terms" />} />
           <Route path="/privacy" element={<PublicLegalPage kind="privacy" />} />
           <Route path="/mechanic/privacy" element={<PublicLegalPage kind="privacy" role="mechanic" />} />
+          <Route path="/partner/privacy" element={<PublicLegalPage kind="privacy" role="mechanic" />} />
           <Route path="/privacy-policy" element={<Navigate to="/privacy" replace />} />
 
           <Route
@@ -100,6 +105,16 @@ function App() {
 
           <Route
             path="/mechanic/onboarding"
+            element={
+              <ProtectedRoute roles={[USER_ROLES.MECHANIC]}>
+                <ErrorBoundary>
+                  <MechanicOnboardingPage />
+                </ErrorBoundary>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/partner/onboarding"
             element={
               <ProtectedRoute roles={[USER_ROLES.MECHANIC]}>
                 <ErrorBoundary>
