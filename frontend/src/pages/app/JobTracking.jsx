@@ -20,6 +20,7 @@ import { AppStackScreenHeader } from '../../components/app/AppStackScreenHeader.
 import { GlassPanel } from '../../components/ui/GlassPanel.jsx'
 import { ReviewModal } from '../../components/app/ReviewModal.jsx'
 import { LiveTrackingScreen } from '../../components/app/tracking/LiveTrackingScreen.jsx'
+import { CancelSearchButton } from '../../components/app/booking/CancelSearchButton.jsx'
 
 const BOOKING_STEPS = [
   { id: 'CREATED', label: 'Booking Created' },
@@ -374,6 +375,13 @@ export function JobTracking() {
           </div>
         </GlassPanel>
       )}
+
+      {['CREATED', 'BROADCASTING'].includes(booking.status) ? (
+        <CancelSearchButton
+          bookingId={booking._id || bookingId}
+          onCancelled={() => navigate('/app/my-bookings', { replace: true })}
+        />
+      ) : null}
 
       {/* Booking Info */}
       <GlassPanel className="p-4 text-sm">

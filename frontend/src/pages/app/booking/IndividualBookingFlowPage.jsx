@@ -20,6 +20,7 @@ import {
 } from 'lucide-react'
 import { AppStackScreenHeader } from '../../../components/app/AppStackScreenHeader.jsx'
 import { AppButton } from '../../../components/app-ui/buttons/AppButton.jsx'
+import { CancelSearchButton } from '../../../components/app/booking/CancelSearchButton.jsx'
 import { AppTextInput } from '../../../components/app-ui/inputs/AppTextInput.jsx'
 import { GlassPanel } from '../../../components/ui/GlassPanel.jsx'
 import { fetchLabourCategoriesGrouped } from '../../../api/labourCategoriesApi.js'
@@ -687,6 +688,12 @@ export function IndividualBookingFlowPage() {
           categoryLabel={draft.serviceName || draft.categoryName}
           onComplete={() => { }}
           onNoMatch={() => { }}
+        />
+
+        <CancelSearchButton
+          bookingId={activeBookingId}
+          className="mt-4"
+          onCancelled={() => { clearBookingDraft(); navigate('/app/my-bookings', { replace: true }) }}
         />
       </div>
     )
