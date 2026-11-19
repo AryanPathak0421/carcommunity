@@ -13,17 +13,22 @@ import { normalizeIndianPhone } from '../utils/phone.js'
 const SMS_API_BASE = process.env.SMS_API_URL || 'https://cloud.smsindiahub.in/api/mt/SendSMS'
 
 const OTP_TEMPLATE_ID = process.env.OTP_TEMPLATE_ID || '1007282516644508833'
-// ##var## placeholders: 1) app/brand name, 2) OTP code
+// ##var## placeholders, in order: 1) app/brand name, 2) "powered by" name, 3) OTP code.
+// Must match the approved DLT template text exactly (current: BGADPL "App Login" template).
 const OTP_TEMPLATE_TEXT =
   process.env.OTP_TEMPLATE_TEXT ||
-  'Welcome to the ##var## powered by Appzeto.Your OTP for registration is ##var##.BGADEC'
+  'Welcome to ##var##, powered by ##var##. Your OTP for registration ##var##. This OTP is valid for 10 minutes. Please do not share it with anyone.BGADPL'
+const OTP_POWERED_BY = process.env.OTP_POWERED_BY || 'Appzeto'
 
 function isSmsConfigured() {
   return Boolean(process.env.SMS_API_KEY && process.env.SMS_SENDER_ID)
 }
 
 function buildOtpMessage(otpCode, appName = 'CarCommunity') {
-  return OTP_TEMPLATE_TEXT.replace('##var##', appName).replace('##var##', otpCode)
+  const values = [appName, OTP_POWERED_BY, otpCode]
+  let i = 0
+  // Fill the ##var## slots left to right; extra slots (if the template changes) stay empty.
+  return OTP_TEMPLATE_TEXT.replace(/##var##/g, () => values[i++] ?? '')
 }
 
 /**
