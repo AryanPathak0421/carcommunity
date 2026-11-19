@@ -25,7 +25,7 @@ export function AppRouteLoader() {
       >
         <div className="flex items-center gap-3">
           <motion.img
-            src="/logo-icon.png?v=3"
+            src="/logo-icon.png?v=4"
             alt=""
             className="h-14 w-14 object-contain"
             animate={reduce ? undefined : { scale: [1, 1.05, 1] }}
