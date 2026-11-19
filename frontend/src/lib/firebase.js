@@ -38,8 +38,16 @@ export const requestFcmToken = async () => {
   const messaging = await getMessagingIfSupported()
   if (!messaging) return null
   if (typeof Notification === 'undefined' || !('serviceWorker' in navigator)) return null
+  if (Notification.permission === 'denied') return null
 
-  const permission = await Notification.requestPermission()
+  let permission = Notification.permission
+  if (permission !== 'granted') {
+    try {
+      permission = await Notification.requestPermission()
+    } catch {
+      return null
+    }
+  }
   if (permission !== 'granted') return null
 
   const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js')

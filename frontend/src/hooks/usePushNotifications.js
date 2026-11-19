@@ -12,15 +12,17 @@ const FCM_TOKEN_STORAGE_KEY = 'lc_fcm_token'
  */
 export function usePushNotifications() {
   const authToken = useSelector((s) => s.auth.token)
-  const setupDoneRef = useRef(false)
+  const user = useSelector((s) => s.auth.user)
+  const userId = user?._id || user?.id
+  const setupDoneRef = useRef(null)
 
   useEffect(() => {
-    if (!authToken) {
-      setupDoneRef.current = false
+    if (!authToken || !userId) {
+      setupDoneRef.current = null
       return
     }
-    if (setupDoneRef.current) return
-    setupDoneRef.current = true
+    if (setupDoneRef.current === userId) return
+    setupDoneRef.current = userId
 
     let unsubscribe = () => {}
     let cancelled = false
@@ -30,13 +32,14 @@ export function usePushNotifications() {
         const fcmToken = await requestFcmToken()
         if (cancelled || !fcmToken) return
 
-        // Re-register only when the token changed (getToken can rotate tokens)
-        const previous = localStorage.getItem(FCM_TOKEN_STORAGE_KEY)
+        // Track per-user so switching accounts on the same browser always registers
+        const userKey = `${FCM_TOKEN_STORAGE_KEY}_${userId}`
+        const previous = localStorage.getItem(userKey)
         if (previous !== fcmToken) {
           await registerFcmToken(fcmToken, 'web')
-          localStorage.setItem(FCM_TOKEN_STORAGE_KEY, fcmToken)
+          localStorage.setItem(userKey, fcmToken)
+          console.info('[push] FCM token registered for user:', userId)
         } else {
-          // Refresh the server-side timestamp on a best-effort basis
           registerFcmToken(fcmToken, 'web').catch(() => {})
         }
 
