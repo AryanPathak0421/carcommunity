@@ -502,7 +502,8 @@ export const updatePaymentMethod = asyncHandler(async (req, res) => {
       userId: req.user._id,
       paymentStatus: 'PENDING',
       settledAt: { $exists: false },
-      status: { $in: ['DRAFT', 'CREATED', 'BROADCASTING', 'ACCEPTED', 'ASSIGNED', 'EN_ROUTE', 'STARTED'] },
+      // COMPLETED is allowed: the customer picks how they pay on the payment screen, after the job is done.
+      status: { $in: ['DRAFT', 'CREATED', 'BROADCASTING', 'ACCEPTED', 'ASSIGNED', 'EN_ROUTE', 'STARTED', 'COMPLETED'] },
     },
     { $set: { paymentMethod } },
     { new: true },
@@ -514,6 +515,13 @@ export const updatePaymentMethod = asyncHandler(async (req, res) => {
       message: exists ? 'Payment method can no longer be changed for this booking' : 'Booking not found',
       statusCode: exists ? HTTP_STATUS.CONFLICT : HTTP_STATUS.NOT_FOUND,
     })
+  }
+
+  // Switching to Cash after the job is done: the mechanic has collected it, so split the money now
+  // (a no-op while the booking is still ONLINE and unpaid).
+  if (booking.status === 'COMPLETED') {
+    await topUpWorkerForCashDiscount(booking)
+    await settleBookingIfReady(booking._id)
   }
 
   res.json({ success: true, paymentMethod })

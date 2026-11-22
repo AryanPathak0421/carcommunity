@@ -992,7 +992,10 @@ export function IndividualBookingFlowPage() {
                     try {
                       await bookingsApi.updatePaymentMethod(activeBookingId, 'CASH')
                     } catch (e) {
+                      // Do not carry on as if it were Cash: the booking would still be recorded as Online.
                       console.error('Failed to update payment method:', e)
+                      alert(e?.message || 'Could not switch this booking to Cash. Please try again.')
+                      return
                     }
                   }
                   clearBookingDraft()
