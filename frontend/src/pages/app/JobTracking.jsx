@@ -379,6 +379,7 @@ export function JobTracking() {
       {['CREATED', 'BROADCASTING'].includes(booking.status) ? (
         <CancelSearchButton
           bookingId={booking._id || bookingId}
+          onStale={() => bookingsApi.getBookingStatus(bookingId).then((res) => { if (res.data?.booking) setBooking(res.data.booking) }).catch(() => {})}
           onCancelled={() => navigate('/app/my-bookings', { replace: true })}
         />
       ) : null}

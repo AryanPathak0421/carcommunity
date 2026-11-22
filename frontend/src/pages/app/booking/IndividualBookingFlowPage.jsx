@@ -251,6 +251,35 @@ export function IndividualBookingFlowPage() {
     }
   }, [bookingEvent, activeBookingId, goStep, realUser])
 
+  // The server can end the search (no mechanic nearby, accepted, cancelled) before the socket event
+  // reaches this screen, so also check the booking itself: right away and every 4 s while searching.
+  const [searchRecheck, setSearchRecheck] = useState(0)
+  useEffect(() => {
+    if (step !== 'searching' || noMatch || !activeBookingId || !realUser) return undefined
+    let stopped = false
+    const check = async () => {
+      try {
+        const res = await bookingsApi.getBookingStatus(activeBookingId)
+        const b = res.data?.booking
+        if (stopped || !b) return
+        setActiveBooking(b)
+        if (b.status === 'FAILED' || b.status === 'REFUNDED') setNoMatch(true)
+        else if (b.status === 'CANCELLED') {
+          clearBookingDraft()
+          navigate('/app/my-bookings', { replace: true })
+        } else if (['ACCEPTED', 'ASSIGNED', 'EN_ROUTE', 'STARTED'].includes(b.status)) goStep('active')
+      } catch {
+        /* network blip: try again on the next tick */
+      }
+    }
+    check()
+    const id = setInterval(check, 4000)
+    return () => {
+      stopped = true
+      clearInterval(id)
+    }
+  }, [step, noMatch, activeBookingId, realUser, goStep, navigate, searchRecheck])
+
   useEffect(() => {
     const cid = categoryIdParam
     const gid = groupIdParam
@@ -693,6 +722,7 @@ export function IndividualBookingFlowPage() {
         <CancelSearchButton
           bookingId={activeBookingId}
           className="mt-4"
+          onStale={() => setSearchRecheck((n) => n + 1)}
           onCancelled={() => { clearBookingDraft(); navigate('/app/my-bookings', { replace: true }) }}
         />
       </div>

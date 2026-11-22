@@ -6,9 +6,9 @@ import { bookingsApi } from '../../../api/bookingsApi.js'
  * "Cancel booking" for the searching screens (customer only, before a mechanic accepts).
  * Asks for confirmation, then moves the booking to CANCELLED; the server releases any wallet discount / parts.
  *
- * @param {{ bookingId?: string, onCancelled?: () => void, className?: string }} props
+ * @param {{ bookingId?: string, onCancelled?: () => void, onStale?: () => void, className?: string }} props
  */
-export function CancelSearchButton({ bookingId, onCancelled, className = '' }) {
+export function CancelSearchButton({ bookingId, onCancelled, onStale, className = '' }) {
   const [confirming, setConfirming] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
@@ -22,8 +22,10 @@ export function CancelSearchButton({ bookingId, onCancelled, className = '' }) {
       await bookingsApi.updateBookingStatus(bookingId, 'CANCELLED')
       onCancelled?.()
     } catch (e) {
-      // A mechanic may have accepted in the meantime: the server then refuses and the screen refreshes itself.
-      setError(e?.message || 'Could not cancel this booking. Please try again.')
+      // The search may have ended in the meantime (no mechanic, accepted): tell the screen to refresh itself.
+      const ended = /cannot be cancelled/i.test(e?.message || '')
+      setError(ended ? 'This search has already ended. Updating…' : e?.message || 'Could not cancel this booking. Please try again.')
+      onStale?.()
       setBusy(false)
       setConfirming(false)
     }
