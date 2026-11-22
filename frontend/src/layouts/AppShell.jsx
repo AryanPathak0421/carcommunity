@@ -371,7 +371,7 @@ export function AppShell() {
         ) : null}
       </AnimatePresence>
 
-      <div className="relative z-10 mx-auto flex min-h-dvh w-full max-w-lg flex-col">
+      <div className="relative mx-auto flex min-h-dvh w-full max-w-lg flex-col">
         {!isIndividualAppHome && isLabourNotifications ? (
           <div
             className="pointer-events-none absolute left-1/2 top-0 z-0 h-[min(52vh,26rem)] w-full max-w-lg -translate-x-1/2 rounded-b-[2rem] bg-brand"
@@ -442,7 +442,7 @@ export function AppShell() {
         ) : null}
 
         <main
-          className={`relative z-10 flex-1 px-4 pb-32 ${hideShellHeader
+          className={`relative flex-1 px-4 pb-32 ${hideShellHeader
             ? 'pt-[max(0.5rem,0px)]'
             : isIndividualAppHome
               ? 'pt-0'
