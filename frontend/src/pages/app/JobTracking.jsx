@@ -174,10 +174,10 @@ export function JobTracking() {
         purpose: 'BOOKING',
         bookingId: booking._id,
       })
-      const { order } = orderRes.data
+      const { order, keyId } = orderRes.data
 
       const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_TYe1C0k011xHMB', // fallback
+        key: keyId || import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount: order.amount,
         currency: order.currency,
         name: 'CarCommunity',

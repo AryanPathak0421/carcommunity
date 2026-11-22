@@ -107,7 +107,7 @@ export const initPayment = asyncHandler(async (req, res) => {
     status: 'CREATED',
   })
 
-  return sendSuccess(res, { data: { order, paymentTransactionId: pTx._id } })
+  return sendSuccess(res, { data: { order, keyId: process.env.RAZORPAY_KEY_ID, paymentTransactionId: pTx._id } })
 })
 
 export const verifyPayment = asyncHandler(async (req, res) => {

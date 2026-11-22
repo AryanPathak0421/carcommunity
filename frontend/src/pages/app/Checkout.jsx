@@ -319,7 +319,7 @@ export function Checkout() {
       if (!order) throw new Error('Payment initialization failed')
 
       const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_placeholder',
+        key: payRes.data?.keyId || import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount: order.amount,
         currency: order.currency || 'INR',
         order_id: order.id,
