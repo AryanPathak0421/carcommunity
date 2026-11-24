@@ -33,7 +33,7 @@ export function AccessoryDetailPage() {
   const [data, setData] = useState(null)
   const [error, setError] = useState('')
   const [slide, setSlide] = useState(0)
-  const [sheet, setSheet] = useState({ open: false, qty: 1, message: '' })
+  const [sheet, setSheet] = useState({ open: false, qty: 1, message: '', name: '', address: '' })
   const [sending, setSending] = useState(false)
   const [formError, setFormError] = useState('')
   const [seller, setSeller] = useState(null)
@@ -72,7 +72,7 @@ export function AccessoryDetailPage() {
       return
     }
     setFormError('')
-    setSheet((s) => ({ ...s, open: true }))
+    setSheet((s) => ({ ...s, open: true, name: s.name || user?.fullName || '' }))
   }
 
   const loadRazorpay = async () => {
@@ -88,12 +88,22 @@ export function AccessoryDetailPage() {
 
   const pay = async () => {
     try {
-      setSending(true)
       setFormError('')
       const qty = sheet.qty
+      const address = sheet.address.trim()
+      if (address.length < 10) {
+        setFormError('Please enter your full delivery address.')
+        return
+      }
+      setSending(true)
 
       // 1. Create the order (price snapshotted server-side).
-      const orderRes = await accessoriesApi.order(id, { quantity: qty, message: sheet.message })
+      const orderRes = await accessoriesApi.order(id, {
+        quantity: qty,
+        message: sheet.message,
+        name: sheet.name.trim(),
+        address,
+      })
       const { orderId, amount } = orderRes.data
 
       // 2. Load the Razorpay SDK.
@@ -121,7 +131,7 @@ export function AccessoryDetailPage() {
               razorpaySignature: response.razorpay_signature,
             })
             setData((d) => ({ ...d, myInquiry: { status: 'NEW', quantity: qty, paid: true, amount } }))
-            setSheet({ open: false, qty: 1, message: '' })
+            setSheet({ open: false, qty: 1, message: '', name: '', address: '' })
             try {
               const sc = await accessoriesApi.sellerContact(id)
               setSeller(sc.data?.seller || null)
@@ -366,6 +376,28 @@ export function AccessoryDetailPage() {
               </span>
             </div>
             <p className="mt-2 text-right text-sm font-black text-navy">Total ≈ {formatCarPrice(p.price * sheet.qty)}</p>
+            <label className="mt-3 block text-xs font-bold text-slate-600">
+              Your name
+              <input
+                type="text"
+                maxLength={80}
+                value={sheet.name}
+                onChange={(e) => setSheet((s) => ({ ...s, name: e.target.value }))}
+                placeholder="Full name"
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm font-semibold outline-none focus:border-navy focus:ring-2 focus:ring-navy/15"
+              />
+            </label>
+            <label className="mt-2 block text-xs font-bold text-slate-600">
+              Delivery address <span className="text-rose-500">*</span>
+              <textarea
+                rows={2}
+                maxLength={500}
+                value={sheet.address}
+                onChange={(e) => setSheet((s) => ({ ...s, address: e.target.value }))}
+                placeholder="House / flat, street, area, city, pincode"
+                className="mt-1 w-full resize-none rounded-lg border border-slate-300 px-3 py-2.5 text-sm font-semibold outline-none focus:border-navy focus:ring-2 focus:ring-navy/15"
+              />
+            </label>
             <label className="mt-2 block text-xs font-bold text-slate-600">
               Message <span className="font-medium text-slate-400">(optional)</span>
               <textarea

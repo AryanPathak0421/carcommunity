@@ -372,7 +372,7 @@ export function AdminAccessoriesPage() {
                   {inqRows.map((i) => (
                     <tr key={i._id} className="align-top">
                       <td className="px-4 py-3"><div className="flex items-center gap-2"><Thumb src={i.product?.image} className="h-10 w-10" /><div><p className="font-bold text-slate-900">{i.product?.name || 'Removed product'}</p><p className="text-xs font-semibold text-orange-600">{i.product ? formatCarPrice(i.product.price) : ''}</p></div></div></td>
-                      <td className="px-4 py-3 font-semibold text-slate-800">{i.buyerName || '—'}<p className="text-xs text-slate-500">{i.buyerPhone}</p></td>
+                      <td className="px-4 py-3 font-semibold text-slate-800">{i.buyerName || '—'}<p className="text-xs text-slate-500">{i.buyerPhone}</p>{i.buyerAddress ? <p className="mt-0.5 max-w-[16rem] text-xs font-medium text-slate-600">📍 {i.buyerAddress}</p> : null}</td>
                       <td className="px-4 py-3 font-semibold text-slate-800">{i.seller?.name || '—'}<p className="text-xs text-slate-500">{i.seller?.phone}</p></td>
                       <td className="max-w-xs px-4 py-3 text-slate-700">
                         <p className="font-bold">× {i.quantity}</p>

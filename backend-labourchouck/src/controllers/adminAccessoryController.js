@@ -127,6 +127,7 @@ export const listInquiries = asyncHandler(async (req, res) => {
         seller: i.sellerId ? { name: i.sellerId.fullName, phone: i.sellerId.phone } : null,
         buyerName: i.buyerName,
         buyerPhone: i.buyerPhone,
+        buyerAddress: i.buyerAddress || '',
         quantity: i.quantity,
         message: i.message,
         status: i.status,

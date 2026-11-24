@@ -245,7 +245,7 @@ export const verifyPayment = asyncHandler(async (req, res) => {
       // Seller gets the sale + buyer contact to arrange delivery.
       sendToUser(order.sellerId, {
         title: 'Product sold 🎉',
-        body: `${order.buyerName || 'A customer'} paid ₹${order.amount} for ${order.quantity} × ${productName}. Call ${order.buyerPhone} to arrange delivery.`,
+        body: `${order.buyerName || 'A customer'} paid ₹${order.amount} for ${order.quantity} × ${productName}. 📞 ${order.buyerPhone}${order.buyerAddress ? ` · 📍 ${order.buyerAddress}` : ''}. Arrange delivery.`,
         type: 'ACCESSORY_SOLD',
         data: { inquiryId: String(order._id), link: '/app/accessories/leads' },
       }).catch((err) => console.error('Notify seller (accessory sold) failed:', err))

@@ -358,9 +358,12 @@ export const getReceivedInquiries = asyncHandler(async (req, res) => {
           : null,
         buyerName: i.buyerName,
         buyerPhone: i.buyerPhone,
+        buyerAddress: i.buyerAddress || '',
         quantity: i.quantity,
         message: i.message,
         status: i.status,
+        paid: Boolean(i.paid),
+        amount: i.amount || 0,
         createdAt: i.createdAt,
       })),
     },
@@ -456,6 +459,16 @@ export const createAccessoryOrder = asyncHandler(async (req, res) => {
     return sendError(res, { message: 'Add a phone number to your profile first', statusCode: HTTP_STATUS.BAD_REQUEST })
   }
 
+  const address = str(req.body.address).slice(0, 500)
+  if (address.length < 10) {
+    return sendError(res, {
+      message: 'Please enter a full delivery address so the seller can deliver',
+      statusCode: HTTP_STATUS.BAD_REQUEST,
+      code: 'ADDRESS_REQUIRED',
+    })
+  }
+  const buyerName = str(req.body.name).slice(0, 80) || buyer.fullName || ''
+
   const existing = await AccessoryInquiry.findOne({ accessoryId: a._id, buyerId: req.user._id }).lean()
   if (existing?.paid) {
     return sendError(res, { message: 'You have already purchased this product', statusCode: HTTP_STATUS.CONFLICT })
@@ -470,8 +483,9 @@ export const createAccessoryOrder = asyncHandler(async (req, res) => {
     {
       $set: {
         sellerId: a.sellerId,
-        buyerName: buyer.fullName || '',
+        buyerName,
         buyerPhone: buyer.phone,
+        buyerAddress: address,
         quantity,
         message: str(req.body.message).slice(0, 500),
         unitPrice,

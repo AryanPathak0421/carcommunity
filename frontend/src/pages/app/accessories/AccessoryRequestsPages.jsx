@@ -124,7 +124,17 @@ export function AccessoryLeadsPage() {
                 </div>
               </div>
               <div className="mt-3 rounded-xl bg-slate-50 p-3">
-                <p className="text-sm font-bold text-slate-900">{l.buyerName || 'Customer'}</p>
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-sm font-bold text-slate-900">{l.buyerName || 'Customer'}</p>
+                  {l.paid ? (
+                    <span className="shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-black text-emerald-700 ring-1 ring-emerald-200">
+                      PAID {formatCarPrice(l.amount)}
+                    </span>
+                  ) : null}
+                </div>
+                {l.buyerAddress ? (
+                  <p className="mt-1 text-[13px] font-semibold text-slate-700">📍 {l.buyerAddress}</p>
+                ) : null}
                 {l.message ? <p className="mt-1 text-[13px] font-medium text-slate-600">“{l.message}”</p> : null}
               </div>
               <div className="mt-3 flex items-center gap-2">

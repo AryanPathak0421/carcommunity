@@ -11,9 +11,11 @@ router.use(protect)
 router.post(
   '/init',
   [
-    body('amount').isNumeric().withMessage('Amount is required'),
-    body('purpose').isIn(['BOOKING', 'WALLET_CLEARANCE']).withMessage('Invalid purpose'),
+    // amount is server-decided for BOOKING/ACCESSORY; only WALLET_CLEARANCE may send one.
+    body('amount').optional().isNumeric().withMessage('Invalid amount'),
+    body('purpose').isIn(['BOOKING', 'WALLET_CLEARANCE', 'ACCESSORY']).withMessage('Invalid purpose'),
     body('bookingId').optional().isMongoId(),
+    body('accessoryInquiryId').optional().isMongoId(),
   ],
   validateRequest,
   payment.initPayment,

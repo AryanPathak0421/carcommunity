@@ -57,6 +57,8 @@ const accessoryInquirySchema = new mongoose.Schema(
     buyerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
     buyerName: { type: String, trim: true, maxlength: 80, default: '' },
     buyerPhone: { type: String, trim: true, maxlength: 20, default: '' },
+    /** Delivery address the buyer enters at checkout (paid purchases). */
+    buyerAddress: { type: String, trim: true, maxlength: 500, default: '' },
     quantity: { type: Number, min: 1, max: 1000, default: 1 },
     message: { type: String, trim: true, maxlength: 500, default: '' },
     status: { type: String, enum: ['NEW', 'CONTACTED', 'CLOSED'], default: 'NEW', index: true },
