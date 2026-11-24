@@ -10,7 +10,7 @@ import { WalletTransaction } from '../models/WalletTransaction.js'
 import { asyncHandler } from '../utils/asyncHandler.js'
 import { HTTP_STATUS, sendError, sendSuccess } from '../utils/apiResponse.js'
 import { parseISTDateTime } from '../utils/dateHelper.js'
-import { sendToUser } from '../services/notificationService.js'
+import { sendToUser, notifyAdmins } from '../services/notificationService.js'
 import { qualifyReferralForBooking } from '../services/referralService.js'
 import { creditSelfBalance, debitSelfBalance, getSelfBalance } from '../services/walletService.js'
 import { priceParts, releaseParts, reserveParts } from '../services/partsService.js'
@@ -326,6 +326,14 @@ export const createBooking = asyncHandler(async (req, res) => {
   import('../socket.js')
     .then(({ emitToAdmins }) => emitToAdmins('BOOKING_STATUS_UPDATE', { bookingId: booking._id, status: booking.status }))
     .catch(err => console.error(err))
+
+  // Persisted admin inbox notification for the new booking (socket above is live-only).
+  notifyAdmins({
+    title: 'New booking',
+    body: `${service.name || 'Service'} · ₹${Number(booking.totalAmount || 0).toLocaleString('en-IN')} · ${locationText}`,
+    type: 'BOOKING_CREATED',
+    data: { bookingId: String(booking._id), link: '/admin/bookings' },
+  }).catch((err) => console.error('Notify admins (new booking) failed:', err))
 
   // Phase 3: Trigger the Broadcast Engine asynchronously
   // Only trigger immediately for INSTANT bookings.
