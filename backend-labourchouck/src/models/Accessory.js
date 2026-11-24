@@ -60,6 +60,11 @@ const accessoryInquirySchema = new mongoose.Schema(
     quantity: { type: Number, min: 1, max: 1000, default: 1 },
     message: { type: String, trim: true, maxlength: 500, default: '' },
     status: { type: String, enum: ['NEW', 'CONTACTED', 'CLOSED'], default: 'NEW', index: true },
+    /** Paid purchase (online). Price snapshot at order time; platform collects the money. */
+    unitPrice: { type: Number, min: 0, default: 0 },
+    amount: { type: Number, min: 0, default: 0 },
+    paid: { type: Boolean, default: false, index: true },
+    paidAt: Date,
   },
   { timestamps: true },
 )

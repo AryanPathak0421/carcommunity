@@ -229,7 +229,7 @@ export const getAccessory = asyncHandler(async (req, res) => {
   let myInquiry = null
   if (viewerId && !isOwner) {
     myInquiry = await AccessoryInquiry.findOne({ accessoryId: a._id, buyerId: viewerId })
-      .select('status quantity message createdAt')
+      .select('status quantity message createdAt paid amount')
       .lean()
   }
   const base = isOwner || isAdmin ? ownerProduct(a) : publicProduct(a)
@@ -435,10 +435,66 @@ export const createInquiry = asyncHandler(async (req, res) => {
   })
 })
 
+/**
+ * Create (or reuse) a pending paid order for this accessory, then the client pays
+ * it online via /payments/init (purpose ACCESSORY). Price is snapshotted server-side.
+ */
+export const createAccessoryOrder = asyncHandler(async (req, res) => {
+  const a = await Accessory.findById(req.params.id)
+  if (!a || a.status !== ACCESSORY_STATUS.APPROVED) {
+    return sendError(res, { message: 'This product is no longer available', statusCode: HTTP_STATUS.NOT_FOUND })
+  }
+  if (a.stock <= 0) {
+    return sendError(res, { message: 'This product is out of stock', statusCode: HTTP_STATUS.CONFLICT })
+  }
+  const quantity = Math.max(1, Math.min(1000, Number.parseInt(req.body.quantity, 10) || 1))
+  if (quantity > a.stock) {
+    return sendError(res, { message: `Only ${a.stock} in stock`, statusCode: HTTP_STATUS.CONFLICT })
+  }
+  const buyer = await User.findById(req.user._id).select('fullName phone').lean()
+  if (!str(buyer?.phone)) {
+    return sendError(res, { message: 'Add a phone number to your profile first', statusCode: HTTP_STATUS.BAD_REQUEST })
+  }
+
+  const existing = await AccessoryInquiry.findOne({ accessoryId: a._id, buyerId: req.user._id }).lean()
+  if (existing?.paid) {
+    return sendError(res, { message: 'You have already purchased this product', statusCode: HTTP_STATUS.CONFLICT })
+  }
+
+  const unitPrice = a.price
+  const amount = unitPrice * quantity
+
+  // One order doc per (product, buyer). Reuse the pending one on a retry.
+  const order = await AccessoryInquiry.findOneAndUpdate(
+    { accessoryId: a._id, buyerId: req.user._id },
+    {
+      $set: {
+        sellerId: a.sellerId,
+        buyerName: buyer.fullName || '',
+        buyerPhone: buyer.phone,
+        quantity,
+        message: str(req.body.message).slice(0, 500),
+        unitPrice,
+        amount,
+        paid: false,
+        status: 'NEW',
+      },
+    },
+    { upsert: true, new: true, setDefaultsOnInsert: true },
+  )
+
+  return sendSuccess(res, {
+    message: 'Order created',
+    statusCode: HTTP_STATUS.CREATED,
+    data: { orderId: order._id, amount, quantity, productName: a.name },
+  })
+})
+
 export const getSellerContact = asyncHandler(async (req, res) => {
-  const inq = await AccessoryInquiry.findOne({ accessoryId: req.params.id, buyerId: req.user._id }).lean()
+  // Contact is only shared once the buyer has actually paid.
+  const inq = await AccessoryInquiry.findOne({ accessoryId: req.params.id, buyerId: req.user._id, paid: true }).lean()
   if (!inq) {
-    return sendError(res, { message: 'Send a request to see the seller contact', statusCode: HTTP_STATUS.FORBIDDEN })
+    return sendError(res, { message: 'Complete the payment to see the seller contact', statusCode: HTTP_STATUS.FORBIDDEN })
   }
   const seller = await User.findById(inq.sellerId).select('fullName phone').lean()
   return sendSuccess(res, { data: { seller: { name: seller?.fullName, phone: seller?.phone } } })

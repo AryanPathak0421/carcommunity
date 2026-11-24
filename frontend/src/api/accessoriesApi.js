@@ -17,6 +17,7 @@ export const accessoriesApi = {
   categories: () => apiRequest('/accessories/categories'),
   get: (id) => apiRequest(`/accessories/${id}`),
   request: (id, payload) => apiRequest(`/accessories/${id}/inquiry`, { method: 'POST', body: payload }),
+  order: (id, payload) => apiRequest(`/accessories/${id}/order`, { method: 'POST', body: payload }),
   sellerContact: (id) => apiRequest(`/accessories/${id}/seller-contact`),
   sentRequests: () => apiRequest('/accessories/inquiries/sent'),
 

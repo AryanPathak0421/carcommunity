@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, BadgeCheck, CheckCircle2, Minus, Pencil, Phone, Plus, ShieldCheck, Trash2 } from 'lucide-react'
 import { accessoriesApi } from '../../../api/accessoriesApi.js'
+import { paymentsApi } from '../../../api/paymentsApi.js'
 import { useAuth } from '../../../hooks/useAuth.js'
 import { discountPct, formatCarPrice, timeAgo } from '../../../lib/carFormat.js'
 import { CarImage } from '../cars/CarsMarketplacePage.jsx'
@@ -51,10 +52,10 @@ export function AccessoryDetailPage() {
 
   const p = data?.product
   const isOwner = Boolean(data?.isOwner)
-  const requested = Boolean(data?.myInquiry)
+  const purchased = Boolean(data?.myInquiry?.paid)
 
   useEffect(() => {
-    if (!requested || !isCustomer) return undefined
+    if (!purchased || !isCustomer) return undefined
     let alive = true
     accessoriesApi
       .sellerContact(id)
@@ -63,7 +64,7 @@ export function AccessoryDetailPage() {
     return () => {
       alive = false
     }
-  }, [requested, isCustomer, id])
+  }, [purchased, isCustomer, id])
 
   const openSheet = () => {
     if (!isCustomer) {
@@ -74,16 +75,70 @@ export function AccessoryDetailPage() {
     setSheet((s) => ({ ...s, open: true }))
   }
 
-  const send = async () => {
+  const loadRazorpay = async () => {
+    if (window.Razorpay) return true
+    return new Promise((resolve) => {
+      const s = document.createElement('script')
+      s.src = 'https://checkout.razorpay.com/v1/checkout.js'
+      s.onload = () => resolve(true)
+      s.onerror = () => resolve(false)
+      document.body.appendChild(s)
+    })
+  }
+
+  const pay = async () => {
     try {
       setSending(true)
       setFormError('')
-      const res = await accessoriesApi.request(id, { quantity: sheet.qty, message: sheet.message })
-      setSeller(res.data?.seller || null)
-      setData((d) => ({ ...d, myInquiry: { status: 'NEW', quantity: sheet.qty } }))
-      setSheet({ open: false, qty: 1, message: '' })
+      const qty = sheet.qty
+
+      // 1. Create the order (price snapshotted server-side).
+      const orderRes = await accessoriesApi.order(id, { quantity: qty, message: sheet.message })
+      const { orderId, amount } = orderRes.data
+
+      // 2. Load the Razorpay SDK.
+      if (!(await loadRazorpay())) {
+        setFormError('Payment could not start. Please check your connection.')
+        return
+      }
+
+      // 3. Create the Razorpay order on the server (amount is server-decided).
+      const initRes = await paymentsApi.initPayment({ purpose: 'ACCESSORY', accessoryInquiryId: orderId })
+      const { order, keyId } = initRes.data
+
+      const rzp = new window.Razorpay({
+        key: keyId,
+        amount: order.amount,
+        currency: order.currency,
+        name: 'CarCommunity',
+        description: p.name,
+        order_id: order.id,
+        handler: async (response) => {
+          try {
+            await paymentsApi.verifyPayment({
+              razorpayOrderId: response.razorpay_order_id,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpaySignature: response.razorpay_signature,
+            })
+            setData((d) => ({ ...d, myInquiry: { status: 'NEW', quantity: qty, paid: true, amount } }))
+            setSheet({ open: false, qty: 1, message: '' })
+            try {
+              const sc = await accessoriesApi.sellerContact(id)
+              setSeller(sc.data?.seller || null)
+            } catch {
+              // contact loads on next render anyway
+            }
+          } catch {
+            setFormError('Payment could not be verified. If money was deducted it will be refunded.')
+          }
+        },
+        prefill: { name: user?.fullName || '', contact: user?.phone || '' },
+        theme: { color: '#f97316' },
+      })
+      rzp.on('payment.failed', (resp) => setFormError(resp?.error?.description || 'Payment failed. Please try again.'))
+      rzp.open()
     } catch (e) {
-      setFormError(e.message || 'Could not send your request')
+      setFormError(e?.message || 'Could not start the payment')
     } finally {
       setSending(false)
     }
@@ -244,12 +299,12 @@ export function AccessoryDetailPage() {
           </div>
         ) : !live ? (
           <p className="py-2 text-center text-sm font-bold text-slate-500">This product is no longer available</p>
-        ) : requested && seller?.phone ? (
+        ) : purchased && seller?.phone ? (
           <div className="flex items-center gap-3">
             <CheckCircle2 className="h-6 w-6 shrink-0 text-emerald-600" aria-hidden />
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-extrabold text-navy">{seller.name || 'Seller'}</p>
-              <p className="text-xs font-medium text-slate-500">Request sent · {seller.phone}</p>
+              <p className="text-xs font-medium text-slate-500">Paid · seller will deliver · {seller.phone}</p>
             </div>
             <a
               href={`tel:${seller.phone}`}
@@ -259,6 +314,11 @@ export function AccessoryDetailPage() {
               Call
             </a>
           </div>
+        ) : purchased ? (
+          <div className="flex items-center justify-center gap-2 py-2">
+            <CheckCircle2 className="h-5 w-5 text-emerald-600" aria-hidden />
+            <p className="text-sm font-black text-navy">Paid — the seller will contact you soon</p>
+          </div>
         ) : (
           <button
             type="button"
@@ -266,7 +326,7 @@ export function AccessoryDetailPage() {
             onClick={openSheet}
             className="w-full rounded-lg bg-navy py-3.5 text-base font-black text-white transition active:scale-[0.98] disabled:bg-slate-300"
           >
-            {p.inStock ? 'Request this product' : 'Out of stock'}
+            {p.inStock ? `Pay ${formatCarPrice(p.price)} · Buy now` : 'Out of stock'}
           </button>
         )}
       </div>
@@ -275,13 +335,13 @@ export function AccessoryDetailPage() {
         <div className="fixed inset-0 z-[70] flex items-end justify-center bg-slate-900/50" onClick={() => setSheet((s) => ({ ...s, open: false }))}>
           <div
             role="dialog"
-            aria-label="Request product"
+            aria-label="Buy product"
             onClick={(e) => e.stopPropagation()}
             className="w-full max-w-lg rounded-t-3xl bg-white p-5 pb-7 shadow-2xl"
           >
-            <h2 className="text-base font-black text-navy">Request this product</h2>
+            <h2 className="text-base font-black text-navy">Buy this product</h2>
             <p className="mt-0.5 text-xs font-medium text-slate-500">
-              The mechanic gets your name and number, and you get theirs straight away.
+              Pay securely online. The seller gets your name &amp; number and contacts you to arrange delivery.
             </p>
             <div className="mt-4 flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3">
               <span className="text-sm font-bold text-slate-700">Quantity</span>
@@ -321,10 +381,10 @@ export function AccessoryDetailPage() {
             <button
               type="button"
               disabled={sending}
-              onClick={send}
+              onClick={pay}
               className="mt-4 w-full rounded-lg bg-navy py-3.5 text-base font-black text-white active:scale-[0.98] disabled:opacity-60"
             >
-              {sending ? 'Sending…' : 'Send request'}
+              {sending ? 'Processing…' : `Pay ${formatCarPrice(p.price * sheet.qty)}`}
             </button>
           </div>
         </div>

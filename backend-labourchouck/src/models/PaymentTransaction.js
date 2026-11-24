@@ -13,6 +13,11 @@ const paymentTransactionSchema = new mongoose.Schema(
       ref: 'Booking',
       index: true,
     },
+    accessoryInquiryId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'AccessoryInquiry',
+      index: true,
+    },
     razorpayOrderId: {
       type: String,
       required: true,
@@ -39,7 +44,7 @@ const paymentTransactionSchema = new mongoose.Schema(
     },
     purpose: {
       type: String,
-      enum: ['BOOKING', 'WALLET_CLEARANCE'],
+      enum: ['BOOKING', 'WALLET_CLEARANCE', 'ACCESSORY'],
       required: true,
     },
   },

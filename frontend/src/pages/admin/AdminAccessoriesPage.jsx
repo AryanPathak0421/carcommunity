@@ -374,7 +374,13 @@ export function AdminAccessoriesPage() {
                       <td className="px-4 py-3"><div className="flex items-center gap-2"><Thumb src={i.product?.image} className="h-10 w-10" /><div><p className="font-bold text-slate-900">{i.product?.name || 'Removed product'}</p><p className="text-xs font-semibold text-orange-600">{i.product ? formatCarPrice(i.product.price) : ''}</p></div></div></td>
                       <td className="px-4 py-3 font-semibold text-slate-800">{i.buyerName || '—'}<p className="text-xs text-slate-500">{i.buyerPhone}</p></td>
                       <td className="px-4 py-3 font-semibold text-slate-800">{i.seller?.name || '—'}<p className="text-xs text-slate-500">{i.seller?.phone}</p></td>
-                      <td className="max-w-xs px-4 py-3 text-slate-700"><p className="font-bold">× {i.quantity}</p><p className="text-xs">{i.message || '—'}</p></td>
+                      <td className="max-w-xs px-4 py-3 text-slate-700">
+                        <p className="font-bold">× {i.quantity}</p>
+                        {i.paid
+                          ? <span className="my-0.5 inline-block rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-black text-emerald-700 ring-1 ring-emerald-200">PAID {formatCarPrice(i.amount)}</span>
+                          : <span className="my-0.5 inline-block rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-bold text-slate-500">Unpaid lead</span>}
+                        <p className="text-xs">{i.message || '—'}</p>
+                      </td>
                       <td className="px-4 py-3">
                         <select value={i.status} onChange={(e) => act(i._id, () => adminAccessoriesApi.setInquiryStatus(i._id, e.target.value))} className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-bold" aria-label="Request status">
                           {Object.entries(INQUIRY_STATUS).map(([v, m]) => <option key={v} value={v}>{m.label}</option>)}

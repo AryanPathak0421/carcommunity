@@ -32,6 +32,7 @@ router.delete('/:id', protect, mechanic, idParam, validateRequest, acc.deleteAcc
 // Customer side
 router.get('/inquiries/sent', protect, customer, acc.getMyInquiries)
 router.post('/:id/inquiry', protect, customer, idParam, validateRequest, acc.createInquiry)
+router.post('/:id/order', protect, customer, idParam, validateRequest, acc.createAccessoryOrder)
 router.get('/:id/seller-contact', protect, customer, idParam, validateRequest, acc.getSellerContact)
 
 router.get('/:id', idParam, validateRequest, optionalAuth, acc.getAccessory)

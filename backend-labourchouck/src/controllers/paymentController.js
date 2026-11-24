@@ -2,9 +2,10 @@ import { PaymentTransaction } from '../models/PaymentTransaction.js'
 import { Booking } from '../models/Booking.js'
 import { Wallet } from '../models/Wallet.js'
 import { WalletTransaction } from '../models/WalletTransaction.js'
+import { Accessory, AccessoryInquiry } from '../models/Accessory.js'
 import { createOrder, verifyPaymentSignature } from '../services/paymentService.js'
 import { settleBookingIfReady } from '../services/bookingSettlementService.js'
-import { sendToUser } from '../services/notificationService.js'
+import { sendToUser, notifyAdmins } from '../services/notificationService.js'
 import { asyncHandler } from '../utils/asyncHandler.js'
 import { HTTP_STATUS, sendError, sendSuccess } from '../utils/apiResponse.js'
 
@@ -14,7 +15,7 @@ const NOT_PAYABLE_STATUSES = ['CANCELLED', 'FAILED', 'REFUNDED', 'DRAFT']
 const roundRupees = (n) => Math.round(Number(n) * 100) / 100
 
 export const initPayment = asyncHandler(async (req, res) => {
-  const { amount, purpose, bookingId } = req.body
+  const { amount, purpose, bookingId, accessoryInquiryId } = req.body
 
   if (purpose === 'BOOKING' && !bookingId) {
     return sendError(res, { message: 'bookingId is required for BOOKING purpose', statusCode: HTTP_STATUS.BAD_REQUEST })
@@ -78,6 +79,21 @@ export const initPayment = asyncHandler(async (req, res) => {
     }
     const requested = Number(amount)
     chargeAmount = Number.isFinite(requested) && requested > 0 ? Math.min(requested, owed) : owed
+  } else if (purpose === 'ACCESSORY') {
+    if (!accessoryInquiryId) {
+      return sendError(res, { message: 'accessoryInquiryId is required for ACCESSORY purpose', statusCode: HTTP_STATUS.BAD_REQUEST })
+    }
+    const order = await AccessoryInquiry.findOne({ _id: accessoryInquiryId, buyerId: req.user._id })
+    if (!order) {
+      return sendError(res, { message: 'Order not found', statusCode: HTTP_STATUS.NOT_FOUND, code: 'ORDER_NOT_FOUND' })
+    }
+    if (order.paid) {
+      return sendError(res, { message: 'This product is already paid for', statusCode: HTTP_STATUS.CONFLICT, code: 'ALREADY_PAID' })
+    }
+    chargeAmount = Number(order.amount)
+    if (!(chargeAmount > 0)) {
+      return sendError(res, { message: 'Invalid order amount', statusCode: HTTP_STATUS.BAD_REQUEST })
+    }
   } else {
     return sendError(res, { message: 'Invalid payment purpose', statusCode: HTTP_STATUS.BAD_REQUEST })
   }
@@ -101,6 +117,7 @@ export const initPayment = asyncHandler(async (req, res) => {
   const pTx = await PaymentTransaction.create({
     userId: req.user._id,
     bookingId: purpose === 'BOOKING' ? bookingId : undefined,
+    accessoryInquiryId: purpose === 'ACCESSORY' ? accessoryInquiryId : undefined,
     razorpayOrderId: order.id,
     amount: chargeAmount,
     purpose,
@@ -200,6 +217,46 @@ export const verifyPayment = asyncHandler(async (req, res) => {
         referenceId: claimed._id,
         description: 'Online Payment Clearance',
       })
+    }
+  } else if (claimed.purpose === 'ACCESSORY' && claimed.accessoryInquiryId) {
+    // Mark the order paid exactly once (guards against a replayed verify).
+    const order = await AccessoryInquiry.findOneAndUpdate(
+      { _id: claimed.accessoryInquiryId, paid: { $ne: true } },
+      { $set: { paid: true, paidAt: new Date() } },
+      { new: true },
+    )
+    if (order) {
+      // Take the units off the shelf (best effort — never oversell on a race).
+      await Accessory.updateOne(
+        { _id: order.accessoryId, stock: { $gte: order.quantity } },
+        { $inc: { stock: -order.quantity, inquiryCount: 1 } },
+      )
+      const product = await Accessory.findById(order.accessoryId).select('name sellerId').lean()
+      const productName = product?.name || 'a product'
+
+      // Admin sees every purchase in their inbox.
+      notifyAdmins({
+        title: 'New accessory purchase',
+        body: `${order.buyerName || 'A customer'} bought ${order.quantity} × ${productName} · ₹${order.amount}`,
+        type: 'ACCESSORY_PURCHASE',
+        data: { inquiryId: String(order._id), accessoryId: String(order.accessoryId), link: '/admin/accessories' },
+      }).catch((err) => console.error('Notify admins (accessory purchase) failed:', err))
+
+      // Seller gets the sale + buyer contact to arrange delivery.
+      sendToUser(order.sellerId, {
+        title: 'Product sold 🎉',
+        body: `${order.buyerName || 'A customer'} paid ₹${order.amount} for ${order.quantity} × ${productName}. Call ${order.buyerPhone} to arrange delivery.`,
+        type: 'ACCESSORY_SOLD',
+        data: { inquiryId: String(order._id), link: '/app/accessories/leads' },
+      }).catch((err) => console.error('Notify seller (accessory sold) failed:', err))
+
+      // Buyer gets confirmation.
+      sendToUser(order.buyerId, {
+        title: 'Payment successful',
+        body: `You paid ₹${order.amount} for ${productName}. The seller will contact you to arrange delivery.`,
+        type: 'ACCESSORY_PURCHASED',
+        data: { accessoryId: String(order.accessoryId), link: '/app/accessories/requests' },
+      }).catch((err) => console.error('Notify buyer (accessory purchased) failed:', err))
     }
   }
 

@@ -130,6 +130,8 @@ export const listInquiries = asyncHandler(async (req, res) => {
         quantity: i.quantity,
         message: i.message,
         status: i.status,
+        paid: Boolean(i.paid),
+        amount: i.amount || 0,
         createdAt: i.createdAt,
       })),
       page,
