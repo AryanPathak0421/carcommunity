@@ -536,7 +536,7 @@ export function AppSupportPage() {
               Available 24/7 for all your queries and support needs.
             </p>
             <a 
-              href="tel:+919565195559"
+              href="tel:8668337344"
               className="mt-3 inline-flex items-center rounded-full bg-slate-100 px-3 py-1.5 text-sm font-bold text-slate-700 transition hover:bg-slate-200"
             >
               Call Now
@@ -551,7 +551,7 @@ export function AppSupportPage() {
               Include your booking reference so we can help faster.
             </p>
             <a 
-              href="mailto:laborchowck@gmail.com"
+              href="mailto:sanketmache444@gmail.com"
               className="mt-3 inline-flex items-center rounded-full bg-slate-100 px-3 py-1.5 text-sm font-bold text-slate-700 transition hover:bg-slate-200"
             >
               Email Us

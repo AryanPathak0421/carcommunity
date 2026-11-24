@@ -4,8 +4,9 @@ export const SITE = {
   name: 'CarCommunity',
   tagline: 'Book a trusted car or bike mechanic in minutes',
   url: 'https://carcommunity.com',
-  contactEmail: 'hello@carcommunity.com',
-  phone: '+91 98765 43210',
+  contactEmail: 'sanketmache444@gmail.com',
+  phone: '8668337344',
+  address: 'Shop No. 1, Sutgirni Chowk, Garkheda Parisar, Aurangabad, Maharashtra 431001',
 }
 
 export const trustBadges = [
