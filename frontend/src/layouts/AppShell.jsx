@@ -356,8 +356,9 @@ export function AppShell() {
                   <button
                     type="button"
                     onClick={() => {
+                      const target = user?.role === 'mechanic' ? '/partner' : '/b2c/auth'
                       logout()
-                      navigate('/b2c/auth', { replace: true })
+                      navigate(target, { replace: true })
                     }}
                     className="flex w-full items-center justify-center gap-2 rounded-xl border border-rose-200/90 bg-rose-50 py-3 text-sm font-semibold text-rose-800 shadow-sm transition hover:bg-rose-50/90"
                   >

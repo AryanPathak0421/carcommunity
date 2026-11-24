@@ -267,22 +267,25 @@ export function AppProfilePage() {
   )
 
   const handleSignOut = async () => {
+    // Send a partner (mechanic) back to the partner entry, not the customer app.
+    const target = user?.role === 'mechanic' ? '/partner' : '/b2c/auth'
     await logout()
-    navigate('/b2c/auth', { replace: true })
+    navigate(target, { replace: true })
   }
 
   const handleDeleteAccount = useCallback(async () => {
     setDeletingAccount(true)
     setDeleteErr('')
     try {
+      const target = user?.role === 'mechanic' ? '/partner' : '/b2c/auth'
       await deleteCurrentUser()
       await logout()
-      navigate('/b2c/auth', { replace: true })
+      navigate(target, { replace: true })
     } catch (err) {
       setDeleteErr(err instanceof ApiError ? err.message : 'Could not delete account')
       setDeletingAccount(false)
     }
-  }, [logout, navigate])
+  }, [logout, navigate, user])
 
   const kycSub =
     labourKyc === KYC_STATUS.VERIFIED
