@@ -57,8 +57,8 @@ self.addEventListener('notificationclick', (event) => {
 
 // ---- PWA: installable + offline shell ---------------------------------------
 // Same worker as push so only one registration owns the "/" scope.
-const SHELL_CACHE = 'cc-shell-v1'
-const ASSET_CACHE = 'cc-assets-v1'
+const SHELL_CACHE = 'cc-shell-v2'
+const ASSET_CACHE = 'cc-assets-v2'
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(SHELL_CACHE).then((c) => c.add('/')).catch(() => {}))
