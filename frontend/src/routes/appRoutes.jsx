@@ -13,6 +13,7 @@ import { AppTermsPage } from '../pages/app/AppTermsPage.jsx'
 import { AppPrivacyPolicyPage } from '../pages/app/AppPrivacyPolicyPage.jsx'
 import { AppFaqPage } from '../pages/app/AppFaqPage.jsx'
 import { AppWalletPage } from '../pages/app/AppWalletPage.jsx'
+import { ProductWalletPage } from '../pages/app/ProductWalletPage.jsx'
 import { ReferAndEarnPage } from '../pages/app/ReferAndEarnPage.jsx'
 import { LabourNotificationsPage } from '../pages/app/labour/LabourNotificationsPage.jsx'
 import { IndividualBookingFlowPage } from '../pages/app/booking/IndividualBookingFlowPage.jsx'
@@ -249,6 +250,14 @@ export const appShellChildRoutes = (
       element={
         <RoleRoute allow={[USER_ROLES.MECHANIC, USER_ROLES.INDIVIDUAL]}>
           <AppWalletPage />
+        </RoleRoute>
+      }
+    />
+    <Route
+      path="product-wallet"
+      element={
+        <RoleRoute allow={[USER_ROLES.MECHANIC]}>
+          <ProductWalletPage />
         </RoleRoute>
       }
     />

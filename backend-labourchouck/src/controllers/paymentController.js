@@ -5,6 +5,7 @@ import { WalletTransaction } from '../models/WalletTransaction.js'
 import { Accessory, AccessoryInquiry } from '../models/Accessory.js'
 import { createOrder, verifyPaymentSignature } from '../services/paymentService.js'
 import { settleBookingIfReady } from '../services/bookingSettlementService.js'
+import { creditProductBalance } from '../services/walletService.js'
 import { sendToUser, notifyAdmins } from '../services/notificationService.js'
 import { asyncHandler } from '../utils/asyncHandler.js'
 import { HTTP_STATUS, sendError, sendSuccess } from '../utils/apiResponse.js'
@@ -234,6 +235,23 @@ export const verifyPayment = asyncHandler(async (req, res) => {
       const product = await Accessory.findById(order.accessoryId).select('name sellerId').lean()
       const productName = product?.name || 'a product'
 
+      // Credit the seller's Product Wallet exactly once. The platform holds the money
+      // (paid into admin Razorpay); the mechanic withdraws it later from the Product Wallet.
+      const creditClaim = await AccessoryInquiry.findOneAndUpdate(
+        { _id: order._id, sellerCreditedAt: { $exists: false } },
+        { $set: { sellerCreditedAt: new Date() } },
+        { new: true },
+      )
+      if (creditClaim && order.sellerId) {
+        await creditProductBalance({
+          userId: order.sellerId,
+          amount: order.amount,
+          context: 'PRODUCT_SALE',
+          referenceId: order._id,
+          description: `Sale: ${order.quantity} × ${productName}`,
+        }).catch((err) => console.error('[productWallet] credit failed for order', String(order._id), err?.message || err))
+      }
+
       // Admin sees every purchase in their inbox.
       notifyAdmins({
         title: 'New accessory purchase',
@@ -245,7 +263,7 @@ export const verifyPayment = asyncHandler(async (req, res) => {
       // Seller gets the sale + buyer contact to arrange delivery.
       sendToUser(order.sellerId, {
         title: 'Product sold 🎉',
-        body: `${order.buyerName || 'A customer'} paid ₹${order.amount} for ${order.quantity} × ${productName}. 📞 ${order.buyerPhone}${order.buyerAddress ? ` · 📍 ${order.buyerAddress}` : ''}. Arrange delivery.`,
+        body: `₹${order.amount} added to your Product Wallet for ${order.quantity} × ${productName}. 📞 ${order.buyerPhone}${order.buyerAddress ? ` · 📍 ${order.buyerAddress}` : ''}. Arrange delivery.`,
         type: 'ACCESSORY_SOLD',
         data: { inquiryId: String(order._id), link: '/app/accessories/leads' },
       }).catch((err) => console.error('Notify seller (accessory sold) failed:', err))

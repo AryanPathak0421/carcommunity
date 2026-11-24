@@ -19,6 +19,13 @@ const withdrawalRequestSchema = new mongoose.Schema(
       enum: ['mechanic', 'individual', 'labour'],
       index: true,
     },
+    /** Which wallet this payout draws from. SERVICE = earnings, PRODUCT = product sales. */
+    walletType: {
+      type: String,
+      enum: ['SERVICE', 'PRODUCT'],
+      default: 'SERVICE',
+      index: true,
+    },
     amount: {
       type: Number,
       required: true,
@@ -26,7 +33,7 @@ const withdrawalRequestSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['PENDING', 'APPROVED', 'REJECTED'],
+      enum: ['PENDING', 'APPROVED', 'REJECTED', 'PROCESSING', 'COMPLETED'],
       default: 'PENDING',
       index: true,
     },

@@ -38,6 +38,7 @@ import { AdminZonesPage } from './pages/admin/AdminZonesPage.jsx'
 import { AdminPlatformFeePage } from './pages/admin/AdminPlatformFeePage.jsx'
 import { AdminCommissionFeePage } from './pages/admin/AdminCommissionFeePage.jsx'
 import { AdminLabourWalletPage } from './pages/admin/AdminLabourWalletPage.jsx'
+import { AdminProductWalletPage } from './pages/admin/AdminProductWalletPage.jsx'
 import { AdminCashManagementPage } from './pages/admin/AdminCashManagementPage.jsx'
 import { AdminReviewsRatingsPage } from './pages/admin/AdminReviewsRatingsPage.jsx'
 import { AdminTermsAndConditionsPage } from './pages/admin/AdminTermsAndConditionsPage.jsx'
@@ -160,6 +161,7 @@ function App() {
             <Route path="referrals" element={<AdminReferralsPage />} />
             <Route path="user-wallet" element={<AdminUserWalletPage />} />
             <Route path="labour-wallet" element={<AdminLabourWalletPage />} />
+            <Route path="product-wallet" element={<AdminProductWalletPage />} />
             <Route path="cash-management" element={<AdminCashManagementPage />} />
             <Route path="reviews" element={<AdminReviewsRatingsPage />} />
             <Route path="terms" element={<AdminTermsAndConditionsPage />} />

@@ -71,6 +71,7 @@ const byRole = {
       { id: 'kyc', to: '/app/kyc', label: 'Aadhaar KYC', icon: ShieldCheck },
       { id: 'workTypes', to: '/app/work-categories', label: 'My skills', icon: Wrench },
       { id: 'my-products', to: '/app/accessories/mine', label: 'My products (accessories)', icon: ShoppingBag },
+      { id: 'product-wallet', to: '/app/product-wallet', label: 'Product Wallet', icon: ShoppingBag },
       { id: 'refer', to: '/app/refer', label: 'Refer & Earn', icon: Gift },
       { id: 'support', to: '/app/support', label: 'Support', icon: LifeBuoy },
       { id: 'terms', to: '/app/terms', label: 'Terms & Conditions', icon: FileText },
@@ -92,6 +93,7 @@ export function getAppShellTitle(pathname) {
   if (pathname.startsWith('/app/earnings')) return 'Earnings'
   if (pathname.startsWith('/app/kyc')) return 'KYC verification'
   if (pathname.startsWith('/app/refer')) return 'Refer & Earn'
+  if (pathname.startsWith('/app/product-wallet')) return 'Product Wallet'
   if (pathname.startsWith('/app/wallet')) return 'My Wallet'
   if (pathname.startsWith('/app/vehicles')) return 'My Vehicles'
   if (pathname.startsWith('/app/notifications')) return 'Notifications'

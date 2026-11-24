@@ -17,6 +17,15 @@ const walletSchema = new mongoose.Schema(
       type: Number,
       default: 0, // Amount owed to admin
     },
+    /**
+     * Product Wallet — kept completely separate from the service earnings
+     * (selfBalance). Credited when a customer pays for this mechanic's accessory;
+     * cashed out via its own PRODUCT withdrawal requests.
+     */
+    productBalance: {
+      type: Number,
+      default: 0,
+    },
     isActive: {
       type: Boolean,
       default: true,

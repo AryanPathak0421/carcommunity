@@ -19,12 +19,16 @@ const walletTransactionSchema = new mongoose.Schema(
     },
     targetWallet: {
       type: String,
-      enum: ['SELF', 'ADMIN', 'BANK'],
+      // SELF = service earnings, PRODUCT = product wallet, ADMIN = dues, BANK = paid out
+      enum: ['SELF', 'ADMIN', 'BANK', 'PRODUCT'],
       required: true,
     },
     context: {
       type: String,
-      enum: ['BOOKING', 'CLEARANCE', 'INCENTIVE', 'PENALTY', 'PAYOUT', 'MANUAL', 'WITHDRAWAL', 'REFERRAL'],
+      enum: [
+        'BOOKING', 'CLEARANCE', 'INCENTIVE', 'PENALTY', 'PAYOUT', 'MANUAL', 'WITHDRAWAL', 'REFERRAL',
+        'PRODUCT_SALE', 'PRODUCT_WITHDRAWAL', 'PRODUCT_REFUND',
+      ],
       required: true,
     },
     referenceId: {

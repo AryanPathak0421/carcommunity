@@ -67,6 +67,8 @@ const accessoryInquirySchema = new mongoose.Schema(
     amount: { type: Number, min: 0, default: 0 },
     paid: { type: Boolean, default: false, index: true },
     paidAt: Date,
+    /** Set once the seller's Product Wallet was credited for this paid order (idempotency). */
+    sellerCreditedAt: Date,
   },
   { timestamps: true },
 )

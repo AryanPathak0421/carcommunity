@@ -41,6 +41,8 @@ import adminAccessoryRoutes from './adminAccessoryRoutes.js'
 import carPartRoutes from './carPartRoutes.js'
 import adminCarPartRoutes from './adminCarPartRoutes.js'
 import { publicServiceUiRoutes, adminServiceUiRoutes } from './serviceUiConfigRoutes.js'
+import productWalletRoutes from './productWalletRoutes.js'
+import adminProductWalletRoutes from './adminProductWalletRoutes.js'
 
 const router = Router()
 
@@ -50,6 +52,7 @@ router.use('/uploads', uploadRoutes)
 router.use('/labour-categories', labourCategoryRoutes)
 router.use('/bookings', bookingRoutes)
 router.use('/wallets', walletRoutes)
+router.use('/product-wallet', productWalletRoutes)
 router.use('/broadcasts', broadcastRoutes)
 router.use('/payments', paymentRoutes)
 router.use('/reviews', reviewRoutes)
@@ -86,6 +89,7 @@ router.use('/admin/cars', adminCarListingRoutes)
 router.use('/admin/accessories', adminAccessoryRoutes)
 router.use('/admin/car-parts', adminCarPartRoutes)
 router.use('/admin/service-config', adminServiceUiRoutes)
+router.use('/admin/product-wallet', adminProductWalletRoutes)
 router.use('/admin/contact-settings', adminContactRoutes)
 router.use('/labour/location', locationRoutes)
 
