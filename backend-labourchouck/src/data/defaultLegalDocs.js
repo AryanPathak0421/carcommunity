@@ -11,7 +11,7 @@ export const DEFAULT_TERMS_TEXT = `Please read these Terms carefully. By creatin
 
 ## About CarCommunity and these Terms
 
-CarCommunity is a technology platform and brand operated by Virat Regal Group Private Limited (“Company”, “we”, “our” or “us”). It is available through our mobile app and website (together, the “Platform”).
+CarCommunity is a technology platform and brand operated by Sanket Mache (“Company”, “we”, “our” or “us”). It is available through our mobile app and website (together, the “Platform”).
 
 These Terms are a binding agreement between you and the Company. They apply together with our Privacy Policy and any booking, cancellation, fee or subscription rules shown to you in the Platform.
 
@@ -123,11 +123,11 @@ In line with the Information Technology Act, 2000, the Information Technology (I
 For requests about your personal data — access, correction, deletion or withdrawing consent — write to our privacy contact.
 `
 
-export const DEFAULT_PRIVACY_TEXT = `We respect your privacy. This policy explains how Virat Regal Group Private Limited handles personal data when you use CarCommunity.
+export const DEFAULT_PRIVACY_TEXT = `We respect your privacy. This policy explains how Sanket Mache handles personal data when you use CarCommunity.
 
 ## Who we are and what this covers
 
-Virat Regal Group Private Limited (“Company”, “we”, “our”, “us”) operates CarCommunity and is the data fiduciary for personal data processed through our app and website (the “Platform”) under the Digital Personal Data Protection Act, 2023.
+Sanket Mache (“Company”, “we”, “our”, “us”) operates CarCommunity and is the data fiduciary for personal data processed through our app and website (the “Platform”) under the Digital Personal Data Protection Act, 2023.
 
 This policy applies to customers, mechanics and visitors. Please read it together with our Terms & Conditions.
 

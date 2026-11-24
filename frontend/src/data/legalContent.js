@@ -42,7 +42,7 @@ export const TERMS = {
       id: 'about',
       title: 'About CarCommunity and these Terms',
       content: [
-        'CarCommunity is a technology platform and brand operated by Virat Regal Group Private Limited (“Company”, “we”, “our” or “us”). It is available through our mobile app and website (together, the “Platform”).',
+        'CarCommunity is a technology platform and brand operated by Sanket Mache (“Company”, “we”, “our” or “us”). It is available through our mobile app and website (together, the “Platform”).',
         'These Terms are a binding agreement between you and the Company. They apply together with our Privacy Policy and any booking, cancellation, fee or subscription rules shown to you in the Platform.',
         'If you do not agree with these Terms, please do not use the Platform.',
       ],
@@ -196,13 +196,13 @@ export const PRIVACY = {
   title: 'Privacy Policy',
   subtitle: 'What personal data CarCommunity collects, why, and the choices you have.',
   intro:
-    'We respect your privacy. This policy explains how Virat Regal Group Private Limited handles personal data when you use CarCommunity.',
+    'We respect your privacy. This policy explains how Sanket Mache handles personal data when you use CarCommunity.',
   sections: [
     {
       id: 'who',
       title: 'Who we are and what this covers',
       content: [
-        'Virat Regal Group Private Limited (“Company”, “we”, “our”, “us”) operates CarCommunity and is the data fiduciary for personal data processed through our app and website (the “Platform”) under the Digital Personal Data Protection Act, 2023.',
+        'Sanket Mache (“Company”, “we”, “our”, “us”) operates CarCommunity and is the data fiduciary for personal data processed through our app and website (the “Platform”) under the Digital Personal Data Protection Act, 2023.',
         'This policy applies to customers, mechanics and visitors. Please read it together with our Terms & Conditions.',
       ],
     },
