@@ -172,16 +172,22 @@ export function LegalDocument({ doc, variant = 'public', updatedAt = null }) {
         <p className="text-[13.5px] leading-relaxed text-slate-600">
           {COMPANY.brand} is owned, operated and managed by <strong className="text-slate-900">{COMPANY.legalName}</strong>.
         </p>
-        <dl className="mt-2 grid gap-x-6 gap-y-1 text-[13px] text-slate-600 sm:grid-cols-2">
-          <div>
-            <dt className="inline font-semibold text-slate-500">CIN: </dt>
-            <dd className="inline break-all">{COMPANY.cin}</dd>
-          </div>
-          <div>
-            <dt className="inline font-semibold text-slate-500">ROC: </dt>
-            <dd className="inline">{COMPANY.roc}</dd>
-          </div>
-        </dl>
+        {COMPANY.cin || COMPANY.roc ? (
+          <dl className="mt-2 grid gap-x-6 gap-y-1 text-[13px] text-slate-600 sm:grid-cols-2">
+            {COMPANY.cin ? (
+              <div>
+                <dt className="inline font-semibold text-slate-500">CIN: </dt>
+                <dd className="inline break-all">{COMPANY.cin}</dd>
+              </div>
+            ) : null}
+            {COMPANY.roc ? (
+              <div>
+                <dt className="inline font-semibold text-slate-500">ROC: </dt>
+                <dd className="inline">{COMPANY.roc}</dd>
+              </div>
+            ) : null}
+          </dl>
+        ) : null}
         <div className="mt-2 text-[13px] text-slate-600">
           <span className="font-semibold text-slate-500">Office address: </span>
           {COMPANY.address.join(' ')}

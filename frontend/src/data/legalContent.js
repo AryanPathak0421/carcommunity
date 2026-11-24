@@ -9,10 +9,10 @@
 
 export const COMPANY = {
   brand: 'CarCommunity',
-  legalName: 'Virat Regal Group Private Limited',
-  cin: 'U78200UP2026PTC248313',
-  roc: 'Registrar of Companies, Uttar Pradesh',
-  address: ['Tower No. CV-2, Office No. 201,', 'Supertech Capetown, Sector 74,', 'Noida, Uttar Pradesh – 201301, India'],
+  legalName: 'Sanket Mache',
+  cin: '',
+  roc: '',
+  address: ['Shop No. 1, Sutgirni Chowk,', 'Garkheda Parisar,', 'Aurangabad, Maharashtra – 431001, India'],
   supportEmail: 'sanketmache444@gmail.com',
   grievanceEmail: 'sanketmache444@gmail.com',
   privacyEmail: 'sanketmache444@gmail.com',
