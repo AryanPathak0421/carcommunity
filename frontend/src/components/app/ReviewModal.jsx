@@ -32,6 +32,12 @@ export function ReviewModal({ open, bookingId, onClose }) {
         onClose()
       }, 1500)
     } catch (err) {
+      // 409: this booking was already reviewed (e.g. from another tab or an earlier visit).
+      // Nothing left to rate, so close instead of leaving the modal open with an error.
+      if (err instanceof ApiError && err.status === 409) {
+        onClose()
+        return
+      }
       setError(err instanceof ApiError ? err.message : 'Failed to submit review')
     } finally {
       setSubmitting(false)

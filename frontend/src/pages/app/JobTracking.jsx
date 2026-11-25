@@ -63,7 +63,8 @@ export function JobTracking() {
             setLabourLocation({ lat: b.liveLocation.lat, lng: b.liveLocation.lng })
           }
           dispatch(setActiveBooking({ bookingId: b._id, status: b.status }))
-          if (b.status === 'COMPLETED') {
+          // Already rated: the job is finished, so don't prompt again.
+          if (b.status === 'COMPLETED' && !b.reviewedByMe) {
             if (b.paymentMethod === 'ONLINE' && b.paymentStatus === 'PAID') {
               setShowReview(true)
             } else {
@@ -103,7 +104,7 @@ export function JobTracking() {
       if (data.bookingId === bookingId) {
         setBooking((prev) => {
           const updated = prev ? { ...prev, status: data.status } : null
-          if (data.status === 'COMPLETED' && updated) {
+          if (data.status === 'COMPLETED' && updated && !updated.reviewedByMe) {
             if (updated.paymentMethod === 'ONLINE' && updated.paymentStatus === 'PAID') {
               setShowReview(true)
             } else {

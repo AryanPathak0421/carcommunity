@@ -57,6 +57,11 @@ export function BookingReviewModal({ open, bookingId, revieweeId, workerName, on
         onSubmitted?.()
       }, 1800)
     } catch (err) {
+      // 409: already reviewed (earlier visit or another tab). Nothing to rate, so leave.
+      if (err?.status === 409) {
+        onClose?.()
+        return
+      }
       setError(err?.message || 'Failed to submit review. Please try again.')
     } finally {
       setSubmitting(false)

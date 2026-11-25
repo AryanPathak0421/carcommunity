@@ -1009,7 +1009,7 @@ export function IndividualBookingFlowPage() {
           </motion.div>
         ) : (
           <div className="sticky bottom-2 z-10 space-y-2 pt-2">
-            {activeBooking?.status === 'COMPLETED' ? (
+            {activeBooking?.status === 'COMPLETED' && !activeBooking.reviewedByMe ? (
               <BookingPrimaryButton type="button" onClick={() => setReviewOpen(true)}>
                 <Star className="h-4 w-4" aria-hidden />
                 Rate your experience

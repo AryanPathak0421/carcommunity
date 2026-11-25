@@ -404,6 +404,22 @@ function stripOtps(booking) {
   return booking
 }
 
+/**
+ * Sets `reviewedByMe` on each booking: whether the caller has already left a review for it.
+ * The app uses this so a finished job is not offered for review again.
+ */
+async function markReviewedByMe(bookings, userId) {
+  if (!bookings.length) return
+  const reviewed = await Review.find({
+    bookingId: { $in: bookings.map((b) => b._id) },
+    reviewerId: userId,
+  }).distinct('bookingId')
+  const reviewedIds = new Set(reviewed.map(String))
+  bookings.forEach((b) => {
+    b.reviewedByMe = reviewedIds.has(String(b._id))
+  })
+}
+
 export const getBookingStatus = asyncHandler(async (req, res) => {
   const booking = await Booking.findById(req.params.id)
     .populate('subcategoryId')
@@ -419,6 +435,7 @@ export const getBookingStatus = asyncHandler(async (req, res) => {
   }
 
   if (!access.isOwner) stripOtps(booking)
+  await markReviewedByMe([booking], req.user._id)
   // A mechanic merely looking at an offer does not get the customer's phone yet.
   if (access.isOfferedMechanic && !access.isAssigned && booking.userId) delete booking.userId.phone
   delete booking.eligibleLabourIds
@@ -485,6 +502,7 @@ export const getMyBookings = asyncHandler(async (req, res) => {
     delete b.eligibleLabourIds
     delete b.rejectedBy
   })
+  await markReviewedByMe(bookings, _id)
 
   return sendSuccess(res, { data: { bookings } })
 })
@@ -502,6 +520,17 @@ export const updatePaymentMethod = asyncHandler(async (req, res) => {
       code: 'PAYMENT_METHOD_DISABLED',
     })
   }
+
+  // Already on this method and already paid/settled (e.g. a Cash job the mechanic completed, which
+  // marks it paid): nothing to change, so succeed. Failing here with a 409 left the customer stuck on
+  // the payment screen and they could never reach the review step.
+  const alreadySettledOnThisMethod = await Booking.exists({
+    _id: req.params.id,
+    userId: req.user._id,
+    paymentMethod,
+    $or: [{ paymentStatus: { $ne: 'PENDING' } }, { settledAt: { $exists: true } }],
+  })
+  if (alreadySettledOnThisMethod) return res.json({ success: true, paymentMethod })
 
   // Only the owner, and only while nothing has been paid or settled yet.
   const booking = await Booking.findOneAndUpdate(
