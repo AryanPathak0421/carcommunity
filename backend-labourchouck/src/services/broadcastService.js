@@ -9,6 +9,23 @@ import { refundBookingWalletDiscount } from './bookingSettlementService.js'
 
 export const BROADCAST_TIMEOUT_MS = 300000 // 5 minutes flash broadcast timeout
 
+/** How long a job keeps its mechanic "busy" (so a stalled job cannot block them for good). */
+const BUSY_STARTED_HOURS = 24
+const BUSY_EN_ROUTE_HOURS = 6
+const BUSY_ACCEPTED_INSTANT_HOURS = 2
+const BUSY_SCHEDULED_WINDOW_HOURS = 2
+
+/**
+ * Failure reasons stored on the booking and sent to the customer's app, which shows a matching
+ * message. Keep in sync with NO_MATCH_MESSAGES in the frontend booking flow.
+ */
+export const MATCH_FAILURE = {
+  NO_MECHANICS_IN_AREA: 'No mechanics in area',
+  NOT_WORKING_NOW: 'No mechanics working at this time',
+  NOT_ELIGIBLE: 'No eligible mechanics found',
+  OUT_OF_RANGE: 'No mechanics within actual driving radius',
+}
+
 /**
  * Starts the flash broadcast for a new booking based on a radius zone.
  */
@@ -51,10 +68,28 @@ export async function startBroadcastCycle(bookingId) {
   const bufferLatDiff = latDiff * 1.2
   const bufferLngDiff = lngDiff * 1.2
 
-  // EXCLUDE mechanics who are already busy with an active job
+  // EXCLUDE mechanics who are busy right now. A job only counts while it is actually live:
+  // previously ANY accepted job counted forever, so one job that was accepted and never moved on
+  // (or a scheduled job for tomorrow) kept that mechanic out of every new offer.
+  const nowMs = Date.now()
+  const ago = (h) => new Date(nowMs - h * 3600000)
+  const ahead = (h) => new Date(nowMs + h * 3600000)
   const busyBookings = await Booking.find({
-    status: { $in: ['ACCEPTED', 'ASSIGNED', 'EN_ROUTE', 'STARTED'] },
-    acceptedLabourId: { $exists: true, $ne: null }
+    acceptedLabourId: { $exists: true, $ne: null },
+    $or: [
+      // working on a job (multi-day jobs stay STARTED for days)
+      { status: 'STARTED', $or: [{ durationKind: 'multi_day' }, { updatedAt: { $gte: ago(BUSY_STARTED_HOURS) } }] },
+      // on the way to a customer
+      { status: 'EN_ROUTE', updatedAt: { $gte: ago(BUSY_EN_ROUTE_HOURS) } },
+      // just accepted an instant job and should be heading there
+      { status: { $in: ['ACCEPTED', 'ASSIGNED'] }, type: 'INSTANT', updatedAt: { $gte: ago(BUSY_ACCEPTED_INSTANT_HOURS) } },
+      // a scheduled job that is about to start (or should have just started)
+      {
+        status: { $in: ['ACCEPTED', 'ASSIGNED'] },
+        type: 'SCHEDULED',
+        scheduledAt: { $gte: ago(BUSY_SCHEDULED_WINDOW_HOURS), $lte: ahead(BUSY_SCHEDULED_WINDOW_HOURS) },
+      },
+    ],
   }).select('acceptedLabourId').lean()
   const busyLabourIds = busyBookings.map(b => b.acceptedLabourId)
 
@@ -119,8 +154,17 @@ export async function startBroadcastCycle(bookingId) {
 
   const targetDate = (booking.type === 'SCHEDULED' && booking.scheduledAt) ? new Date(booking.scheduledAt) : new Date()
   const { day: targetDayName, timeStr: currentIstTimeStr } = getIstDayAndTime(targetDate)
-  const targetStartTimeStr = to24Hour(booking.timeSlot) || currentIstTimeStr
-  const targetEndTimeStr = to24Hour(booking.endTime)
+  // An instant job is "now": the clock decides, not a time slot the client may have sent along.
+  const isInstant = booking.type === 'INSTANT'
+  const targetStartTimeStr = (!isInstant && to24Hour(booking.timeSlot)) || currentIstTimeStr
+  const targetEndTimeStr = isInstant ? '' : to24Hour(booking.endTime)
+
+  // Nobody with this skill nearby (and free) at all: that is a different answer from "nobody is on
+  // duty right now", so the customer is told which one it is.
+  if (potentialLaborersRaw.length === 0) {
+    await markBookingFailed(booking, MATCH_FAILURE.NO_MECHANICS_IN_AREA)
+    return
+  }
 
   const potentialLaborers = potentialLaborersRaw.filter(labor => {
     const schedule = labor.labourProfile?.schedule || []
@@ -134,7 +178,10 @@ export async function startBroadcastCycle(bookingId) {
 
     if (targetEndTimeStr) {
       if (targetEndTimeStr > eTime) return false
-    } else {
+    } else if (!isInstant) {
+      // Scheduled job without an end time: leave at least an hour before the shift ends.
+      // (Instant jobs used to get this too, which made every booking in a mechanic's last working
+      // hour fail, e.g. after 4 PM for a 9-5 schedule.)
       let [h, m] = targetStartTimeStr.split(':')
       h = parseInt(h, 10) + 1
       const bufferEndTime = `${String(h).padStart(2, '0')}:${m}`
@@ -145,7 +192,7 @@ export async function startBroadcastCycle(bookingId) {
   })
 
   if (potentialLaborers.length === 0) {
-    await markBookingFailed(booking, 'No mechanics in area')
+    await markBookingFailed(booking, MATCH_FAILURE.NOT_WORKING_NOW)
     return
   }
 
@@ -159,7 +206,7 @@ export async function startBroadcastCycle(bookingId) {
   }
 
   if (walletEligible.length === 0) {
-    await markBookingFailed(booking, 'No eligible mechanics found')
+    await markBookingFailed(booking, MATCH_FAILURE.NOT_ELIGIBLE)
     return
   }
 
@@ -186,7 +233,7 @@ export async function startBroadcastCycle(bookingId) {
   await booking.save()
 
   if (eligibleLaborers.length === 0) {
-    await markBookingFailed(booking, 'No mechanics within actual driving radius')
+    await markBookingFailed(booking, MATCH_FAILURE.OUT_OF_RANGE)
     return
   }
 

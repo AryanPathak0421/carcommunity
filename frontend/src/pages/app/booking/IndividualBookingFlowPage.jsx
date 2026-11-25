@@ -63,6 +63,41 @@ import {
 
 const TIME_SLOTS = ['9:00 AM – 12:00 PM', '12:00 PM – 3:00 PM', '3:00 PM – 6:00 PM', '6:00 PM – 9:00 PM']
 
+/**
+ * What the customer is told when the search ends without a mechanic, keyed by the server's
+ * failureReason (MATCH_FAILURE in backend broadcastService, plus the expiry/decline reasons).
+ */
+const NO_MATCH_MESSAGES = {
+  'No mechanics working at this time': {
+    title: 'No mechanic is on duty right now',
+    body: 'Mechanics near you are outside their working hours. Please try again later, or schedule the job for another time.',
+  },
+  'No mechanics in area': {
+    title: 'No mechanic available nearby',
+    body: 'No free mechanic for this service is near your location right now. Please try again in a little while.',
+  },
+  'No mechanics within actual driving radius': {
+    title: 'No mechanic within reach',
+    body: 'The nearest mechanics are too far from your location right now. Please try again later.',
+  },
+  'No mechanic accepted in time': {
+    title: 'No mechanic accepted in time',
+    body: 'Mechanics nearby did not respond in time. Please try searching again.',
+  },
+  'All nearby mechanics declined': {
+    title: 'Nearby mechanics are busy',
+    body: 'The mechanics near you could not take this job. Please try again in a few minutes.',
+  },
+  'Invalid location': {
+    title: 'We could not read your location',
+    body: 'Please go back and choose your address again.',
+  },
+}
+const DEFAULT_NO_MATCH = {
+  title: 'Mechanics are currently not available',
+  body: 'Please try searching again in a few minutes.',
+}
+
 function FieldLabel({ children, optional, htmlFor }) {
   const Tag = htmlFor ? 'label' : 'div'
   return (
@@ -102,6 +137,8 @@ export function IndividualBookingFlowPage() {
   const [activeBookingId, setActiveBookingId] = useState(() => readBookingDraft()?.lastRef || null)
   const [activeBooking, setActiveBooking] = useState(null)
   const [noMatch, setNoMatch] = useState(false)
+  /** Why the search ended (server's failureReason), to tell the customer what actually happened. */
+  const [noMatchReason, setNoMatchReason] = useState('')
   const [imageFiles, setImageFiles] = useState([])
 
   const [calculatedBill, setCalculatedBill] = useState(null)
@@ -235,6 +272,7 @@ export function IndividualBookingFlowPage() {
         }).catch(err => console.error(err))
       }
     } else if (bookingEvent.type === 'BOOKING_FAILED') {
+      setNoMatchReason(bookingEvent.data?.reason || '')
       setNoMatch(true)
     } else if (bookingEvent.type === 'BOOKING_STATUS_UPDATE') {
       const newStatus = bookingEvent.data?.status
@@ -263,7 +301,10 @@ export function IndividualBookingFlowPage() {
         const b = res.data?.booking
         if (stopped || !b) return
         setActiveBooking(b)
-        if (b.status === 'FAILED' || b.status === 'REFUNDED') setNoMatch(true)
+        if (b.status === 'FAILED' || b.status === 'REFUNDED') {
+          setNoMatchReason(b.failureReason || '')
+          setNoMatch(true)
+        }
         else if (b.status === 'CANCELLED') {
           clearBookingDraft()
           navigate('/app/my-bookings', { replace: true })
@@ -730,15 +771,16 @@ export function IndividualBookingFlowPage() {
   }
 
   if (noMatch) {
+    const noMatchText = NO_MATCH_MESSAGES[noMatchReason] || DEFAULT_NO_MATCH
     return (
       <div className="space-y-4 pb-8">
         <AppStackScreenHeader title="No match" onBack={() => { window.scrollTo(0, 0); navigate('/app') }} />
         <GlassPanel className="p-6 text-center">
           <AlertCircle className="mx-auto h-10 w-10 text-amber-500" aria-hidden />
-          <p className="mt-3 text-sm font-bold text-slate-900">Mechanics are currently not available</p>
-          <p className="mt-2 text-xs text-slate-600">Please try searching again in a few minutes.</p>
+          <p className="mt-3 text-sm font-bold text-slate-900">{noMatchText.title}</p>
+          <p className="mt-2 text-xs text-slate-600">{noMatchText.body}</p>
           <motion.div className="mt-5 flex flex-col gap-2">
-            <BookingPrimaryButton type="button" onClick={() => { setNoMatch(false); confirmBooking() }}>
+            <BookingPrimaryButton type="button" onClick={() => { setNoMatch(false); setNoMatchReason(''); confirmBooking() }}>
               Retry search
             </BookingPrimaryButton>
             <AppButton type="button" variant="secondary" onClick={() => { window.scrollTo(0, 0); navigate('/app') }}>
