@@ -59,8 +59,58 @@ const buildWebMessage = (tokens, { title, body, data, type }) => ({
   },
 })
 
+/**
+ * Pushes that must RING on the partner (mechanic) app: a new job offer.
+ *
+ * The Flutter partner app plays its looping order ringtone (channel `critical_order_alerts_v8`,
+ * sound `order_ringtone`, FLAG_INSISTENT) only when its NotificationService.isNewOrderNotification()
+ * matches, i.e. data.type is one of new_order / new_booking_request / booking_offer / … . Our own
+ * type for an offer is BOOKING_RECEIVED, which it does not know, so offers arrived silently.
+ */
+const RINGING_APP_TYPES = new Set(['BOOKING_RECEIVED'])
+/** The data.type the partner app recognises as "new booking — ring". */
+const APP_RING_TYPE = 'new_booking_request'
+/** An offer stops being acceptable after the broadcast window, so do not deliver (ring) it later. */
+const RING_TTL_MS = 5 * 60 * 1000
+
+/**
+ * App message for a ringing job offer. Deliberately DATA-ONLY (no `notification` block): with a
+ * notification block Android shows its own silent copy first and the app has to cancel it; without
+ * it the app's handler (foreground and background/terminated) always runs and posts the ringing
+ * alert itself. iOS gets a visible alert through `apns` since it cannot run that handler.
+ */
+const buildRingingAppMessage = (tokens, { title, body, data, type }) => ({
+  tokens,
+  data: {
+    ...toStringData(data),
+    type: APP_RING_TYPE,
+    eventType: type, // the original BOOKING_RECEIVED, for anything that wants it
+    title,
+    body: body || '',
+    // the app reads orderId / id to open the job when the notification is tapped
+    ...(data?.bookingId ? { orderId: String(data.bookingId), id: String(data.bookingId) } : {}),
+  },
+  android: {
+    priority: 'high',
+    ttl: RING_TTL_MS,
+  },
+  apns: {
+    headers: { 'apns-priority': '10', 'apns-push-type': 'alert' },
+    payload: {
+      aps: {
+        alert: { title, body: body || '' },
+        sound: 'order_ringtone.mp3',
+        'interruption-level': 'time-sensitive',
+      },
+    },
+  },
+})
+
 /** 2) FCM APP message — Android/iOS delivery via android + apns configs */
-const buildAppMessage = (tokens, { title, body, data, type }) => ({
+const buildAppMessage = (tokens, payload) =>
+  RINGING_APP_TYPES.has(payload.type) ? buildRingingAppMessage(tokens, payload) : buildDefaultAppMessage(tokens, payload)
+
+const buildDefaultAppMessage = (tokens, { title, body, data, type }) => ({
   tokens,
   data: { ...toStringData(data), type: type || 'GENERAL', title, body: body || '' },
   notification: { title, body: body || '' },

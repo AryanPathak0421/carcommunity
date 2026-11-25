@@ -101,7 +101,15 @@ export const sendTestNotification = asyncHandler(async (req, res) => {
     })
   }
 
-  await sendToUser(req.user._id, {
+  // { kind: 'booking' } sends a pretend job offer the same way a real one goes out, so the partner
+  // app's ringing alert can be checked without creating a booking.
+  const ringTest = req.body?.kind === 'booking'
+  await sendToUser(req.user._id, ringTest ? {
+    title: 'Test: New job offer nearby',
+    body: 'This is a test of the booking ringtone. You can ignore it.',
+    type: 'BOOKING_RECEIVED',
+    data: { bookingId: 'test', link: '/app', test: 'true' },
+  } : {
     title: 'Test notification 🔔',
     body: `Hi ${req.user.fullName || 'there'}! Push notifications are working on your account.`,
     type: 'TEST',
