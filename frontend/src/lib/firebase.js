@@ -3,18 +3,18 @@ import { getMessaging, getToken, onMessage, isSupported } from 'firebase/messagi
 
 // Public web config — safe to expose; env vars allow per-environment overrides.
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'AIzaSyD4iAyXjO4UXZqnXiZ7qYTi_WFF18NzjVA',
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'labourchowck.firebaseapp.com',
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'labourchowck',
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || 'labourchowck.firebasestorage.app',
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '894889908263',
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || '1:894889908263:web:2ce3fba6abc9476eba1602',
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || 'G-VME8E5BZDB',
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'AIzaSyB361jNGJb2cKYF1ja5CAsC3o8lXY8KDo8',
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'carcommunity-bdedd.firebaseapp.com',
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'carcommunity-bdedd',
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || 'carcommunity-bdedd.firebasestorage.app',
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '114298702775',
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || '1:114298702775:web:e5d65462f7513b1e9a3632',
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || 'G-4FZ7ELMVSZ',
 }
 
 const VAPID_KEY =
   import.meta.env.VITE_FIREBASE_VAPID_KEY ||
-  'BDE-_LLOF5d7gJqjuCJniWWHNgEiBmAEy1ONqGtXQbrxag1Ur9Z3vj9H28cJvSXHvbWwJid_6zWEzvbDKgaCybA'
+  'BO4iKh1hdnK9ZFFdlVvsA-tBQO4iFih4TEKhbnr-GLgqvqrhpZwtMCFQIJc36t-UIibhjTu6rBxHuncRkZ_wyRM'
 
 export const firebaseApp = initializeApp(firebaseConfig)
 

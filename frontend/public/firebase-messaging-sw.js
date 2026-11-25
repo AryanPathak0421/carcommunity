@@ -8,12 +8,12 @@ importScripts('https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js
 importScripts('https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-compat.js')
 
 firebase.initializeApp({
-  apiKey: 'AIzaSyD4iAyXjO4UXZqnXiZ7qYTi_WFF18NzjVA',
-  authDomain: 'labourchowck.firebaseapp.com',
-  projectId: 'labourchowck',
-  storageBucket: 'labourchowck.firebasestorage.app',
-  messagingSenderId: '894889908263',
-  appId: '1:894889908263:web:2ce3fba6abc9476eba1602',
+  apiKey: 'AIzaSyB361jNGJb2cKYF1ja5CAsC3o8lXY8KDo8',
+  authDomain: 'carcommunity-bdedd.firebaseapp.com',
+  projectId: 'carcommunity-bdedd',
+  storageBucket: 'carcommunity-bdedd.firebasestorage.app',
+  messagingSenderId: '114298702775',
+  appId: '1:114298702775:web:e5d65462f7513b1e9a3632',
 })
 
 const messaging = firebase.messaging()
