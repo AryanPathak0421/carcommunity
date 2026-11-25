@@ -82,7 +82,11 @@ export function usePushNotifications() {
       cancelled = true
       unsubscribe()
     }
-  }, [authToken])
+    // userId must be a dependency: for an already signed-in user the stored token is there on the
+    // first render but the profile (and so userId) arrives a moment later from /auth/me. With only
+    // authToken here the effect had already returned early and never ran again, so push was never
+    // registered for anyone who just opened the app with an existing session.
+  }, [authToken, userId])
 }
 
 export function PushNotificationManager() {
