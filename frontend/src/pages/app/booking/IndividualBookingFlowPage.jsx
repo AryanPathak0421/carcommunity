@@ -17,6 +17,12 @@ import {
   Star,
   Zap,
   Loader2,
+  CalendarClock,
+  Clock,
+  MapPinOff,
+  RefreshCw,
+  ShieldCheck,
+  Users,
 } from 'lucide-react'
 import { AppStackScreenHeader } from '../../../components/app/AppStackScreenHeader.jsx'
 import { AppButton } from '../../../components/app-ui/buttons/AppButton.jsx'
@@ -69,33 +75,41 @@ const TIME_SLOTS = ['9:00 AM – 12:00 PM', '12:00 PM – 3:00 PM', '3:00 PM –
  */
 const NO_MATCH_MESSAGES = {
   'No mechanics working at this time': {
-    title: 'No mechanic is on duty right now',
-    body: 'Mechanics near you are outside their working hours. Please try again later, or schedule the job for another time.',
+    icon: Clock,
+    title: 'Mechanics are off duty right now',
+    body: 'Mechanics near you are not working at this hour. You can search again later, or book for a time that suits you.',
   },
   'No mechanics in area': {
-    title: 'No mechanic available nearby',
-    body: 'No free mechanic for this service is near your location right now. Please try again in a little while.',
+    icon: Users,
+    title: 'No mechanics free nearby',
+    body: 'Mechanics near you for this service are busy or away right now. Please search again in a few minutes.',
   },
   'No mechanics within actual driving radius': {
-    title: 'No mechanic within reach',
-    body: 'The nearest mechanics are too far from your location right now. Please try again later.',
+    icon: MapPin,
+    title: 'Mechanics are a little far',
+    body: 'The nearest mechanics are too far to reach you right now. Please search again shortly.',
   },
   'No mechanic accepted in time': {
-    title: 'No mechanic accepted in time',
-    body: 'Mechanics nearby did not respond in time. Please try searching again.',
+    icon: Users,
+    title: 'No mechanic picked it up yet',
+    body: 'Mechanics nearby could not respond in time. Search again, new mechanics come online often.',
   },
   'All nearby mechanics declined': {
+    icon: Users,
     title: 'Nearby mechanics are busy',
-    body: 'The mechanics near you could not take this job. Please try again in a few minutes.',
+    body: 'The mechanics near you could not take this job right now. Please search again in a few minutes.',
   },
   'Invalid location': {
-    title: 'We could not read your location',
-    body: 'Please go back and choose your address again.',
+    icon: MapPinOff,
+    title: 'We could not find your location',
+    body: 'Please choose your address again so we can look for mechanics near you.',
+    fixAddress: true,
   },
 }
 const DEFAULT_NO_MATCH = {
-  title: 'Mechanics are currently not available',
-  body: 'Please try searching again in a few minutes.',
+  icon: Users,
+  title: 'Mechanics are not available right now',
+  body: 'All mechanics near you are busy at the moment. Please search again in a few minutes.',
 }
 
 function FieldLabel({ children, optional, htmlFor }) {
@@ -770,24 +784,84 @@ export function IndividualBookingFlowPage() {
     )
   }
 
+  // Search ended without a mechanic. This is an availability state, not an error: calm colours, the
+  // reason in plain words, a reassurance that nothing was charged, and a clear next step.
   if (noMatch) {
     const noMatchText = NO_MATCH_MESSAGES[noMatchReason] || DEFAULT_NO_MATCH
+    const NoMatchIcon = noMatchText.icon
+    const leaveNoMatch = () => {
+      // Forget the failed booking too. Otherwise, for one render the step is still "searching" with
+      // that id, the search re-check reads it as FAILED again and brings this screen straight back.
+      // A new search sets the new booking id once it is created.
+      setActiveBookingId(null)
+      syncDraft({ lastRef: null })
+      setNoMatch(false)
+      setNoMatchReason('')
+    }
+    const searchAgain = () => {
+      leaveNoMatch()
+      confirmBooking()
+    }
+    const scheduleInstead = () => {
+      leaveNoMatch()
+      syncDraft({ bookingType: 'scheduled' })
+      goStep('type')
+    }
+    const changeAddress = () => {
+      leaveNoMatch()
+      goStep('details')
+    }
+    const goHome = () => {
+      window.scrollTo(0, 0)
+      navigate('/app')
+    }
     return (
-      <div className="space-y-4 pb-8">
-        <AppStackScreenHeader title="No match" onBack={() => { window.scrollTo(0, 0); navigate('/app') }} />
-        <GlassPanel className="p-6 text-center">
-          <AlertCircle className="mx-auto h-10 w-10 text-amber-500" aria-hidden />
-          <p className="mt-3 text-sm font-bold text-slate-900">{noMatchText.title}</p>
-          <p className="mt-2 text-xs text-slate-600">{noMatchText.body}</p>
-          <motion.div className="mt-5 flex flex-col gap-2">
-            <BookingPrimaryButton type="button" onClick={() => { setNoMatch(false); setNoMatchReason(''); confirmBooking() }}>
-              Retry search
-            </BookingPrimaryButton>
-            <AppButton type="button" variant="secondary" onClick={() => { window.scrollTo(0, 0); navigate('/app') }}>
-              Cancel
-            </AppButton>
+      <div className="pb-8">
+        <AppStackScreenHeader title="Mechanics unavailable" onBack={goHome} />
+        <BookingServiceHighlight categoryName={draft.serviceName || draft.categoryName} groupName={draft.groupName} />
+
+        <div className="mt-6 px-4">
+          <motion.div
+            initial={reduce ? false : { opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="lc-booking-flow-card px-5 py-7 text-center"
+          >
+            <div className="relative mx-auto flex h-20 w-20 items-center justify-center">
+              <span className="absolute inset-0 rounded-full bg-orange-100/70" aria-hidden />
+              <span className="absolute inset-2.5 rounded-full bg-orange-50" aria-hidden />
+              <NoMatchIcon className="relative h-8 w-8 text-brand" aria-hidden />
+            </div>
+            <h2 className="mt-4 text-base font-extrabold text-slate-900">{noMatchText.title}</h2>
+            <p className="mx-auto mt-2 max-w-xs text-sm leading-relaxed text-slate-600">{noMatchText.body}</p>
+            <p className="mx-auto mt-4 inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-semibold text-emerald-700">
+              <ShieldCheck className="h-3.5 w-3.5" aria-hidden />
+              You have not been charged
+            </p>
           </motion.div>
-        </GlassPanel>
+
+          <div className="mt-4 flex flex-col gap-2">
+            {noMatchText.fixAddress ? (
+              <BookingPrimaryButton type="button" onClick={changeAddress}>
+                <MapPin className="h-4 w-4" aria-hidden />
+                Change address
+              </BookingPrimaryButton>
+            ) : (
+              <>
+                <BookingPrimaryButton type="button" onClick={searchAgain}>
+                  <RefreshCw className="h-4 w-4" aria-hidden />
+                  Search again
+                </BookingPrimaryButton>
+                <button type="button" className="lc-booking-btn-secondary flex items-center justify-center gap-2" onClick={scheduleInstead}>
+                  <CalendarClock className="h-4 w-4" aria-hidden />
+                  Schedule for later
+                </button>
+              </>
+            )}
+            <button type="button" className="py-2 text-xs font-semibold text-slate-500 hover:text-slate-700" onClick={goHome}>
+              Back to home
+            </button>
+          </div>
+        </div>
       </div>
     )
   }
