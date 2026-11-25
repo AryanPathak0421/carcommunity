@@ -8,6 +8,8 @@ const router = Router()
 router.use(protect)
 
 // Only Mechanics can interact with broadcasts directly
+router.get('/offers/open', restrictTo(USER_ROLES.MECHANIC), broadcast.listOpenOffers)
+
 router.post(
   '/:bookingId/accept',
   restrictTo(USER_ROLES.MECHANIC),

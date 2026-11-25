@@ -651,6 +651,51 @@ export function LabourHomeScreen({ user }) {
           </GlassPanel>
         </motion.section>
 
+        {/* 3b. Job alerts (Flash Broadcasts) — first thing a mechanic should see */}
+        {liveOffers.length > 0 ? (
+          <section aria-label="New job alerts">
+            <AppSectionHeader title="New flash assignments" className="mb-2 px-0.5" />
+            <ul className="space-y-3">
+              {liveOffers.map((offer) => (
+                <li key={offer.bookingId}>
+                  <GlassPanel
+                    className="relative overflow-hidden border-2 p-4 border-amber-300/80 bg-amber-50/50"
+                  >
+                    <motion.div
+                      className="pointer-events-none absolute inset-0 rounded-[inherit] ring-2 ring-amber-400/50"
+                      animate={reduce ? undefined : { opacity: [0.4, 0.9, 0.4] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                      aria-hidden
+                    />
+                    <div className="relative flex items-start gap-2">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-800">
+                        <Flame className="h-4 w-4" aria-hidden />
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[10px] font-bold uppercase tracking-wide text-amber-800">New job</p>
+                        <p className="text-sm font-extrabold text-slate-900">{formatInrFromPaise((offer.laborShare || 0) * 100)} payout</p>
+                        <p className="mt-0.5 text-xs text-slate-600">
+                          {offer.radiusKm ? `${offer.radiusKm} km radius` : ''} · {offer.type}
+                        </p>
+                        <p className="mt-0.5 truncate text-xs text-slate-500">{offer.address?.locationText}</p>
+                      </div>
+                    </div>
+                    <div className="relative mt-3 flex gap-2">
+                      <AppPrimaryButton
+                        type="button"
+                        onClick={() => handleAcceptOffer(offer.bookingId)}
+                        className="flex-1 py-2.5 text-xs"
+                      >
+                        Accept job
+                      </AppPrimaryButton>
+                    </div>
+                  </GlassPanel>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
+
         {/* 4. Today's job */}
         <motion.section
           initial={reduce ? false : { opacity: 0, y: 10 }}
@@ -791,51 +836,6 @@ export function LabourHomeScreen({ user }) {
             </div>
           </GlassPanel>
         </motion.section>
-
-        {/* 6. Job alerts (Flash Broadcasts) */}
-        {liveOffers.length > 0 ? (
-          <section aria-label="New job alerts">
-            <AppSectionHeader title="New flash assignments" className="mb-2 px-0.5" />
-            <ul className="space-y-3">
-              {liveOffers.map((offer) => (
-                <li key={offer.bookingId}>
-                  <GlassPanel
-                    className="relative overflow-hidden border-2 p-4 border-amber-300/80 bg-amber-50/50"
-                  >
-                    <motion.div
-                      className="pointer-events-none absolute inset-0 rounded-[inherit] ring-2 ring-amber-400/50"
-                      animate={reduce ? undefined : { opacity: [0.4, 0.9, 0.4] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                      aria-hidden
-                    />
-                    <div className="relative flex items-start gap-2">
-                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-800">
-                        <Flame className="h-4 w-4" aria-hidden />
-                      </span>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-[10px] font-bold uppercase tracking-wide text-amber-800">New job</p>
-                        <p className="text-sm font-extrabold text-slate-900">{formatInrFromPaise((offer.laborShare || 0) * 100)} payout</p>
-                        <p className="mt-0.5 text-xs text-slate-600">
-                          {offer.radiusKm ? `${offer.radiusKm} km radius` : ''} · {offer.type}
-                        </p>
-                        <p className="mt-0.5 truncate text-xs text-slate-500">{offer.address?.locationText}</p>
-                      </div>
-                    </div>
-                    <div className="relative mt-3 flex gap-2">
-                      <AppPrimaryButton
-                        type="button"
-                        onClick={() => handleAcceptOffer(offer.bookingId)}
-                        className="flex-1 py-2.5 text-xs"
-                      >
-                        Accept job
-                      </AppPrimaryButton>
-                    </div>
-                  </GlassPanel>
-                </li>
-              ))}
-            </ul>
-          </section>
-        ) : null}
 
         {/* 7. Upcoming schedule */}
         {upcomingSchedule.length > 0 ? (

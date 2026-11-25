@@ -4,6 +4,44 @@ import { asyncHandler } from '../utils/asyncHandler.js'
 import { HTTP_STATUS, sendError, sendSuccess } from '../utils/apiResponse.js'
 import { sendToUser } from '../services/notificationService.js'
 import { refundBookingWalletDiscount } from '../services/bookingSettlementService.js'
+import { BROADCAST_TIMEOUT_MS } from '../services/broadcastService.js'
+
+/**
+ * GET /broadcasts/offers/open
+ * Offers this mechanic can still accept. Offers are normally pushed over the socket, but a mechanic
+ * whose app was closed/backgrounded (or whose socket reconnected) would never see them, even though
+ * the push notification said "open the app to accept". The app calls this on load, on reconnect and
+ * when it comes back to the foreground. Same shape as the BOOKING_RECEIVED socket event.
+ */
+export const listOpenOffers = asyncHandler(async (req, res) => {
+  const now = Date.now()
+  const bookings = await Booking.find({
+    status: 'BROADCASTING',
+    eligibleLabourIds: req.user._id,
+    rejectedBy: { $ne: req.user._id },
+    updatedAt: { $gte: new Date(now - BROADCAST_TIMEOUT_MS) },
+  })
+    .populate('userId', 'fullName')
+    .sort({ createdAt: -1 })
+    .limit(20)
+    .lean()
+
+  const offers = bookings.map((b) => ({
+    bookingId: b._id,
+    basePrice: b.basePrice,
+    laborShare: b.laborShare,
+    partsTotal: b.partsTotal || 0,
+    parts: (b.parts || []).map((p) => ({ name: p.name, brand: p.brand, quantity: p.quantity })),
+    address: b.address,
+    scheduledAt: b.scheduledAt,
+    type: b.type,
+    radiusKm: b.broadcastRadius,
+    customer: { _id: b.userId?._id, fullName: b.userId?.fullName },
+    timeoutMs: Math.max(1000, BROADCAST_TIMEOUT_MS - (now - new Date(b.updatedAt).getTime())),
+  }))
+
+  return sendSuccess(res, { data: { offers } })
+})
 
 export const acceptBroadcast = asyncHandler(async (req, res) => {
   const { bookingId } = req.params
