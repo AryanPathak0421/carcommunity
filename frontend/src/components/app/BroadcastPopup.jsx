@@ -8,6 +8,9 @@ import { ApiError } from '../../api/http.js'
 import { useSocket } from '../../context/SocketContext.jsx'
 import { USER_ROLES } from '../../constants/userRoles.js'
 
+/** Same ringtone the partner app uses for new orders (android res/raw/order_ringtone.mp3). */
+const RINGTONE_URL = '/sounds/order_ringtone.mp3'
+
 export function BroadcastPopup() {
   const socket = useSocket()
   const navigate = useNavigate()
@@ -89,6 +92,39 @@ export function BroadcastPopup() {
 
     return () => {
       if (timerRef.current) clearInterval(timerRef.current)
+    }
+  }, [incoming])
+
+  // Ring while a job offer is on screen, like the partner app's own order alert, and stop as soon
+  // as it is accepted, rejected, times out or is taken by someone else (incoming -> null).
+  // The partner app's WebView allows playback without a tap; a normal browser may block it until the
+  // user has interacted with the page, in which case play() rejects and we stay silent.
+  useEffect(() => {
+    if (!incoming) return undefined
+    const ring = new Audio(RINGTONE_URL)
+    ring.loop = true
+    ring.play().catch(() => {})
+    let vibrateTimer = null
+    if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
+      const buzz = () => {
+        try {
+          navigator.vibrate([700, 400, 700])
+        } catch {
+          /* not allowed */
+        }
+      }
+      buzz()
+      vibrateTimer = setInterval(buzz, 2500)
+    }
+    return () => {
+      ring.pause()
+      ring.currentTime = 0
+      if (vibrateTimer) clearInterval(vibrateTimer)
+      try {
+        navigator.vibrate?.(0)
+      } catch {
+        /* ignore */
+      }
     }
   }, [incoming])
 
