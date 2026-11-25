@@ -1,14 +1,15 @@
 import { useEffect, useRef } from 'react'
 import { useSelector } from 'react-redux'
-import { requestFcmToken, onForegroundMessage } from '../lib/firebase.js'
-import { registerFcmToken } from '../api/notificationsApi.js'
-
-const FCM_TOKEN_STORAGE_KEY = 'lc_fcm_token'
+import { enablePush, stopPushForeground } from '../lib/pushSetup.js'
 
 /**
  * Registers this device for push notifications once the user is logged in,
  * and surfaces foreground FCM messages as system notifications.
  * Mount once (see <PushNotificationManager /> in App.jsx).
+ *
+ * This runs automatically, so browsers that block permission prompts that were not triggered by a
+ * tap (Chrome on Android often does) will not show it. The "Turn on notifications" button
+ * (PushNotificationToggle) covers that case with the same enablePush() call.
  */
 export function usePushNotifications() {
   const authToken = useSelector((s) => s.auth.token)
@@ -24,63 +25,19 @@ export function usePushNotifications() {
     if (setupDoneRef.current === userId) return
     setupDoneRef.current = userId
 
-    let unsubscribe = () => {}
     let cancelled = false
-
-    const setup = async () => {
-      try {
-        const fcmToken = await requestFcmToken()
-        if (cancelled || !fcmToken) return
-
-        // Track per-user so switching accounts on the same browser always registers
-        const userKey = `${FCM_TOKEN_STORAGE_KEY}_${userId}`
-        const previous = localStorage.getItem(userKey)
-        if (previous !== fcmToken) {
-          await registerFcmToken(fcmToken, 'web')
-          localStorage.setItem(userKey, fcmToken)
-          console.info('[push] FCM token registered for user:', userId)
-        } else {
-          registerFcmToken(fcmToken, 'web').catch(() => {})
-        }
-
-        // Foreground messages are not auto-displayed by the SDK — show them ourselves
-        unsubscribe = await onForegroundMessage(async (payload) => {
-          console.info('[push] Foreground FCM message received:', payload?.data?.type, payload)
-          const title = payload.notification?.title || payload.data?.title || 'CarCommunity'
-          const body = payload.notification?.body || payload.data?.body || ''
-          const options = {
-            body,
-            icon: '/icon-192.png',
-            badge: '/favicon-32.png',
-            data: payload.data || {},
-            tag: payload.data?.type || 'carcommunity',
-          }
-          try {
-            const registration =
-              (await navigator.serviceWorker.getRegistration('/firebase-messaging-sw.js')) ||
-              (await navigator.serviceWorker.ready)
-            if (registration) {
-              await registration.showNotification(title, options)
-            } else if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-              // Last-resort fallback when no service worker registration is available
-              new Notification(title, options)
-            } else {
-              console.warn('[push] No service worker registration — notification not displayed')
-            }
-          } catch (error) {
-            console.warn('[push] Failed to display foreground notification:', error)
-          }
-        })
-      } catch (error) {
-        console.warn('[push] Push notification setup failed:', error)
+    enablePush(userId).then((result) => {
+      // Signed out / switched account while this was still running: do not keep listening.
+      if (cancelled) {
+        stopPushForeground()
+        return
       }
-    }
-
-    setup()
+      if (!result.ok) console.info('[push] Automatic setup did not complete:', result.reason, result.error || '')
+    })
 
     return () => {
       cancelled = true
-      unsubscribe()
+      stopPushForeground()
     }
     // userId must be a dependency: for an already signed-in user the stored token is there on the
     // first render but the profile (and so userId) arrives a moment later from /auth/me. With only

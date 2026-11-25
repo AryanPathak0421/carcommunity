@@ -5,6 +5,7 @@ import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { Bell, CheckCheck, Loader2 } from 'lucide-react'
 import { useNotificationInbox } from '../../hooks/useNotificationInbox.js'
 import { formatRelativeTime } from '../../lib/formatRelativeTime.js'
+import { PushNotificationToggle } from './PushNotificationToggle.jsx'
 
 const DEFAULT_BUTTON_CLASS =
   'relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-slate-200/70 bg-white text-slate-600 shadow-sm transition hover:border-brand/25 hover:text-brand hover:shadow-md'
@@ -123,6 +124,7 @@ export function NotificationBell({ buttonClassName, iconClassName = 'h-5 w-5', a
                   </button>
                 ) : null}
               </div>
+              <PushNotificationToggle variant="banner" />
               <div className="max-h-[min(55vh,26rem)] overflow-y-auto overscroll-contain">
                 {loading && notifications.length === 0 ? (
                   <div className="flex items-center justify-center gap-2 px-4 py-8 text-xs font-medium text-slate-400">

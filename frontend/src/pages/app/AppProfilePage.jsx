@@ -42,6 +42,7 @@ import { referralsApi } from '../../api/referralsApi.js'
 import { carsApi } from '../../api/carsApi.js'
 import { ApiError } from '../../api/http.js'
 import { setUser } from '../../store/slices/authSlice.js'
+import { PushNotificationToggle } from '../../components/notifications/PushNotificationToggle.jsx'
 
 function openAppDrawer() {
   window.dispatchEvent(new Event('lc-open-app-drawer'))
@@ -421,6 +422,8 @@ export function AppProfilePage() {
             <MenuRow icon={MessageSquare} label="Customer requests" sub="Who wants your products" to="/app/accessories/leads" />
           </MenuGroup>
         ) : null}
+
+        <PushNotificationToggle />
 
         <MenuGroup>
           <MenuRow icon={Info} label="About us" to="/app/about" />
